@@ -1,0 +1,45 @@
+{
+  "name": "User",
+  "type": "object",
+  "properties": {
+    "role": {
+      "type": "string",
+      "enum": [
+        "admin",
+        "member"
+      ],
+      "default": "member"
+    },
+    "bio": {
+      "type": "string",
+      "description": "Short bio"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "avatar_url": {
+      "type": "string"
+    },
+    "job_title": {
+      "type": "string"
+    },
+    "xp": {
+      "type": "number",
+      "default": 0
+    },
+    "ai_api_key": {
+      "type": "string",
+      "description": "User's personal AI API key"
+    },
+    "ai_provider": {
+      "type": "string",
+      "enum": [
+        "none",
+        "grok",
+        "claude"
+      ],
+      "default": "none"
+    }
+  },
+  "required": []
+}

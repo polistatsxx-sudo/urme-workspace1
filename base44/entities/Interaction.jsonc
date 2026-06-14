@@ -1,0 +1,45 @@
+{
+  "name": "Interaction",
+  "type": "object",
+  "properties": {
+    "business_id": {
+      "type": "string"
+    },
+    "business_name": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "call",
+        "meeting",
+        "email",
+        "intro_made",
+        "follow_up",
+        "note",
+        "event"
+      ],
+      "default": "note"
+    },
+    "title": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "outcome": {
+      "type": "string"
+    },
+    "interaction_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "logged_by_name": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "business_id",
+    "type"
+  ]
+}

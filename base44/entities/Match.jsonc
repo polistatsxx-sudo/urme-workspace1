@@ -1,0 +1,43 @@
+{
+  "name": "Match",
+  "type": "object",
+  "properties": {
+    "business_a_id": {
+      "type": "string"
+    },
+    "business_a_name": {
+      "type": "string"
+    },
+    "business_b_id": {
+      "type": "string"
+    },
+    "business_b_name": {
+      "type": "string"
+    },
+    "synergy_score": {
+      "type": "number",
+      "description": "0-100 match score"
+    },
+    "reason": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "suggested",
+        "intro_proposed",
+        "introduced",
+        "collaborating",
+        "dismissed"
+      ],
+      "default": "suggested"
+    },
+    "proposed_by_name": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "business_a_id",
+    "business_b_id"
+  ]
+}

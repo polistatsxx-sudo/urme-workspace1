@@ -1,0 +1,110 @@
+import React, { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { 
+  LayoutDashboard, Building2, KanbanSquare, CheckSquare, Lightbulb, 
+  Calendar, MessageSquare, User, ChevronLeft, ChevronRight, Zap, Menu, X
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+
+const navItems = [
+  { path: '/', icon: LayoutDashboard, label: 'Dashboard' },
+  { path: '/pipeline', icon: KanbanSquare, label: 'Pipeline' },
+  { path: '/businesses', icon: Building2, label: 'Businesses' },
+  { path: '/tasks', icon: CheckSquare, label: 'Tasks' },
+  { path: '/ideas', icon: Lightbulb, label: 'Ideas' },
+  { path: '/events', icon: Calendar, label: 'Events' },
+  { path: '/sync', icon: MessageSquare, label: 'Sync Hub' },
+  { path: '/profile', icon: User, label: 'Profile' },
+];
+
+export default function Sidebar({ collapsed, setCollapsed }) {
+  const location = useLocation();
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  const NavContent = () => (
+    <div className="flex flex-col h-full">
+      <div className={cn("flex items-center gap-2 px-4 py-5 border-b border-border/50", collapsed && "justify-center px-2")}>
+        <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
+          <Zap className="w-4 h-4 text-primary-foreground" />
+        </div>
+        {!collapsed && (
+          <div className="overflow-hidden">
+            <h1 className="font-display font-bold text-sm tracking-tight text-foreground">URME</h1>
+            <p className="text-[10px] text-muted-foreground tracking-wider uppercase">Workspace</p>
+          </div>
+        )}
+      </div>
+
+      <nav className="flex-1 py-3 px-2 space-y-0.5 overflow-y-auto">
+        {navItems.map((item) => {
+          const isActive = location.pathname === item.path;
+          return (
+            <Link
+              key={item.path}
+              to={item.path}
+              onClick={() => setMobileOpen(false)}
+              className={cn(
+                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
+                collapsed && "justify-center px-2",
+                isActive
+                  ? "bg-primary/10 text-primary"
+                  : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+              )}
+            >
+              <item.icon className={cn("w-[18px] h-[18px] flex-shrink-0", isActive && "text-primary")} />
+              {!collapsed && <span>{item.label}</span>}
+            </Link>
+          );
+        })}
+      </nav>
+
+      <div className="p-2 border-t border-border/50 hidden lg:block">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setCollapsed(!collapsed)}
+          className="w-full justify-center text-muted-foreground"
+        >
+          {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+        </Button>
+      </div>
+    </div>
+  );
+
+  return (
+    <>
+      {/* Mobile hamburger */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border px-4 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
+            <Zap className="w-3.5 h-3.5 text-primary-foreground" />
+          </div>
+          <span className="font-display font-bold text-sm">URME</span>
+        </div>
+        <Button variant="ghost" size="icon" onClick={() => setMobileOpen(!mobileOpen)}>
+          {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        </Button>
+      </div>
+
+      {/* Mobile overlay */}
+      {mobileOpen && (
+        <div className="lg:hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-sm" onClick={() => setMobileOpen(false)}>
+          <div className="w-64 h-full bg-background border-r border-border" onClick={e => e.stopPropagation()}>
+            <div className="pt-14">
+              <NavContent />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Desktop sidebar */}
+      <aside className={cn(
+        "hidden lg:block fixed left-0 top-0 h-screen bg-sidebar border-r border-sidebar-border z-30 transition-all duration-300",
+        collapsed ? "w-16" : "w-56"
+      )}>
+        <NavContent />
+      </aside>
+    </>
+  );
+}

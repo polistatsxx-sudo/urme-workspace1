@@ -1,0 +1,77 @@
+{
+  "name": "Business",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Company name"
+    },
+    "industry": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "needs": {
+      "type": "string",
+      "description": "What the business needs"
+    },
+    "offers": {
+      "type": "string",
+      "description": "What the business offers"
+    },
+    "contact_name": {
+      "type": "string"
+    },
+    "contact_email": {
+      "type": "string"
+    },
+    "contact_phone": {
+      "type": "string"
+    },
+    "website": {
+      "type": "string"
+    },
+    "logo_url": {
+      "type": "string"
+    },
+    "stage": {
+      "type": "string",
+      "enum": [
+        "new_lead",
+        "contacted",
+        "meeting_scheduled",
+        "in_discussion",
+        "collaborating",
+        "partnered",
+        "archived"
+      ],
+      "default": "new_lead"
+    },
+    "assigned_to": {
+      "type": "string",
+      "description": "User ID of relationship manager"
+    },
+    "assigned_to_name": {
+      "type": "string"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "notes": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

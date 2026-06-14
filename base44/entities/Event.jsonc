@@ -1,0 +1,77 @@
+{
+  "name": "Event",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "time": {
+      "type": "string"
+    },
+    "location": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "planning",
+        "confirmed",
+        "in_progress",
+        "completed",
+        "cancelled"
+      ],
+      "default": "planning"
+    },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "mixer",
+        "workshop",
+        "conference",
+        "dinner",
+        "virtual",
+        "showcase",
+        "other"
+      ],
+      "default": "mixer"
+    },
+    "target_industries": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "objectives": {
+      "type": "string"
+    },
+    "attendee_business_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "attendee_count": {
+      "type": "number",
+      "default": 0
+    },
+    "post_event_notes": {
+      "type": "string"
+    },
+    "outcomes": {
+      "type": "string"
+    },
+    "organizer_name": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name"
+  ]
+}
