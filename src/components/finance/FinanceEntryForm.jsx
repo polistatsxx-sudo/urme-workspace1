@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Calendar, Building2 } from 'lucide-react';
 
 const revenueCategories = [
   { value: 'event_revenue', label: 'Event Revenue' },
@@ -60,7 +61,7 @@ export default function FinanceEntryForm({ type, events = [], businesses = [], o
   };
 
   return (
-    <form onSubmit={e => { e.preventDefault(); onSubmit({ ...form, amount: parseFloat(form.amount) || 0 }); }} className="space-y-3">
+    <form onSubmit={e => { e.preventDefault(); onSubmit({ ...form, amount: parseFloat(form.amount) || 0 }); }} className="space-y-4">
       <div>
         <Label className="text-xs">Category</Label>
         <Select value={form.category} onValueChange={v => set('category', v)}>
@@ -68,6 +69,7 @@ export default function FinanceEntryForm({ type, events = [], businesses = [], o
           <SelectContent>{categories.map(c => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}</SelectContent>
         </Select>
       </div>
+
       <div className="grid grid-cols-2 gap-3">
         <div>
           <Label className="text-xs">Amount ($) *</Label>
@@ -78,10 +80,12 @@ export default function FinanceEntryForm({ type, events = [], businesses = [], o
           <Input type="date" value={form.date} onChange={e => set('date', e.target.value)} required className="bg-secondary/50 mt-1" />
         </div>
       </div>
+
       <div>
         <Label className="text-xs">Description</Label>
         <Input value={form.description} onChange={e => set('description', e.target.value)} placeholder="What is this for?" className="bg-secondary/50 mt-1" />
       </div>
+
       {type === 'revenue' && (
         <div>
           <Label className="text-xs">Payment Status</Label>
@@ -95,30 +99,57 @@ export default function FinanceEntryForm({ type, events = [], businesses = [], o
           </Select>
         </div>
       )}
-      <div>
-        <Label className="text-xs">Link to Event (optional)</Label>
-        <Select value={form.linked_event_id || 'none'} onValueChange={handleEventLink}>
-          <SelectTrigger className="bg-secondary/50 mt-1"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="none">None</SelectItem>
-            {events.map(ev => <SelectItem key={ev.id} value={ev.id}>{ev.name}</SelectItem>)}
-          </SelectContent>
-        </Select>
+
+      {/* Link Section */}
+      <div className="border border-border rounded-xl p-3 space-y-3 bg-secondary/20">
+        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Link to Context</p>
+
+        <div>
+          <Label className="text-xs flex items-center gap-1.5 mb-1">
+            <Calendar className="w-3 h-3 text-primary" /> Link to Event
+          </Label>
+          <Select value={form.linked_event_id || 'none'} onValueChange={handleEventLink}>
+            <SelectTrigger className="bg-secondary/50">
+              <SelectValue placeholder="Select an event..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">— No Event —</SelectItem>
+              {events.map(ev => <SelectItem key={ev.id} value={ev.id}>{ev.name}</SelectItem>)}
+            </SelectContent>
+          </Select>
+          {form.linked_event_name && (
+            <p className="text-[10px] text-primary mt-1 flex items-center gap-1">
+              <Calendar className="w-2.5 h-2.5" /> Linked: {form.linked_event_name}
+            </p>
+          )}
+        </div>
+
+        <div>
+          <Label className="text-xs flex items-center gap-1.5 mb-1">
+            <Building2 className="w-3 h-3 text-accent" /> Link to Business
+          </Label>
+          <Select value={form.linked_business_id || 'none'} onValueChange={handleBusinessLink}>
+            <SelectTrigger className="bg-secondary/50">
+              <SelectValue placeholder="Select a business..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">— No Business —</SelectItem>
+              {businesses.map(b => <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>)}
+            </SelectContent>
+          </Select>
+          {form.linked_business_name && (
+            <p className="text-[10px] text-accent mt-1 flex items-center gap-1">
+              <Building2 className="w-2.5 h-2.5" /> Linked: {form.linked_business_name}
+            </p>
+          )}
+        </div>
       </div>
-      <div>
-        <Label className="text-xs">Link to Business (optional)</Label>
-        <Select value={form.linked_business_id || 'none'} onValueChange={handleBusinessLink}>
-          <SelectTrigger className="bg-secondary/50 mt-1"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="none">None</SelectItem>
-            {businesses.map(b => <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>)}
-          </SelectContent>
-        </Select>
-      </div>
+
       <div>
         <Label className="text-xs">Notes</Label>
         <Textarea value={form.notes} onChange={e => set('notes', e.target.value)} className="bg-secondary/50 mt-1 h-16 resize-none" />
       </div>
+
       <Button type="submit" disabled={saving || !form.amount} className="w-full">
         {saving ? 'Saving...' : `Log ${type === 'revenue' ? 'Revenue' : 'Expense'}`}
       </Button>
