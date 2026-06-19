@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, CheckCircle2, Circle, Clock, AlertTriangle, Trophy, Flame } from 'lucide-react';
+import { Plus, CheckCircle2, Circle, Clock, AlertTriangle, Trophy, Flame, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -22,6 +22,24 @@ export default function Tasks() {
   const [showAdd, setShowAdd] = useState(false);
   const [form, setForm] = useState({ title: '', description: '', priority: 'medium', due_date: '', status: 'todo' });
   const [tab, setTab] = useState('todo');
+  const [isEnhancing, setIsEnhancing] = useState(false);
+
+  const handleEnhance = async () => {
+    if (!form.title.trim() && !form.description.trim()) {
+      toast.error('Add a title or description first');
+      return;
+    }
+    setIsEnhancing(true);
+    try {
+      const res = await base44.functions.invoke('aiEnhanceTask', { title: form.title, description: form.description });
+      setForm(p => ({ ...p, title: res.data.improvedTitle, description: res.data.improvedDescription }));
+      toast.success('Task improved with AI!', { icon: '✨' });
+    } catch (err) {
+      toast.error('Failed to enhance task');
+    } finally {
+      setIsEnhancing(false);
+    }
+  };
 
   const { data: tasks = [] } = useQuery({ queryKey: ['tasks'], queryFn: () => base44.entities.Task.list('-created_date') });
 
@@ -81,7 +99,12 @@ export default function Tasks() {
                   </div>
                   <div><Label className="text-xs">Due Date</Label><Input type="date" value={form.due_date} onChange={e => setForm(p => ({...p, due_date: e.target.value}))} className="bg-secondary/50 mt-1" /></div>
                 </div>
-                <Button type="submit" disabled={createMut.isPending || !form.title.trim()} className="w-full">{createMut.isPending ? 'Creating...' : 'Create Task'}</Button>
+                <div className="flex gap-2">
+                  <Button type="button" variant="outline" onClick={handleEnhance} disabled={isEnhancing} className="flex-1 border-accent/50 text-accent hover:bg-accent/10">
+                    <Sparkles className="w-4 h-4 mr-1" />{isEnhancing ? 'Improving...' : 'Improve with AI'}
+                  </Button>
+                  <Button type="submit" disabled={createMut.isPending || !form.title.trim()} className="flex-1">{createMut.isPending ? 'Creating...' : 'Create Task'}</Button>
+                </div>
               </form>
             </DialogContent>
           </Dialog>
