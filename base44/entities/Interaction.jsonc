@@ -14,6 +14,7 @@
         "call",
         "meeting",
         "email",
+        "referral",
         "intro_made",
         "follow_up",
         "note",
@@ -33,6 +34,17 @@
     "interaction_date": {
       "type": "string",
       "format": "date-time"
+    },
+    "team_member": {
+      "type": "string",
+      "description": "Linked team member name"
+    },
+    "attachment_url": {
+      "type": "string",
+      "description": "Optional attachment file URL"
+    },
+    "attachment_name": {
+      "type": "string"
     },
     "logged_by_name": {
       "type": "string"

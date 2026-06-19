@@ -12,6 +12,9 @@ import BusinessForm from '@/components/business/BusinessForm';
 import InteractionTimeline from '@/components/business/InteractionTimeline';
 import LogInteractionForm from '@/components/business/LogInteractionForm';
 import MatchList from '@/components/business/MatchList';
+import ContactInfoCard from '@/components/business/ContactInfoCard';
+import AccountManagerCard from '@/components/business/AccountManagerCard';
+import EventEngagements from '@/components/business/EventEngagements';
 import { toast } from 'sonner';
 import { useAuth } from '@/lib/AuthContext';
 
@@ -97,7 +100,6 @@ export default function BusinessDetail() {
             <Button variant="outline" size="sm" className="text-destructive" onClick={() => { if (confirm('Delete this business?')) deleteMut.mutate(); }}><Trash2 className="w-4 h-4" /></Button>
           </div>
         </div>
-        {biz.assigned_to_name && <p className="text-xs text-muted-foreground mt-3 border-t border-border/50 pt-3">Relationship Manager: <span className="text-foreground font-medium">{biz.assigned_to_name}</span></p>}
         {biz.tags?.length > 0 && (
           <div className="flex gap-1 flex-wrap mt-2">
             {biz.tags.map(t => <span key={t} className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full">{t}</span>)}
@@ -111,6 +113,15 @@ export default function BusinessDetail() {
           <p className="text-sm text-foreground/80 whitespace-pre-wrap">{insight}</p>
         </div>
       )}
+
+      <div className="grid lg:grid-cols-3 gap-4 mb-4">
+        <div className="lg:col-span-2"><ContactInfoCard biz={biz} /></div>
+        <AccountManagerCard name={biz.assigned_to_name} />
+      </div>
+
+      <div className="mb-4">
+        <EventEngagements bizId={bizId} />
+      </div>
 
       <div className="grid lg:grid-cols-3 gap-4 mb-4">
         <div className="bg-card border border-border rounded-xl p-4">
@@ -153,7 +164,7 @@ export default function BusinessDetail() {
       <Dialog open={logOpen} onOpenChange={setLogOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader><DialogTitle>Log Interaction</DialogTitle></DialogHeader>
-          <LogInteractionForm onSubmit={data => logMut.mutate(data)} saving={logMut.isPending} />
+          <LogInteractionForm users={users} onSubmit={data => logMut.mutate(data)} saving={logMut.isPending} />
         </DialogContent>
       </Dialog>
     </div>

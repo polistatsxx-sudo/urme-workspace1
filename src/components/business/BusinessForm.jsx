@@ -13,7 +13,8 @@ const industries = ['Technology', 'Marketing', 'Real Estate', 'Construction', 'L
 export default function BusinessForm({ initialData, users = [], onSubmit, saving }) {
   const [form, setForm] = useState(initialData || {
     name: '', industry: '', description: '', needs: '', offers: '',
-    contact_name: '', contact_email: '', contact_phone: '', website: '',
+    contact_name: '', contact_title: '', contact_email: '', contact_phone: '',
+    linkedin: '', website: '', address: '',
     stage: 'new_lead', assigned_to: '', assigned_to_name: '', city: '', state: '',
     tags: [], notes: ''
   });
@@ -99,6 +100,10 @@ export default function BusinessForm({ initialData, users = [], onSubmit, saving
           <Input value={form.contact_name} onChange={e => set('contact_name', e.target.value)} className="bg-secondary/50 mt-1" />
         </div>
         <div>
+          <Label className="text-xs">Title / Role</Label>
+          <Input value={form.contact_title} onChange={e => set('contact_title', e.target.value)} placeholder="e.g. CEO" className="bg-secondary/50 mt-1" />
+        </div>
+        <div>
           <Label className="text-xs">Contact Email</Label>
           <Input value={form.contact_email} onChange={e => set('contact_email', e.target.value)} type="email" className="bg-secondary/50 mt-1" />
         </div>
@@ -107,8 +112,16 @@ export default function BusinessForm({ initialData, users = [], onSubmit, saving
           <Input value={form.contact_phone} onChange={e => set('contact_phone', e.target.value)} className="bg-secondary/50 mt-1" />
         </div>
         <div>
+          <Label className="text-xs">LinkedIn</Label>
+          <Input value={form.linkedin} onChange={e => set('linkedin', e.target.value)} placeholder="LinkedIn URL" className="bg-secondary/50 mt-1" />
+        </div>
+        <div>
           <Label className="text-xs">Website</Label>
           <Input value={form.website} onChange={e => set('website', e.target.value)} className="bg-secondary/50 mt-1" />
+        </div>
+        <div className="col-span-2">
+          <Label className="text-xs">Address</Label>
+          <Input value={form.address} onChange={e => set('address', e.target.value)} className="bg-secondary/50 mt-1" />
         </div>
         <div>
           <Label className="text-xs">City</Label>
@@ -119,9 +132,9 @@ export default function BusinessForm({ initialData, users = [], onSubmit, saving
           <Input value={form.state} onChange={e => set('state', e.target.value)} className="bg-secondary/50 mt-1" />
         </div>
         <div className="col-span-2">
-          <Label className="text-xs">Relationship Manager</Label>
+          <Label className="text-xs">Account Manager</Label>
           <Select value={form.assigned_to} onValueChange={handleAssign}>
-            <SelectTrigger className="bg-secondary/50 mt-1"><SelectValue placeholder="Assign..." /></SelectTrigger>
+            <SelectTrigger className="bg-secondary/50 mt-1"><SelectValue placeholder="Assign a relationship manager..." /></SelectTrigger>
             <SelectContent>{users.map(u => <SelectItem key={u.id} value={u.id}>{u.full_name}</SelectItem>)}</SelectContent>
           </Select>
         </div>

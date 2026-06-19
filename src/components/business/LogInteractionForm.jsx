@@ -1,48 +1,92 @@
 import React, { useState } from 'react';
+import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Paperclip, Loader2, X } from 'lucide-react';
+import { toast } from 'sonner';
 
-export default function LogInteractionForm({ onSubmit, saving }) {
-  const [form, setForm] = useState({ type: 'note', title: '', notes: '', outcome: '', interaction_date: new Date().toISOString().split('T')[0] });
+export default function LogInteractionForm({ onSubmit, saving, users = [] }) {
+  const [form, setForm] = useState({
+    type: 'meeting', title: '', notes: '', outcome: '', team_member: '',
+    attachment_url: '', attachment_name: '',
+    interaction_date: new Date().toISOString().slice(0, 16),
+  });
+  const [uploading, setUploading] = useState(false);
   const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
+
+  const handleUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      set('attachment_url', file_url);
+      set('attachment_name', file.name);
+      toast.success('File attached');
+    } catch { toast.error('Upload failed'); } finally { setUploading(false); }
+  };
 
   return (
     <form onSubmit={e => { e.preventDefault(); onSubmit(form); }} className="space-y-3">
-      <div>
-        <Label className="text-xs">Type</Label>
-        <Select value={form.type} onValueChange={v => set('type', v)}>
-          <SelectTrigger className="bg-secondary/50 mt-1"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="call">Phone Call</SelectItem>
-            <SelectItem value="meeting">Meeting</SelectItem>
-            <SelectItem value="email">Email</SelectItem>
-            <SelectItem value="intro_made">Introduction Made</SelectItem>
-            <SelectItem value="follow_up">Follow-up</SelectItem>
-            <SelectItem value="note">Note</SelectItem>
-            <SelectItem value="event">Event</SelectItem>
-          </SelectContent>
-        </Select>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <Label className="text-xs">Type</Label>
+          <Select value={form.type} onValueChange={v => set('type', v)}>
+            <SelectTrigger className="bg-secondary/50 mt-1"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="meeting">Meeting</SelectItem>
+              <SelectItem value="email">Email</SelectItem>
+              <SelectItem value="call">Phone Call</SelectItem>
+              <SelectItem value="referral">Referral</SelectItem>
+              <SelectItem value="event">Event</SelectItem>
+              <SelectItem value="note">Other</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label className="text-xs">Date & Time</Label>
+          <Input type="datetime-local" value={form.interaction_date} onChange={e => set('interaction_date', e.target.value)} className="bg-secondary/50 mt-1" />
+        </div>
       </div>
       <div>
         <Label className="text-xs">Title</Label>
         <Input value={form.title} onChange={e => set('title', e.target.value)} className="bg-secondary/50 mt-1" />
       </div>
       <div>
-        <Label className="text-xs">Date</Label>
-        <Input type="date" value={form.interaction_date} onChange={e => set('interaction_date', e.target.value)} className="bg-secondary/50 mt-1" />
-      </div>
-      <div>
-        <Label className="text-xs">Notes</Label>
+        <Label className="text-xs">Notes / Details</Label>
         <Textarea value={form.notes} onChange={e => set('notes', e.target.value)} className="bg-secondary/50 mt-1 h-20 resize-none" />
       </div>
       <div>
-        <Label className="text-xs">Outcome</Label>
-        <Input value={form.outcome} onChange={e => set('outcome', e.target.value)} placeholder="What happened?" className="bg-secondary/50 mt-1" />
+        <Label className="text-xs">Linked Team Member</Label>
+        <Select value={form.team_member} onValueChange={v => set('team_member', v)}>
+          <SelectTrigger className="bg-secondary/50 mt-1"><SelectValue placeholder="Select team member..." /></SelectTrigger>
+          <SelectContent>{users.map(u => <SelectItem key={u.id} value={u.full_name}>{u.full_name}</SelectItem>)}</SelectContent>
+        </Select>
       </div>
-      <Button type="submit" disabled={saving} className="w-full">{saving ? 'Saving...' : 'Log Interaction'}</Button>
+      <div>
+        <Label className="text-xs">Outcome / Next Steps</Label>
+        <Input value={form.outcome} onChange={e => set('outcome', e.target.value)} placeholder="What happened next?" className="bg-secondary/50 mt-1" />
+      </div>
+      <div>
+        <Label className="text-xs">Attachment (optional)</Label>
+        {form.attachment_url ? (
+          <div className="flex items-center gap-2 mt-1 text-xs bg-secondary/50 rounded-md px-3 py-2">
+            <Paperclip className="w-3 h-3 text-primary" />
+            <span className="truncate flex-1">{form.attachment_name}</span>
+            <button type="button" onClick={() => { set('attachment_url', ''); set('attachment_name', ''); }}><X className="w-3 h-3 text-muted-foreground hover:text-destructive" /></button>
+          </div>
+        ) : (
+          <label className="flex items-center gap-2 mt-1 text-xs bg-secondary/50 rounded-md px-3 py-2 cursor-pointer hover:bg-secondary">
+            {uploading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Paperclip className="w-3 h-3" />}
+            <span className="text-muted-foreground">{uploading ? 'Uploading...' : 'Attach a file'}</span>
+            <input type="file" className="hidden" onChange={handleUpload} disabled={uploading} />
+          </label>
+        )}
+      </div>
+      <Button type="submit" disabled={saving || uploading} className="w-full">{saving ? 'Saving...' : 'Log Interaction'}</Button>
     </form>
   );
 }

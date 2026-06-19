@@ -23,14 +23,26 @@
     "contact_name": {
       "type": "string"
     },
+    "contact_title": {
+      "type": "string",
+      "description": "Title or role of the primary contact"
+    },
     "contact_email": {
       "type": "string"
     },
     "contact_phone": {
       "type": "string"
     },
+    "linkedin": {
+      "type": "string",
+      "description": "LinkedIn profile URL"
+    },
     "website": {
       "type": "string"
+    },
+    "address": {
+      "type": "string",
+      "description": "Company address"
     },
     "logo_url": {
       "type": "string"

@@ -15,6 +15,10 @@ import { toast } from 'sonner';
 export default function Businesses() {
   const [search, setSearch] = useState('');
   const [stageFilter, setStageFilter] = useState('all');
+  const [managerFilter, setManagerFilter] = useState('all');
+  const [industryFilter, setIndustryFilter] = useState('all');
+  const [cityFilter, setCityFilter] = useState('all');
+  const [stateFilter, setStateFilter] = useState('all');
   const [showAdd, setShowAdd] = useState(false);
   const [scanning, setScanning] = useState(false);
   const qc = useQueryClient();
@@ -69,11 +73,23 @@ export default function Businesses() {
     setScanning(false);
   };
 
+  const managers = [...new Set(businesses.map(b => b.assigned_to_name).filter(Boolean))].sort();
+  const industries = [...new Set(businesses.map(b => b.industry).filter(Boolean))].sort();
+  const cities = [...new Set(businesses.map(b => b.city).filter(Boolean))].sort();
+  const states = [...new Set(businesses.map(b => b.state).filter(Boolean))].sort();
+
   const filtered = businesses.filter(b => {
     const matchSearch = b.name?.toLowerCase().includes(search.toLowerCase()) || b.industry?.toLowerCase().includes(search.toLowerCase());
     const matchStage = stageFilter === 'all' || b.stage === stageFilter;
-    return matchSearch && matchStage;
+    const matchManager = managerFilter === 'all' || b.assigned_to_name === managerFilter;
+    const matchIndustry = industryFilter === 'all' || b.industry === industryFilter;
+    const matchCity = cityFilter === 'all' || b.city === cityFilter;
+    const matchState = stateFilter === 'all' || b.state === stateFilter;
+    return matchSearch && matchStage && matchManager && matchIndustry && matchCity && matchState;
   });
+
+  const activeFilters = [stageFilter, managerFilter, industryFilter, cityFilter, stateFilter].filter(f => f !== 'all').length;
+  const clearFilters = () => { setStageFilter('all'); setManagerFilter('all'); setIndustryFilter('all'); setCityFilter('all'); setStateFilter('all'); };
 
   return (
     <div className="animate-slide-up">
@@ -99,24 +115,58 @@ export default function Businesses() {
         }
       />
 
-      <div className="flex flex-col sm:flex-row gap-2 mb-4">
+      <div className="flex flex-col gap-2 mb-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input placeholder="Search businesses..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9 bg-card" />
         </div>
-        <Select value={stageFilter} onValueChange={setStageFilter}>
-          <SelectTrigger className="w-full sm:w-44 bg-card"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Stages</SelectItem>
-            <SelectItem value="new_lead">New Lead</SelectItem>
-            <SelectItem value="contacted">Contacted</SelectItem>
-            <SelectItem value="meeting_scheduled">Meeting Scheduled</SelectItem>
-            <SelectItem value="in_discussion">In Discussion</SelectItem>
-            <SelectItem value="collaborating">Collaborating</SelectItem>
-            <SelectItem value="partnered">Partnered</SelectItem>
-            <SelectItem value="archived">Archived</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><Filter className="w-3.5 h-3.5" /> Filters:</div>
+          <Select value={stageFilter} onValueChange={setStageFilter}>
+            <SelectTrigger className="w-auto min-w-32 h-8 text-xs bg-card"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Stages</SelectItem>
+              <SelectItem value="new_lead">New Lead</SelectItem>
+              <SelectItem value="contacted">Contacted</SelectItem>
+              <SelectItem value="meeting_scheduled">Meeting Scheduled</SelectItem>
+              <SelectItem value="in_discussion">In Discussion</SelectItem>
+              <SelectItem value="collaborating">Collaborating</SelectItem>
+              <SelectItem value="partnered">Partnered</SelectItem>
+              <SelectItem value="archived">Archived</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={managerFilter} onValueChange={setManagerFilter}>
+            <SelectTrigger className="w-auto min-w-32 h-8 text-xs bg-card"><SelectValue placeholder="Manager" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Managers</SelectItem>
+              {managers.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}
+            </SelectContent>
+          </Select>
+          <Select value={industryFilter} onValueChange={setIndustryFilter}>
+            <SelectTrigger className="w-auto min-w-32 h-8 text-xs bg-card"><SelectValue placeholder="Industry" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Industries</SelectItem>
+              {industries.map(i => <SelectItem key={i} value={i}>{i}</SelectItem>)}
+            </SelectContent>
+          </Select>
+          <Select value={cityFilter} onValueChange={setCityFilter}>
+            <SelectTrigger className="w-auto min-w-28 h-8 text-xs bg-card"><SelectValue placeholder="City" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Cities</SelectItem>
+              {cities.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+            </SelectContent>
+          </Select>
+          <Select value={stateFilter} onValueChange={setStateFilter}>
+            <SelectTrigger className="w-auto min-w-24 h-8 text-xs bg-card"><SelectValue placeholder="State" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All States</SelectItem>
+              {states.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+            </SelectContent>
+          </Select>
+          {activeFilters > 0 && (
+            <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={clearFilters}>Clear ({activeFilters})</Button>
+          )}
+        </div>
       </div>
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
