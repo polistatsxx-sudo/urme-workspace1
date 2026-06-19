@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, ThumbsUp, MessageSquare, Sparkles, Loader2, Tag } from 'lucide-react';
+import { Plus, ThumbsUp, MessageSquare, Sparkles, Loader2, Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -25,6 +25,8 @@ export default function Ideas() {
   const { user } = useAuth();
   const [showAdd, setShowAdd] = useState(false);
   const [form, setForm] = useState({ title: '', description: '', category: 'other' });
+  const [editingIdea, setEditingIdea] = useState(null);
+  const [editForm, setEditForm] = useState({});
   const [commentText, setCommentText] = useState({});
   const [expandedIdea, setExpandedIdea] = useState(null);
   const [aiLoading, setAiLoading] = useState(false);
@@ -35,6 +37,21 @@ export default function Ideas() {
     mutationFn: (d) => base44.entities.Idea.create({ ...d, author_name: user?.full_name, votes: 0, voted_by: [], comments: [], status: 'new' }),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['ideas'] }); setShowAdd(false); setForm({ title: '', description: '', category: 'other' }); toast.success('Idea posted!'); },
   });
+
+  const updateMut = useMutation({
+    mutationFn: ({ id, data }) => base44.entities.Idea.update(id, data),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['ideas'] }); setEditingIdea(null); toast.success('Idea updated!'); },
+  });
+
+  const deleteMut = useMutation({
+    mutationFn: (id) => base44.entities.Idea.delete(id),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['ideas'] }); toast.success('Idea deleted'); },
+  });
+
+  const startEdit = (idea) => {
+    setEditingIdea(idea.id);
+    setEditForm({ title: idea.title, description: idea.description || '', category: idea.category || 'other' });
+  };
 
   const vote = async (idea) => {
     const alreadyVoted = idea.voted_by?.includes(user?.id);
@@ -109,13 +126,21 @@ export default function Ideas() {
               </button>
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-2">
-                  <div>
+                  <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold">{idea.title}</p>
                     {idea.description && <p className="text-xs text-muted-foreground mt-1">{idea.description}</p>}
                   </div>
-                  <Badge variant="outline" className={`text-[10px] flex-shrink-0 ${categoryColors[idea.category] || categoryColors.other}`}>
-                    {idea.category?.replace(/_/g, ' ')}
-                  </Badge>
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    <Badge variant="outline" className={`text-[10px] ${categoryColors[idea.category] || categoryColors.other}`}>
+                      {idea.category?.replace(/_/g, ' ')}
+                    </Badge>
+                    <button onClick={() => startEdit(idea)} className="p-1 text-muted-foreground hover:text-foreground transition-colors">
+                      <Pencil className="w-3.5 h-3.5" />
+                    </button>
+                    <button onClick={() => { if (confirm('Delete this idea?')) deleteMut.mutate(idea.id); }} className="p-1 text-muted-foreground hover:text-destructive transition-colors">
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
                 <div className="flex items-center gap-3 mt-2 text-[10px] text-muted-foreground">
                   <span>{idea.author_name}</span>
@@ -156,6 +181,31 @@ export default function Ideas() {
         ))}
         {ideas.length === 0 && <p className="text-center text-muted-foreground text-sm py-12">No ideas yet — be the first!</p>}
       </div>
+
+      {/* Edit Dialog */}
+      <Dialog open={!!editingIdea} onOpenChange={open => !open && setEditingIdea(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>Edit Idea</DialogTitle></DialogHeader>
+          <form onSubmit={e => { e.preventDefault(); updateMut.mutate({ id: editingIdea, data: editForm }); }} className="space-y-3">
+            <div><Label className="text-xs">Title *</Label><Input value={editForm.title || ''} onChange={e => setEditForm(p => ({...p, title: e.target.value}))} required className="bg-secondary/50 mt-1" /></div>
+            <div><Label className="text-xs">Description</Label><Textarea value={editForm.description || ''} onChange={e => setEditForm(p => ({...p, description: e.target.value}))} className="bg-secondary/50 mt-1 h-24 resize-none" /></div>
+            <div><Label className="text-xs">Category</Label>
+              <Select value={editForm.category || 'other'} onValueChange={v => setEditForm(p => ({...p, category: v}))}>
+                <SelectTrigger className="bg-secondary/50 mt-1"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="strategy">Strategy</SelectItem><SelectItem value="partnership">Partnership</SelectItem>
+                  <SelectItem value="event_concept">Event Concept</SelectItem><SelectItem value="marketing">Marketing</SelectItem>
+                  <SelectItem value="product">Product</SelectItem><SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex gap-2">
+              <Button type="button" variant="outline" onClick={() => setEditingIdea(null)} className="flex-1">Cancel</Button>
+              <Button type="submit" disabled={updateMut.isPending || !editForm.title?.trim()} className="flex-1">{updateMut.isPending ? 'Saving...' : 'Save Changes'}</Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
