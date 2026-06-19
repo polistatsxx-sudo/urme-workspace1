@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Calendar, MapPin, Users, Clock, Edit, Trash2, Sparkles } from 'lucide-react';
+import { Plus, Calendar, MapPin, Users, Clock, Edit, Trash2, Sparkles, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -14,6 +14,16 @@ import PageHeader from '@/components/shared/PageHeader';
 import { toast } from 'sonner';
 import { format, isPast } from 'date-fns';
 import { useAuth } from '@/lib/AuthContext';
+
+const getGoogleCalendarUrl = (ev) => {
+  const base = 'https://www.google.com/calendar/render?action=TEMPLATE';
+  const title = encodeURIComponent(ev.name || '');
+  const details = encodeURIComponent(ev.description || '');
+  const location = encodeURIComponent(ev.location || '');
+  const dateStr = (ev.date || '').replace(/-/g, '');
+  const dates = dateStr ? `${dateStr}T090000Z/${dateStr}T100000Z` : '';
+  return `${base}&text=${title}&details=${details}&location=${location}${dates ? `&dates=${dates}` : ''}`;
+};
 
 const statusColors = {
   planning: 'bg-blue-500/15 text-blue-400', confirmed: 'bg-emerald-500/15 text-emerald-400',
@@ -140,6 +150,9 @@ export default function Events() {
       </div>
       {ev.objectives && <p className="text-xs text-muted-foreground mt-2 border-t border-border/50 pt-2"><span className="font-semibold text-foreground/70">Objectives:</span> {ev.objectives}</p>}
       {ev.post_event_notes && <p className="text-xs text-primary mt-1"><span className="font-semibold">Post-Event:</span> {ev.post_event_notes}</p>}
+      <a href={getGoogleCalendarUrl(ev)} target="_blank" rel="noopener noreferrer" className="mt-2 flex items-center gap-1.5 text-xs text-blue-400 hover:text-blue-300 transition-colors">
+        <ExternalLink className="w-3 h-3" /> Add to Google Calendar
+      </a>
     </div>
   );
 
