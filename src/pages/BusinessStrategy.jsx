@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, Sparkles, Loader2, ChevronRight, Target, Users, Lightbulb, TrendingUp, MessageSquare } from 'lucide-react';
+import { ArrowLeft, Sparkles, Loader2, Target, Users, Lightbulb, TrendingUp, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const stageLabels = {
@@ -26,6 +26,7 @@ export default function BusinessStrategy() {
   const { id } = useParams();
   const [strategy, setStrategy] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [checked, setChecked] = useState({});
 
   const { data: biz } = useQuery({
     queryKey: ['business', id],
@@ -193,14 +194,20 @@ Be specific, concise, and practical. Reference their actual details.`;
                 </div>
                 {section.summary && <p className="text-sm text-muted-foreground mb-3">{section.summary}</p>}
                 {section.points?.length > 0 && (
-                  <ul className="space-y-2">
-                    {section.points.map((point, i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm">
-                        <ChevronRight className="w-3.5 h-3.5 text-primary mt-0.5 flex-shrink-0" />
-                        <span>{point}</span>
+                <ul className="space-y-2">
+                  {section.points.map((point, i) => {
+                    const key = `${section.title}-${i}`;
+                    const done = !!checked[key];
+                    return (
+                      <li key={i} className="flex items-start gap-2.5 text-sm cursor-pointer group" onClick={() => setChecked(prev => ({ ...prev, [key]: !prev[key] }))}>
+                        <div className={`w-4 h-4 mt-0.5 flex-shrink-0 rounded border-2 flex items-center justify-center transition-colors ${done ? 'bg-primary border-primary' : 'border-muted-foreground/40 group-hover:border-primary/60'}`}>
+                          {done && <svg className="w-2.5 h-2.5 text-primary-foreground" fill="none" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                        </div>
+                        <span className={done ? 'line-through text-muted-foreground' : ''}>{point}</span>
                       </li>
-                    ))}
-                  </ul>
+                    );
+                  })}
+                </ul>
                 )}
               </div>
             );
