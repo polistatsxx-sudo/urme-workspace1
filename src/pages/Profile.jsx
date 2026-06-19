@@ -86,8 +86,8 @@ export default function Profile() {
                 </label>
               </div>
               <div>
-                <h2 className="text-lg font-bold">{user?.full_name}</h2>
-                <p className="text-xs text-muted-foreground">{user?.email}</p>
+                <h2 className="text-lg font-bold">AJ Macedonia</h2>
+                <p className="text-xs text-muted-foreground">macecnc@urmeinc.com</p>
                 <div className="flex items-center gap-1 mt-1">
                   <Shield className="w-3 h-3 text-primary" />
                   <span className="text-[10px] text-primary font-semibold uppercase">{user?.role}</span>
