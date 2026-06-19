@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, CheckCircle2, Circle, Clock, AlertTriangle, Trophy, Flame, Sparkles } from 'lucide-react';
+import { Plus, CheckCircle2, Circle, Clock, AlertTriangle, Trophy, Flame, Sparkles, MessageCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -19,6 +20,7 @@ import confetti from 'canvas-confetti';
 export default function Tasks() {
   const qc = useQueryClient();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [showAdd, setShowAdd] = useState(false);
   const [form, setForm] = useState({ title: '', description: '', priority: 'medium', due_date: '', status: 'todo' });
   const [tab, setTab] = useState('todo');
@@ -109,15 +111,14 @@ export default function Tasks() {
                   <Button type="submit" disabled={createMut.isPending || !form.title.trim()} className="flex-1">{createMut.isPending ? 'Creating...' : 'Create Task'}</Button>
                 </div>
                 {showAILink && (
-                  <a
-                    href={`/task-ai-chat?title=${encodeURIComponent(form.title)}&description=${encodeURIComponent(form.description)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 text-xs text-accent hover:text-accent/80 transition-colors"
+                  <button
+                    type="button"
+                    onClick={() => navigate(`/task-ai-chat?title=${encodeURIComponent(form.title)}&description=${encodeURIComponent(form.description)}`)}
+                    className="flex items-center gap-1.5 text-xs text-accent hover:text-accent/80 transition-colors w-full"
                   >
-                    <Sparkles className="w-3 h-3" />
+                    <MessageCircle className="w-3.5 h-3.5" />
                     Chat with AI about how to make this task successful →
-                  </a>
+                  </button>
                 )}
               </form>
             </DialogContent>
