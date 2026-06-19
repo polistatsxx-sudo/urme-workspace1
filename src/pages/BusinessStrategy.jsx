@@ -27,6 +27,7 @@ export default function BusinessStrategy() {
   const [strategy, setStrategy] = useState(null);
   const [loading, setLoading] = useState(false);
   const [checked, setChecked] = useState({});
+  const [activeStep, setActiveStep] = useState(null);
 
   const { data: biz } = useQuery({
     queryKey: ['business', id],
@@ -184,6 +185,7 @@ Be specific, concise, and practical. Reference their actual details.`;
 
           {strategy.sections?.map((section) => {
             const Icon = sectionIcons[section.title] || Target;
+            const isNextSteps = section.title === 'Immediate Next Steps';
             return (
               <div key={section.title} className="bg-card border border-border rounded-xl p-5">
                 <div className="flex items-center gap-2 mb-3">
@@ -191,23 +193,51 @@ Be specific, concise, and practical. Reference their actual details.`;
                     <Icon className="w-3.5 h-3.5 text-primary" />
                   </div>
                   <h3 className="font-semibold text-sm">{section.title}</h3>
+                  {isNextSteps && activeStep !== null && (
+                    <button onClick={() => setActiveStep(null)} className="ml-auto text-xs text-muted-foreground hover:text-foreground transition-colors">
+                      Clear highlight
+                    </button>
+                  )}
                 </div>
                 {section.summary && <p className="text-sm text-muted-foreground mb-3">{section.summary}</p>}
                 {section.points?.length > 0 && (
-                <ul className="space-y-2">
-                  {section.points.map((point, i) => {
-                    const key = `${section.title}-${i}`;
-                    const done = !!checked[key];
-                    return (
-                      <li key={i} className="flex items-start gap-2.5 text-sm cursor-pointer group" onClick={() => setChecked(prev => ({ ...prev, [key]: !prev[key] }))}>
-                        <div className={`w-4 h-4 mt-0.5 flex-shrink-0 rounded border-2 flex items-center justify-center transition-colors ${done ? 'bg-primary border-primary' : 'border-muted-foreground/40 group-hover:border-primary/60'}`}>
-                          {done && <svg className="w-2.5 h-2.5 text-primary-foreground" fill="none" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
-                        </div>
-                        <span className={done ? 'line-through text-muted-foreground' : ''}>{point}</span>
-                      </li>
-                    );
-                  })}
-                </ul>
+                  <ul className="space-y-2">
+                    {section.points.map((point, i) => {
+                      if (isNextSteps) {
+                        const key = `next-${i}`;
+                        const done = !!checked[key];
+                        const isActive = activeStep === i;
+                        return (
+                          <li key={i} className={`flex items-start gap-2.5 text-sm rounded-lg p-1.5 -mx-1.5 transition-colors ${isActive ? 'bg-primary/10' : ''}`}>
+                            <div
+                              className={`w-4 h-4 mt-0.5 flex-shrink-0 rounded border-2 flex items-center justify-center transition-colors cursor-pointer ${done ? 'bg-primary border-primary' : 'border-muted-foreground/40 hover:border-primary/60'}`}
+                              onClick={() => setChecked(prev => ({ ...prev, [key]: !prev[key] }))}
+                            >
+                              {done && <svg className="w-2.5 h-2.5 text-primary-foreground" fill="none" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                            </div>
+                            <span
+                              className={`cursor-pointer flex-1 ${done ? 'line-through text-muted-foreground' : ''} ${isActive ? 'font-medium text-primary' : ''}`}
+                              onClick={() => setActiveStep(isActive ? null : i)}
+                            >
+                              {point}
+                            </span>
+                          </li>
+                        );
+                      } else {
+                        // Highlight points that share keywords with the active next step
+                        const nextStepsSection = strategy.sections?.find(s => s.title === 'Immediate Next Steps');
+                        const activeStepText = activeStep !== null ? nextStepsSection?.points?.[activeStep] || '' : '';
+                        const stepWords = activeStepText.toLowerCase().split(/\W+/).filter(w => w.length > 4);
+                        const isHighlighted = activeStep !== null && stepWords.some(w => point.toLowerCase().includes(w));
+                        return (
+                          <li key={i} className={`flex items-start gap-2 text-sm rounded-lg p-1.5 -mx-1.5 transition-all ${isHighlighted ? 'bg-yellow-400/10 border border-yellow-400/30' : activeStep !== null ? 'opacity-40' : ''}`}>
+                            <span className="w-1.5 h-1.5 rounded-full bg-primary/50 mt-1.5 flex-shrink-0" />
+                            <span>{point}</span>
+                          </li>
+                        );
+                      }
+                    })}
+                  </ul>
                 )}
               </div>
             );
