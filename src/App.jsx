@@ -23,6 +23,7 @@ import Events from '@/pages/Events';
 import SyncHub from '@/pages/SyncHub';
 import Profile from '@/pages/Profile';
 import Finance from '@/pages/Finance';
+import TaskAIChat from '@/pages/TaskAIChat';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -65,6 +66,7 @@ const AuthenticatedApp = () => {
           <Route path="/events" element={<Events />} />
           <Route path="/sync" element={<SyncHub />} />
           <Route path="/finance" element={<Finance />} />
+          <Route path="/task-ai-chat" element={<TaskAIChat />} />
           <Route path="/profile" element={<Profile />} />
         </Route>
       </Route>

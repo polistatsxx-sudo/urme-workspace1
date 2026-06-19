@@ -23,6 +23,7 @@ export default function Tasks() {
   const [form, setForm] = useState({ title: '', description: '', priority: 'medium', due_date: '', status: 'todo' });
   const [tab, setTab] = useState('todo');
   const [isEnhancing, setIsEnhancing] = useState(false);
+  const [showAILink, setShowAILink] = useState(false);
 
   const handleEnhance = async () => {
     if (!form.title.trim() && !form.description.trim()) {
@@ -30,9 +31,11 @@ export default function Tasks() {
       return;
     }
     setIsEnhancing(true);
+    setShowAILink(false);
     try {
       const res = await base44.functions.invoke('aiEnhanceTask', { title: form.title, description: form.description });
       setForm(p => ({ ...p, title: res.data.improvedTitle, description: res.data.improvedDescription }));
+      setShowAILink(true);
       toast.success('Task improved with AI!', { icon: '✨' });
     } catch (err) {
       toast.error('Failed to enhance task');
@@ -105,6 +108,17 @@ export default function Tasks() {
                   </Button>
                   <Button type="submit" disabled={createMut.isPending || !form.title.trim()} className="flex-1">{createMut.isPending ? 'Creating...' : 'Create Task'}</Button>
                 </div>
+                {showAILink && (
+                  <a
+                    href={`/task-ai-chat?title=${encodeURIComponent(form.title)}&description=${encodeURIComponent(form.description)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 text-xs text-accent hover:text-accent/80 transition-colors"
+                  >
+                    <Sparkles className="w-3 h-3" />
+                    Chat with AI about how to make this task successful →
+                  </a>
+                )}
               </form>
             </DialogContent>
           </Dialog>
