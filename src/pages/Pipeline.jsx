@@ -66,7 +66,7 @@ export default function Pipeline() {
                             {...prov.dragHandleProps}
                             className={`bg-card border border-border rounded-lg p-3 cursor-grab active:cursor-grabbing transition-shadow ${snap.isDragging ? 'shadow-xl shadow-primary/10' : 'hover:border-primary/20'}`}
                           >
-                            <Link to={`/businesses/${biz.id}`} className="block">
+                            <Link to={`/businesses/${biz.id}/strategy`} className="block">
                               <div className="flex items-start gap-2">
                                 <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
                                   <Building2 className="w-3.5 h-3.5 text-primary" />
