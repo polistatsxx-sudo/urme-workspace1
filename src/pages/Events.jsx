@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Calendar, MapPin, Users, Clock, Edit, Trash2 } from 'lucide-react';
+import { Plus, Calendar, MapPin, Users, Clock, Edit, Trash2, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -27,7 +27,21 @@ export default function Events() {
   const [showAdd, setShowAdd] = useState(false);
   const [editEvent, setEditEvent] = useState(null);
   const [form, setForm] = useState({ name: '', description: '', date: '', time: '', location: '', status: 'planning', event_type: 'mixer', objectives: '', target_industries: [] });
+  const [isEnhancing, setIsEnhancing] = useState(false);
   const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
+
+  const handleEnhance = async () => {
+    if (!form.name.trim() && !form.description.trim()) { toast.error('Add a name or description first'); return; }
+    setIsEnhancing(true);
+    try {
+      const res = await base44.integrations.Core.InvokeLLM({
+        prompt: `You're a B2B event strategist. Improve this event for a business matchmaking company:\nName: "${form.name}"\nDescription: "${form.description || ''}"\nObjectives: "${form.objectives || ''}"\nType: ${form.event_type}\n\nReturn improved, compelling versions of the name, description, and objectives. Be specific and professional.`,
+        response_json_schema: { type: 'object', properties: { name: { type: 'string' }, description: { type: 'string' }, objectives: { type: 'string' } } }
+      });
+      setForm(p => ({ ...p, name: res.name || p.name, description: res.description || p.description, objectives: res.objectives || p.objectives }));
+      toast.success('Event improved with AI!', { icon: '✨' });
+    } catch { toast.error('Failed to enhance'); } finally { setIsEnhancing(false); }
+  };
 
   const { data: events = [] } = useQuery({ queryKey: ['events'], queryFn: () => base44.entities.Event.list('-date') });
 
@@ -92,9 +106,14 @@ export default function Events() {
       {isEdit && (
         <div><Label className="text-xs">Post-Event Notes</Label><Textarea value={form.post_event_notes || ''} onChange={e => set('post_event_notes', e.target.value)} className="bg-secondary/50 mt-1 h-16 resize-none" /></div>
       )}
-      <Button type="submit" disabled={createMut.isPending || updateMut.isPending || !form.name.trim()} className="w-full">
-        {isEdit ? 'Update Event' : 'Create Event'}
-      </Button>
+      <div className="flex gap-2">
+        <Button type="button" variant="outline" onClick={handleEnhance} disabled={isEnhancing} className="flex-1 border-accent/50 text-accent hover:bg-accent/10">
+          <Sparkles className="w-4 h-4 mr-1" />{isEnhancing ? 'Improving...' : 'Improve with AI'}
+        </Button>
+        <Button type="submit" disabled={createMut.isPending || updateMut.isPending || !form.name.trim()} className="flex-1">
+          {isEdit ? 'Update Event' : 'Create Event'}
+        </Button>
+      </div>
     </form>
   );
 

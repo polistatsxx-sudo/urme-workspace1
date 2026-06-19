@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, ThumbsUp, MessageSquare, Sparkles, Loader2, Pencil, Trash2 } from 'lucide-react';
+import { Plus, ThumbsUp, MessageSquare, Sparkles, Loader2, Pencil, Trash2, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -27,6 +27,8 @@ export default function Ideas() {
   const [form, setForm] = useState({ title: '', description: '', category: 'other' });
   const [editingIdea, setEditingIdea] = useState(null);
   const [editForm, setEditForm] = useState({});
+  const [isEnhancingEdit, setIsEnhancingEdit] = useState(false);
+  const [isEnhancingNew, setIsEnhancingNew] = useState(false);
   const [commentText, setCommentText] = useState({});
   const [expandedIdea, setExpandedIdea] = useState(null);
   const [aiLoading, setAiLoading] = useState(false);
@@ -51,6 +53,19 @@ export default function Ideas() {
   const startEdit = (idea) => {
     setEditingIdea(idea.id);
     setEditForm({ title: idea.title, description: idea.description || '', category: idea.category || 'other' });
+  };
+
+  const handleEnhanceForm = async (formState, setFormFn, setLoading) => {
+    if (!formState.title.trim()) { toast.error('Add a title first'); return; }
+    setLoading(true);
+    try {
+      const res = await base44.integrations.Core.InvokeLLM({
+        prompt: `You're a B2B networking strategist. Improve this idea for a business matchmaking company:\nTitle: "${formState.title}"\nDescription: "${formState.description || ''}"\nCategory: ${formState.category}\n\nReturn an improved, compelling title and description. Be specific and actionable.`,
+        response_json_schema: { type: 'object', properties: { title: { type: 'string' }, description: { type: 'string' } } }
+      });
+      setFormFn(p => ({ ...p, title: res.title || p.title, description: res.description || p.description }));
+      toast.success('Idea improved with AI!', { icon: '✨' });
+    } catch { toast.error('Failed to enhance'); } finally { setLoading(false); }
   };
 
   const vote = async (idea) => {
@@ -109,7 +124,12 @@ export default function Ideas() {
                     </SelectContent>
                   </Select>
                 </div>
-                <Button type="submit" disabled={createMut.isPending || !form.title.trim()} className="w-full">{createMut.isPending ? 'Posting...' : 'Post Idea'}</Button>
+                <div className="flex gap-2">
+                  <Button type="button" variant="outline" onClick={() => handleEnhanceForm(form, setForm, setIsEnhancingNew)} disabled={isEnhancingNew} className="flex-1 border-accent/50 text-accent hover:bg-accent/10">
+                    <Sparkles className="w-4 h-4 mr-1" />{isEnhancingNew ? 'Improving...' : 'Improve with AI'}
+                  </Button>
+                  <Button type="submit" disabled={createMut.isPending || !form.title.trim()} className="flex-1">{createMut.isPending ? 'Posting...' : 'Post Idea'}</Button>
+                </div>
               </form>
             </DialogContent>
           </Dialog>
@@ -199,6 +219,9 @@ export default function Ideas() {
                 </SelectContent>
               </Select>
             </div>
+            <Button type="button" variant="outline" onClick={() => handleEnhanceForm(editForm, setEditForm, setIsEnhancingEdit)} disabled={isEnhancingEdit} className="w-full border-accent/50 text-accent hover:bg-accent/10">
+              <Sparkles className="w-4 h-4 mr-1" />{isEnhancingEdit ? 'Improving...' : 'Improve with AI'}
+            </Button>
             <div className="flex gap-2">
               <Button type="button" variant="outline" onClick={() => setEditingIdea(null)} className="flex-1">Cancel</Button>
               <Button type="submit" disabled={updateMut.isPending || !editForm.title?.trim()} className="flex-1">{updateMut.isPending ? 'Saving...' : 'Save Changes'}</Button>

@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
+import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Sparkles } from 'lucide-react';
+import { toast } from 'sonner';
 
 const industries = ['Technology', 'Marketing', 'Real Estate', 'Construction', 'Legal', 'Finance', 'Food & Beverage', 'Healthcare', 'Entertainment', 'Retail', 'Education', 'Media', 'Event Management', 'Transportation', 'Other'];
 
@@ -15,8 +18,22 @@ export default function BusinessForm({ initialData, users = [], onSubmit, saving
     tags: [], notes: ''
   });
   const [tagInput, setTagInput] = useState('');
+  const [isEnhancing, setIsEnhancing] = useState(false);
 
   const set = (k, v) => setForm(prev => ({ ...prev, [k]: v }));
+
+  const handleEnhance = async () => {
+    if (!form.name.trim()) { toast.error('Add a company name first'); return; }
+    setIsEnhancing(true);
+    try {
+      const res = await base44.integrations.Core.InvokeLLM({
+        prompt: `You're a B2B business strategist. Improve this business profile for a matchmaking platform:\nName: "${form.name}"\nIndustry: "${form.industry || ''}"\nDescription: "${form.description || ''}"\nNeeds: "${form.needs || ''}"\nOffers: "${form.offers || ''}"\n\nReturn polished, compelling versions of description, needs, and offers that would attract the right partners. Be specific and concise.`,
+        response_json_schema: { type: 'object', properties: { description: { type: 'string' }, needs: { type: 'string' }, offers: { type: 'string' } } }
+      });
+      setForm(prev => ({ ...prev, description: res.description || prev.description, needs: res.needs || prev.needs, offers: res.offers || prev.offers }));
+      toast.success('Business profile improved with AI!', { icon: '✨' });
+    } catch { toast.error('Failed to enhance'); } finally { setIsEnhancing(false); }
+  };
 
   const handleAssign = (userId) => {
     const user = users.find(u => u.id === userId);
@@ -129,9 +146,14 @@ export default function BusinessForm({ initialData, users = [], onSubmit, saving
           <Textarea value={form.notes} onChange={e => set('notes', e.target.value)} className="bg-secondary/50 mt-1 h-16 resize-none" />
         </div>
       </div>
-      <Button type="submit" disabled={saving || !form.name.trim()} className="w-full">
-        {saving ? 'Saving...' : (initialData ? 'Update Business' : 'Add Business')}
-      </Button>
+      <div className="flex gap-2">
+        <Button type="button" variant="outline" onClick={handleEnhance} disabled={isEnhancing} className="flex-1 border-accent/50 text-accent hover:bg-accent/10">
+          <Sparkles className="w-4 h-4 mr-1" />{isEnhancing ? 'Improving...' : 'Improve with AI'}
+        </Button>
+        <Button type="submit" disabled={saving || !form.name.trim()} className="flex-1">
+          {saving ? 'Saving...' : (initialData ? 'Update Business' : 'Add Business')}
+        </Button>
+      </div>
     </form>
   );
 }
