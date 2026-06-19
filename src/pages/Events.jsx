@@ -143,7 +143,7 @@ export default function Events() {
       <Tabs defaultValue="upcoming">
         <TabsList className="bg-card border border-border mb-4">
           <TabsTrigger value="upcoming">Upcoming ({upcoming.length})</TabsTrigger>
-          <TabsTrigger value="past">Past ({past.length})</TabsTrigger>
+          <TabsTrigger value="past">Archived ({past.length})</TabsTrigger>
         </TabsList>
         <TabsContent value="upcoming">
           <div className="space-y-3">
@@ -154,7 +154,7 @@ export default function Events() {
         <TabsContent value="past">
           <div className="space-y-3">
             {past.map(ev => <EventCard key={ev.id} ev={ev} />)}
-            {past.length === 0 && <p className="text-center text-muted-foreground text-sm py-12">No past events</p>}
+            {past.length === 0 && <p className="text-center text-muted-foreground text-sm py-12">No archived events</p>}
           </div>
         </TabsContent>
       </Tabs>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { User, Shield, Key, LogOut, Save, Trash2, Users } from 'lucide-react';
+import { User, Shield, Key, LogOut, Save, Trash2, Users, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -15,7 +15,7 @@ import { useAuth } from '@/lib/AuthContext';
 export default function Profile() {
   const { user } = useAuth();
   const qc = useQueryClient();
-  const [form, setForm] = useState({ bio: '', phone: '', job_title: '', ai_provider: 'none', ai_api_key: '' });
+  const [form, setForm] = useState({ bio: '', phone: '', job_title: '', ai_provider: 'none', ai_api_key: '', profile_photo: '' });
   const [saving, setSaving] = useState(false);
 
   const { data: allUsers = [] } = useQuery({ queryKey: ['users'], queryFn: () => base44.entities.User.list() });
@@ -28,9 +28,19 @@ export default function Profile() {
         job_title: user.job_title || '',
         ai_provider: user.ai_provider || 'none',
         ai_api_key: user.ai_api_key || '',
+        profile_photo: user.profile_photo || '',
       });
     }
   }, [user]);
+
+  const handlePhotoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const { file_url } = await base44.integrations.Core.UploadFile({ file });
+    setForm(p => ({ ...p, profile_photo: file_url }));
+    await base44.auth.updateMe({ profile_photo: file_url });
+    toast.success('Photo updated!');
+  };
 
   const handleSave = async () => {
     setSaving(true);
@@ -62,8 +72,18 @@ export default function Profile() {
         <TabsContent value="profile">
           <div className="bg-card border border-border rounded-xl p-5 max-w-lg">
             <div className="flex items-center gap-4 mb-6">
-              <div className="w-16 h-16 rounded-xl bg-primary/10 flex items-center justify-center">
-                <User className="w-8 h-8 text-primary" />
+              <div className="relative group">
+                {(form.profile_photo || user?.profile_photo) ? (
+                  <img src={form.profile_photo || user?.profile_photo} alt="Profile" className="w-16 h-16 rounded-xl object-cover" />
+                ) : (
+                  <div className="w-16 h-16 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <User className="w-8 h-8 text-primary" />
+                  </div>
+                )}
+                <label className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                  <Camera className="w-5 h-5 text-white" />
+                  <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
+                </label>
               </div>
               <div>
                 <h2 className="text-lg font-bold">{user?.full_name}</h2>

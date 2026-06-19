@@ -22,6 +22,7 @@ import Ideas from '@/pages/Ideas';
 import Events from '@/pages/Events';
 import SyncHub from '@/pages/SyncHub';
 import Profile from '@/pages/Profile';
+import Finance from '@/pages/Finance';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -63,6 +64,7 @@ const AuthenticatedApp = () => {
           <Route path="/ideas" element={<Ideas />} />
           <Route path="/events" element={<Events />} />
           <Route path="/sync" element={<SyncHub />} />
+          <Route path="/finance" element={<Finance />} />
           <Route path="/profile" element={<Profile />} />
         </Route>
       </Route>

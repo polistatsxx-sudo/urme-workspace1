@@ -33,7 +33,7 @@ export default function Dashboard() {
 
   return (
     <div className="animate-slide-up">
-      <PageHeader title="Dashboard" subtitle="Your URME command center" />
+      <PageHeader title="Dashboard" subtitle={`Today is ${format(new Date(), 'EEEE, MMMM d, yyyy')} · Your URME command center`} />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
         <StatCard label="Active Businesses" value={activeBiz.length} icon={Building2} />

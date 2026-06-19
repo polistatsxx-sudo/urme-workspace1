@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, Building2, KanbanSquare, CheckSquare, Lightbulb, 
-  Calendar, MessageSquare, User, ChevronLeft, ChevronRight, Zap, Menu, X
+  Calendar, MessageSquare, User, ChevronLeft, ChevronRight, Zap, Menu, X, DollarSign
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -15,6 +15,7 @@ const navItems = [
   { path: '/ideas', icon: Lightbulb, label: 'Ideas' },
   { path: '/events', icon: Calendar, label: 'Events' },
   { path: '/sync', icon: MessageSquare, label: 'Sync Hub' },
+  { path: '/finance', icon: DollarSign, label: 'Finance' },
   { path: '/profile', icon: User, label: 'Profile' },
 ];
 

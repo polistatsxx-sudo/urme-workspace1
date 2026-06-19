@@ -1,0 +1,71 @@
+{
+  "name": "FinanceEntry",
+  "type": "object",
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": [
+        "revenue",
+        "expense"
+      ],
+      "description": "Revenue or expense"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "event_revenue",
+        "matchmaking_fee",
+        "sponsorship",
+        "consulting",
+        "other_revenue",
+        "venue_cost",
+        "marketing",
+        "operations",
+        "software",
+        "travel",
+        "payroll",
+        "other_expense"
+      ]
+    },
+    "amount": {
+      "type": "number",
+      "description": "Dollar amount"
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "description": {
+      "type": "string"
+    },
+    "linked_event_id": {
+      "type": "string"
+    },
+    "linked_event_name": {
+      "type": "string"
+    },
+    "linked_business_id": {
+      "type": "string"
+    },
+    "linked_business_name": {
+      "type": "string"
+    },
+    "payment_status": {
+      "type": "string",
+      "enum": [
+        "paid",
+        "pending",
+        "overdue"
+      ],
+      "default": "paid"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "type",
+    "amount",
+    "date"
+  ]
+}
