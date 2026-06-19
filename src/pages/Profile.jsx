@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { User, Shield, Key, LogOut, Save, Trash2, Users, Camera, Activity } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { User, Shield, Key, LogOut, Save, Trash2, Users, Camera, Activity, Building2, Calendar, ChevronRight } from 'lucide-react';
 import InteractionTimeline from '@/components/business/InteractionTimeline';
+import StageBadge from '@/components/shared/StageBadge';
+import { format, isPast } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -16,6 +19,7 @@ import { useAuth } from '@/lib/AuthContext';
 export default function Profile() {
   const { user } = useAuth();
   const qc = useQueryClient();
+  const navigate = useNavigate();
   const [form, setForm] = useState({ bio: '', phone: '', job_title: '', ai_provider: 'none', ai_api_key: '', profile_photo: '' });
   const [saving, setSaving] = useState(false);
 
@@ -25,6 +29,12 @@ export default function Profile() {
     queryFn: () => base44.entities.Interaction.filter({ logged_by_id: user.id }, '-interaction_date'),
     enabled: !!user?.id,
   });
+  const { data: allBusinesses = [] } = useQuery({ queryKey: ['businesses'], queryFn: () => base44.entities.Business.list() });
+  const { data: allEvents = [] } = useQuery({ queryKey: ['events'], queryFn: () => base44.entities.Event.list('-date') });
+
+  const myBusinesses = allBusinesses.filter(b => b.assigned_to === user?.id);
+  const myBusinessIds = new Set(myBusinesses.map(b => b.id));
+  const myEvents = allEvents.filter(e => e.attendee_business_ids?.some(bid => myBusinessIds.has(bid)));
 
   useEffect(() => {
     if (user) {
@@ -71,6 +81,7 @@ export default function Profile() {
       <Tabs defaultValue="profile">
         <TabsList className="bg-card border border-border mb-4">
           <TabsTrigger value="profile">My Profile</TabsTrigger>
+          <TabsTrigger value="businesses">My Businesses ({myBusinesses.length})</TabsTrigger>
           <TabsTrigger value="activity">Activity ({myInteractions.length})</TabsTrigger>
           <TabsTrigger value="ai">AI Settings</TabsTrigger>
           {isAdmin && <TabsTrigger value="team">Team</TabsTrigger>}
@@ -122,6 +133,76 @@ export default function Profile() {
           </div>
         </TabsContent>
 
+        <TabsContent value="businesses">
+          <div className="space-y-4">
+            {/* Managed Businesses */}
+            <div className="bg-card border border-border rounded-xl p-5">
+              <div className="flex items-center gap-2 mb-4">
+                <Building2 className="w-5 h-5 text-primary" />
+                <h3 className="font-semibold">Managed Businesses</h3>
+              </div>
+              {myBusinesses.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-6">No businesses assigned yet</p>
+              ) : (
+                <div className="space-y-2">
+                  {myBusinesses.map(b => (
+                    <button key={b.id} onClick={() => navigate(`/businesses/${b.id}`)}
+                      className="w-full flex items-center gap-3 bg-secondary/40 hover:bg-secondary/70 rounded-lg p-3 text-left transition-colors group">
+                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <Building2 className="w-4 h-4 text-primary" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium">{b.name}</p>
+                        <p className="text-[10px] text-muted-foreground">{b.industry}</p>
+                      </div>
+                      <StageBadge stage={b.stage} />
+                      <ChevronRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 flex-shrink-0" />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Related Events */}
+            <div className="bg-card border border-border rounded-xl p-5">
+              <div className="flex items-center gap-2 mb-4">
+                <Calendar className="w-5 h-5 text-primary" />
+                <h3 className="font-semibold">Related Events</h3>
+              </div>
+              {myEvents.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-6">No events linked to your businesses yet</p>
+              ) : (
+                <div className="space-y-2">
+                  {myEvents.map(ev => {
+                    const past = ev.date && isPast(new Date(ev.date));
+                    const linkedBizNames = (ev.attendee_business_ids || [])
+                      .filter(bid => myBusinessIds.has(bid))
+                      .map(bid => allBusinesses.find(b => b.id === bid)?.name)
+                      .filter(Boolean);
+                    return (
+                      <div key={ev.id} className="flex items-start gap-3 bg-secondary/40 rounded-lg p-3">
+                        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                          <Calendar className="w-4 h-4 text-primary" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center justify-between gap-2">
+                            <p className="text-sm font-medium">{ev.name}</p>
+                            <span className={`text-[10px] ${past ? 'text-muted-foreground' : 'text-emerald-400'}`}>{past ? 'Past' : 'Upcoming'}</span>
+                          </div>
+                          {ev.date && <p className="text-[10px] text-muted-foreground">{format(new Date(ev.date), 'MMM d, yyyy')}{ev.location ? ` · ${ev.location}` : ''}</p>}
+                          {linkedBizNames.length > 0 && (
+                            <p className="text-[10px] text-primary mt-0.5">via {linkedBizNames.join(', ')}</p>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        </TabsContent>
+
         <TabsContent value="activity">
           <div className="bg-card border border-border rounded-xl p-5">
             <div className="flex items-center gap-2 mb-4">
@@ -131,14 +212,7 @@ export default function Profile() {
             {myInteractions.length === 0 ? (
               <p className="text-sm text-muted-foreground text-center py-8">No interactions logged yet</p>
             ) : (
-              <div>
-                {myInteractions.map(ix => (
-                  <div key={ix.id} className="mb-2 last:mb-0">
-                    <div className="text-[10px] text-muted-foreground mb-1">{ix.business_name}</div>
-                    <InteractionTimeline interactions={[ix]} />
-                  </div>
-                ))}
-              </div>
+              <InteractionTimeline interactions={myInteractions} />
             )}
           </div>
         </TabsContent>

@@ -25,6 +25,7 @@ import Profile from '@/pages/Profile';
 import Finance from '@/pages/Finance';
 import TaskAIChat from '@/pages/TaskAIChat';
 import BusinessStrategy from '@/pages/BusinessStrategy';
+import ContactProfile from '@/pages/ContactProfile';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -63,6 +64,7 @@ const AuthenticatedApp = () => {
           <Route path="/businesses" element={<Businesses />} />
           <Route path="/businesses/:id" element={<BusinessDetail />} />
           <Route path="/businesses/:id/strategy" element={<BusinessStrategy />} />
+          <Route path="/contacts/:id" element={<ContactProfile />} />
           <Route path="/tasks" element={<Tasks />} />
           <Route path="/ideas" element={<Ideas />} />
           <Route path="/events" element={<Events />} />

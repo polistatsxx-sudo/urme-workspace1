@@ -15,6 +15,7 @@ import MatchList from '@/components/business/MatchList';
 import ContactInfoCard from '@/components/business/ContactInfoCard';
 import AccountManagerCard from '@/components/business/AccountManagerCard';
 import EventEngagements from '@/components/business/EventEngagements';
+import ContactsCard from '@/components/business/ContactsCard';
 import { toast } from 'sonner';
 import { useAuth } from '@/lib/AuthContext';
 
@@ -140,7 +141,8 @@ export default function BusinessDetail() {
 
       <Tabs defaultValue="activity" className="w-full">
         <TabsList className="bg-card border border-border mb-4">
-          <TabsTrigger value="activity">Activity</TabsTrigger>
+          <TabsTrigger value="activity">Activity ({interactions.length})</TabsTrigger>
+          <TabsTrigger value="contacts">Contacts</TabsTrigger>
           <TabsTrigger value="matches">Matches ({bizMatches.length})</TabsTrigger>
         </TabsList>
         <TabsContent value="activity">
@@ -148,6 +150,9 @@ export default function BusinessDetail() {
             <Button size="sm" onClick={() => setLogOpen(true)}><Plus className="w-4 h-4 mr-1" /> Log Interaction</Button>
           </div>
           <InteractionTimeline interactions={interactions} />
+        </TabsContent>
+        <TabsContent value="contacts">
+          <ContactsCard bizId={bizId} bizName={biz?.name} />
         </TabsContent>
         <TabsContent value="matches">
           <MatchList matches={bizMatches} currentBizId={bizId} />
