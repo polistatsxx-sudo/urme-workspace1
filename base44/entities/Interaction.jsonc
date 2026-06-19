@@ -8,6 +8,14 @@
     "business_name": {
       "type": "string"
     },
+    "contact_id": {
+      "type": "string",
+      "description": "Linked contact person ID"
+    },
+    "contact_name": {
+      "type": "string",
+      "description": "Linked contact person name"
+    },
     "type": {
       "type": "string",
       "enum": [
@@ -39,14 +47,17 @@
       "type": "string",
       "description": "Linked team member name"
     },
-    "attachment_url": {
+    "logged_by_id": {
       "type": "string",
-      "description": "Optional attachment file URL"
-    },
-    "attachment_name": {
-      "type": "string"
+      "description": "User ID of the person who logged this"
     },
     "logged_by_name": {
+      "type": "string"
+    },
+    "attachment_url": {
+      "type": "string"
+    },
+    "attachment_name": {
       "type": "string"
     }
   },

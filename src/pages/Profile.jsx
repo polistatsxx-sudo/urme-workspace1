@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { User, Shield, Key, LogOut, Save, Trash2, Users, Camera } from 'lucide-react';
+import { User, Shield, Key, LogOut, Save, Trash2, Users, Camera, Activity } from 'lucide-react';
+import InteractionTimeline from '@/components/business/InteractionTimeline';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -19,6 +20,11 @@ export default function Profile() {
   const [saving, setSaving] = useState(false);
 
   const { data: allUsers = [] } = useQuery({ queryKey: ['users'], queryFn: () => base44.entities.User.list() });
+  const { data: myInteractions = [] } = useQuery({
+    queryKey: ['my-interactions', user?.id],
+    queryFn: () => base44.entities.Interaction.filter({ logged_by_id: user.id }, '-interaction_date'),
+    enabled: !!user?.id,
+  });
 
   useEffect(() => {
     if (user) {
@@ -65,6 +71,7 @@ export default function Profile() {
       <Tabs defaultValue="profile">
         <TabsList className="bg-card border border-border mb-4">
           <TabsTrigger value="profile">My Profile</TabsTrigger>
+          <TabsTrigger value="activity">Activity ({myInteractions.length})</TabsTrigger>
           <TabsTrigger value="ai">AI Settings</TabsTrigger>
           {isAdmin && <TabsTrigger value="team">Team</TabsTrigger>}
         </TabsList>
@@ -112,6 +119,27 @@ export default function Profile() {
                 <Button variant="outline" onClick={() => base44.auth.logout()} className="text-destructive"><LogOut className="w-4 h-4 mr-1" /> Logout</Button>
               </div>
             </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="activity">
+          <div className="bg-card border border-border rounded-xl p-5">
+            <div className="flex items-center gap-2 mb-4">
+              <Activity className="w-5 h-5 text-primary" />
+              <h3 className="font-semibold">My Logged Interactions</h3>
+            </div>
+            {myInteractions.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-8">No interactions logged yet</p>
+            ) : (
+              <div>
+                {myInteractions.map(ix => (
+                  <div key={ix.id} className="mb-2 last:mb-0">
+                    <div className="text-[10px] text-muted-foreground mb-1">{ix.business_name}</div>
+                    <InteractionTimeline interactions={[ix]} />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </TabsContent>
 

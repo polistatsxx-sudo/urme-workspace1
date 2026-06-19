@@ -60,6 +60,7 @@ export default function InteractionTimeline({ interactions }) {
                   {ix.notes && <p className="text-xs text-muted-foreground mt-1">{ix.notes}</p>}
                   {ix.outcome && <p className="text-xs text-primary mt-1">Next: {ix.outcome}</p>}
                   <div className="flex items-center gap-3 mt-2 flex-wrap">
+                    {ix.contact_name && <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full flex items-center gap-1"><User className="w-3 h-3" /> {ix.contact_name}</span>}
                     {ix.team_member && <span className="text-[10px] text-muted-foreground flex items-center gap-1"><User className="w-3 h-3" /> {ix.team_member}</span>}
                     {ix.attachment_url && (
                       <a href={ix.attachment_url} target="_blank" rel="noopener" className="text-[10px] text-primary flex items-center gap-1 hover:underline">

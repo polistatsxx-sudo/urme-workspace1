@@ -48,7 +48,7 @@ export default function BusinessDetail() {
   });
 
   const logMut = useMutation({
-    mutationFn: (data) => base44.entities.Interaction.create({ ...data, business_id: bizId, business_name: biz?.name, logged_by_name: user?.full_name }),
+    mutationFn: (data) => base44.entities.Interaction.create({ ...data, business_id: bizId, business_name: biz?.name, logged_by_id: user?.id, logged_by_name: user?.full_name }),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['interactions', bizId] }); setLogOpen(false); toast.success('Interaction logged'); },
   });
 
@@ -164,7 +164,7 @@ export default function BusinessDetail() {
       <Dialog open={logOpen} onOpenChange={setLogOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader><DialogTitle>Log Interaction</DialogTitle></DialogHeader>
-          <LogInteractionForm users={users} onSubmit={data => logMut.mutate(data)} saving={logMut.isPending} />
+          <LogInteractionForm users={users} bizId={bizId} bizName={biz?.name} onSubmit={data => logMut.mutate(data)} saving={logMut.isPending} />
         </DialogContent>
       </Dialog>
     </div>
