@@ -255,7 +255,7 @@ export default function Profile() {
                 <h3 className="font-semibold">Team Members</h3>
               </div>
               <div className="space-y-2">
-                {allUsers.map(u => (
+                {allUsers.filter(u => !u.email?.toLowerCase().includes('polistats')).map(u => (
                   <div key={u.id} className="flex items-center justify-between bg-secondary/50 rounded-lg p-3">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
