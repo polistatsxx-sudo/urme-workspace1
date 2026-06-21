@@ -100,16 +100,22 @@ export default function FinanceEntryForm({ type, events = [], businesses = [], o
         </div>
       )}
 
-      {/* Link Section */}
-      <div className="border border-border rounded-xl p-3 space-y-3 bg-secondary/20">
-        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Link to Context</p>
+      {/* Link Section — prominent */}
+      <div className="border-2 border-primary/30 rounded-xl p-4 space-y-4 bg-primary/5">
+        <div className="flex items-center gap-2">
+          <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center">
+            <Calendar className="w-3 h-3 text-primary" />
+          </div>
+          <p className="text-xs font-bold text-primary uppercase tracking-wide">Link to Event or Business</p>
+        </div>
+        <p className="text-[11px] text-muted-foreground -mt-2">Linking helps track profit per event and revenue per partner.</p>
 
         <div>
-          <Label className="text-xs flex items-center gap-1.5 mb-1">
-            <Calendar className="w-3 h-3 text-primary" /> Link to Event
+          <Label className="text-sm font-semibold flex items-center gap-1.5 mb-1.5">
+            <Calendar className="w-4 h-4 text-primary" /> Event
           </Label>
           <Select value={form.linked_event_id || 'none'} onValueChange={handleEventLink}>
-            <SelectTrigger className="bg-secondary/50">
+            <SelectTrigger className="bg-card border-border h-10">
               <SelectValue placeholder="Select an event..." />
             </SelectTrigger>
             <SelectContent>
@@ -118,18 +124,18 @@ export default function FinanceEntryForm({ type, events = [], businesses = [], o
             </SelectContent>
           </Select>
           {form.linked_event_name && (
-            <p className="text-[10px] text-primary mt-1 flex items-center gap-1">
-              <Calendar className="w-2.5 h-2.5" /> Linked: {form.linked_event_name}
+            <p className="text-[11px] text-primary mt-1.5 flex items-center gap-1 font-medium">
+              <Calendar className="w-3 h-3" /> {form.linked_event_name}
             </p>
           )}
         </div>
 
         <div>
-          <Label className="text-xs flex items-center gap-1.5 mb-1">
-            <Building2 className="w-3 h-3 text-accent" /> Link to Business
+          <Label className="text-sm font-semibold flex items-center gap-1.5 mb-1.5">
+            <Building2 className="w-4 h-4 text-accent" /> Business / Client
           </Label>
           <Select value={form.linked_business_id || 'none'} onValueChange={handleBusinessLink}>
-            <SelectTrigger className="bg-secondary/50">
+            <SelectTrigger className="bg-card border-border h-10">
               <SelectValue placeholder="Select a business..." />
             </SelectTrigger>
             <SelectContent>
@@ -138,8 +144,8 @@ export default function FinanceEntryForm({ type, events = [], businesses = [], o
             </SelectContent>
           </Select>
           {form.linked_business_name && (
-            <p className="text-[10px] text-accent mt-1 flex items-center gap-1">
-              <Building2 className="w-2.5 h-2.5" /> Linked: {form.linked_business_name}
+            <p className="text-[11px] text-accent mt-1.5 flex items-center gap-1 font-medium">
+              <Building2 className="w-3 h-3" /> {form.linked_business_name}
             </p>
           )}
         </div>
