@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { Building2, CheckSquare, Calendar, Handshake, AlertTriangle, TrendingUp, ArrowRight, Clock, CreditCard, PenLine } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import PageHeader from '@/components/shared/PageHeader';
 import StatCard from '@/components/shared/StatCard';
 import StageBadge from '@/components/shared/StageBadge';
@@ -37,6 +38,11 @@ export default function Dashboard() {
   const pipelineCounts = {};
   activeBiz.forEach(b => { pipelineCounts[b.stage] = (pipelineCounts[b.stage] || 0) + 1; });
 
+  const pipelineChartData = Object.entries(stageLabels)
+    .filter(([k]) => k !== 'archived')
+    .map(([stage, label]) => ({ stage: label.replace(' ', '\n'), count: pipelineCounts[stage] || 0 }))
+    .filter(d => d.count > 0);
+
   const urgentTasks = tasks.filter(t => t.status !== 'done' && (t.priority === 'urgent' || t.priority === 'high' || (t.due_date && (isPast(new Date(t.due_date)) || isToday(new Date(t.due_date)) || new Date(t.due_date) <= addDays(new Date(), 3))))).slice(0, 5);
 
   return (
@@ -65,14 +71,23 @@ export default function Dashboard() {
             <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Pipeline Health</h2>
             <Link to="/pipeline"><Button variant="ghost" size="sm" className="text-xs">View Pipeline <ArrowRight className="w-3 h-3 ml-1" /></Button></Link>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-            {Object.entries(stageLabels).filter(([k]) => k !== 'archived').map(([stage, label]) => (
-              <div key={stage} className="bg-secondary/50 rounded-lg p-3">
-                <p className="text-xs text-muted-foreground">{label}</p>
-                <p className="text-xl font-bold font-display">{pipelineCounts[stage] || 0}</p>
-              </div>
-            ))}
-          </div>
+          <ResponsiveContainer width="100%" height={180}>
+            <BarChart data={pipelineChartData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+              <XAxis dataKey="stage" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
+              <YAxis allowDecimals={false} tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
+              <Tooltip
+                contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 8, fontSize: 12 }}
+                labelStyle={{ color: 'hsl(var(--foreground))' }}
+                itemStyle={{ color: 'hsl(var(--primary))' }}
+                cursor={{ fill: 'hsl(var(--muted) / 0.4)' }}
+              />
+              <Bar dataKey="count" name="Businesses" radius={[4, 4, 0, 0]}>
+                {pipelineChartData.map((_, i) => (
+                  <Cell key={i} fill={`hsl(var(--primary) / ${0.4 + (i / pipelineChartData.length) * 0.6})`} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
         </div>
 
         {/* Risk & Opportunity */}
