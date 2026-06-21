@@ -20,8 +20,7 @@ import { toast } from 'sonner';
 import { useAuth } from '@/lib/AuthContext';
 
 export default function BusinessDetail() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const bizId = window.location.pathname.split('/businesses/')[1];
+  const bizId = window.location.pathname.split('/businesses/')[1]?.split('/')[0];
   const navigate = useNavigate();
   const qc = useQueryClient();
   const { user } = useAuth();
@@ -33,7 +32,7 @@ export default function BusinessDetail() {
   const { data: businesses = [], isLoading: bizLoading } = useQuery({ queryKey: ['businesses'], queryFn: () => base44.entities.Business.list() });
   const { data: interactions = [] } = useQuery({ queryKey: ['interactions', bizId], queryFn: () => base44.entities.Interaction.filter({ business_id: bizId }, '-interaction_date') });
   const { data: matches = [] } = useQuery({ queryKey: ['matches'], queryFn: () => base44.entities.Match.list() });
-  const { data: users = [] } = useQuery({ queryKey: ['users'], queryFn: () => base44.entities.User.list(), retry: false, throwOnError: false });
+  const { data: users = [] } = useQuery({ queryKey: ['users'], queryFn: () => base44.entities.User.list(), retry: false });
 
   const biz = businesses.find(b => b.id === bizId);
   const bizMatches = matches.filter(m => m.business_a_id === bizId || m.business_b_id === bizId);
