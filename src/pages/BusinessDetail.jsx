@@ -30,10 +30,10 @@ export default function BusinessDetail() {
   const [aiLoading, setAiLoading] = useState(false);
   const [insight, setInsight] = useState('');
 
-  const { data: businesses = [] } = useQuery({ queryKey: ['businesses'], queryFn: () => base44.entities.Business.list() });
+  const { data: businesses = [], isLoading: bizLoading } = useQuery({ queryKey: ['businesses'], queryFn: () => base44.entities.Business.list() });
   const { data: interactions = [] } = useQuery({ queryKey: ['interactions', bizId], queryFn: () => base44.entities.Interaction.filter({ business_id: bizId }, '-interaction_date') });
   const { data: matches = [] } = useQuery({ queryKey: ['matches'], queryFn: () => base44.entities.Match.list() });
-  const { data: users = [] } = useQuery({ queryKey: ['users'], queryFn: () => base44.entities.User.list() });
+  const { data: users = [] } = useQuery({ queryKey: ['users'], queryFn: () => base44.entities.User.list(), retry: false, throwOnError: false });
 
   const biz = businesses.find(b => b.id === bizId);
   const bizMatches = matches.filter(m => m.business_a_id === bizId || m.business_b_id === bizId);
@@ -63,7 +63,8 @@ export default function BusinessDetail() {
     setAiLoading(false);
   };
 
-  if (!biz) return <div className="text-center py-12 text-muted-foreground">Loading...</div>;
+  if (bizLoading) return <div className="text-center py-12 text-muted-foreground">Loading...</div>;
+  if (!biz) return <div className="text-center py-12 text-muted-foreground">Business not found.</div>;
 
   return (
     <div className="animate-slide-up">
