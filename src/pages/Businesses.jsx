@@ -2,15 +2,19 @@ import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { Plus, Search, Building2, Filter, Sparkles, Loader2 } from 'lucide-react';
+import { Plus, Search, Building2, Filter, Sparkles, Loader2, Download, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import PageHeader from '@/components/shared/PageHeader';
 import StageBadge from '@/components/shared/StageBadge';
+import HealthScoreBadge from '@/components/shared/HealthScoreBadge';
 import BusinessForm from '@/components/business/BusinessForm';
+import CSVImportDialog from '@/components/import/CSVImportDialog';
 import { toast } from 'sonner';
+import { exportToCSV } from '@/utils/csvExport';
+import { needsFollowUp } from '@/utils/healthScore';
 
 export default function Businesses() {
   const [search, setSearch] = useState('');
@@ -20,7 +24,9 @@ export default function Businesses() {
   const [cityFilter, setCityFilter] = useState('all');
   const [stateFilter, setStateFilter] = useState('all');
   const [showAdd, setShowAdd] = useState(false);
+  const [showImport, setShowImport] = useState(false);
   const [scanning, setScanning] = useState(false);
+  const [followUpFilter, setFollowUpFilter] = useState(false);
   const qc = useQueryClient();
 
   const { data: businesses = [] } = useQuery({ queryKey: ['businesses'], queryFn: () => base44.entities.Business.list() });
@@ -85,7 +91,8 @@ export default function Businesses() {
     const matchIndustry = industryFilter === 'all' || b.industry === industryFilter;
     const matchCity = cityFilter === 'all' || b.city === cityFilter;
     const matchState = stateFilter === 'all' || b.state === stateFilter;
-    return matchSearch && matchStage && matchManager && matchIndustry && matchCity && matchState;
+    const matchFollowUp = !followUpFilter || needsFollowUp(b);
+    return matchSearch && matchStage && matchManager && matchIndustry && matchCity && matchState && matchFollowUp;
   });
 
   const activeFilters = [stageFilter, managerFilter, industryFilter, cityFilter, stateFilter].filter(f => f !== 'all').length;
@@ -98,6 +105,21 @@ export default function Businesses() {
         subtitle={`${businesses.length} businesses in your network`}
         actions={
           <>
+            <Button variant="outline" size="sm" onClick={() => exportToCSV(filtered, 'businesses_export.csv', [
+              { key: 'name', header: 'Name' },
+              { key: 'industry', header: 'Industry' },
+              { key: 'stage', header: 'Stage' },
+              { key: 'contact_name', header: 'Contact' },
+              { key: 'contact_email', header: 'Email' },
+              { key: 'contact_phone', header: 'Phone' },
+              { key: 'city', header: 'City' },
+              { key: 'state', header: 'State' },
+              { key: 'needs', header: 'Needs' },
+              { key: 'offers', header: 'Offers' },
+              { key: 'health_score', header: 'Health Score' },
+              { key: 'last_interaction_date', header: 'Last Contact' },
+            ])} className="gap-1"><Download className="w-4 h-4" /><span className="hidden lg:inline">Export CSV</span></Button>
+            <Button variant="outline" size="sm" onClick={() => setShowImport(true)} className="gap-1"><Upload className="w-4 h-4" /><span className="hidden lg:inline">Import CSV</span></Button>
             <Button variant="outline" size="sm" onClick={runSynergyScanner} disabled={scanning}>
               {scanning ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Sparkles className="w-4 h-4 mr-1" />}
               Synergy Scanner
@@ -108,9 +130,10 @@ export default function Businesses() {
               </DialogTrigger>
               <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
                 <DialogHeader><DialogTitle>Add New Business</DialogTitle></DialogHeader>
-                <BusinessForm users={users} onSubmit={data => createMut.mutate(data)} saving={createMut.isPending} />
+                <BusinessForm businesses={businesses} users={users} onSubmit={data => createMut.mutate(data)} saving={createMut.isPending} />
               </DialogContent>
             </Dialog>
+            <CSVImportDialog open={showImport} onOpenChange={setShowImport} />
           </>
         }
       />
@@ -121,6 +144,12 @@ export default function Businesses() {
           <Input placeholder="Search businesses..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9 bg-card" />
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={() => setFollowUpFilter(!followUpFilter)}
+            className={`px-3 py-1.5 rounded-full text-xs font-medium ${followUpFilter ? 'bg-orange-500/20 text-orange-400' : 'bg-card border border-border text-muted-foreground'}`}
+          >
+            Needs Follow-Up
+          </button>
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><Filter className="w-3.5 h-3.5" /> Filters:</div>
           <Select value={stageFilter} onValueChange={setStageFilter}>
             <SelectTrigger className="w-auto min-w-32 h-8 text-xs bg-card"><SelectValue /></SelectTrigger>
@@ -183,7 +212,11 @@ export default function Businesses() {
                     <p className="text-xs text-muted-foreground truncate">{biz.industry || 'No industry'}</p>
                   </div>
                 </div>
-                <StageBadge stage={biz.stage} />
+                <div className="flex items-center gap-1.5 flex-shrink-0">
+                  {needsFollowUp(biz) && <span className="w-2 h-2 rounded-full bg-orange-400 animate-pulse" />}
+                  <HealthScoreBadge score={biz.health_score || 0} />
+                  <StageBadge stage={biz.stage} />
+                </div>
               </div>
               {biz.needs && <p className="text-[11px] text-muted-foreground mt-2 line-clamp-2"><span className="font-semibold text-foreground/70">Needs:</span> {biz.needs}</p>}
               {biz.offers && <p className="text-[11px] text-muted-foreground mt-1 line-clamp-2"><span className="font-semibold text-foreground/70">Offers:</span> {biz.offers}</p>}

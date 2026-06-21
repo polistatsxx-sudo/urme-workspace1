@@ -3,10 +3,13 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { Link } from 'react-router-dom';
-import { Building2, User } from 'lucide-react';
+import { Building2, User, FileDown } from 'lucide-react';
 import PageHeader from '@/components/shared/PageHeader';
 import StageBadge from '@/components/shared/StageBadge';
+import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { computeHealthScore, getHealthDotColor } from '@/utils/healthScore';
+import { exportPipelineReportPDF } from '@/utils/pdfExport';
 
 const stages = [
   { id: 'new_lead', label: 'New Lead', color: 'border-blue-500/40' },
@@ -41,7 +44,11 @@ export default function Pipeline() {
 
   return (
     <div className="animate-slide-up">
-      <PageHeader title="Relationship Pipeline" subtitle="Drag businesses between stages" />
+      <PageHeader title="Relationship Pipeline" subtitle="Drag businesses between stages" actions={
+        <Button variant="outline" size="sm" onClick={() => exportPipelineReportPDF(businesses)} className="gap-1">
+          <FileDown className="w-4 h-4" /><span className="hidden lg:inline">Export Report</span>
+        </Button>
+      } />
       <DragDropContext onDragEnd={handleDragEnd}>
         <div className="flex gap-3 overflow-x-auto pb-4 -mx-4 px-4 md:mx-0 md:px-0">
           {stages.map(stage => (
@@ -89,6 +96,7 @@ export default function Pipeline() {
                                   ))}
                                 </div>
                               )}
+                              <div className={`w-1.5 h-1.5 rounded-full ${getHealthDotColor(computeHealthScore(biz))} mt-2`} />
                             </Link>
                           </div>
                         )}

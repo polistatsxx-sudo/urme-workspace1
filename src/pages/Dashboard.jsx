@@ -2,14 +2,16 @@ import React, { useEffect, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { Building2, CheckSquare, Calendar, Handshake, AlertTriangle, TrendingUp, ArrowRight, Clock, CreditCard, PenLine } from 'lucide-react';
+import { Building2, CheckSquare, Calendar, Handshake, AlertTriangle, TrendingUp, ArrowRight, Clock, CreditCard, PenLine, ChevronRight } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import PageHeader from '@/components/shared/PageHeader';
 import StatCard from '@/components/shared/StatCard';
 import StageBadge from '@/components/shared/StageBadge';
+import HealthScoreBadge from '@/components/shared/HealthScoreBadge';
 import { Button } from '@/components/ui/button';
-import { format, isPast, isToday, addDays } from 'date-fns';
+import { format, isPast, isToday, addDays, differenceInDays } from 'date-fns';
 import BulkLogInteractionModal from '@/components/business/BulkLogInteractionModal';
+import { computeHealthScore, isBusinessStale, daysSinceLastInteraction } from '@/utils/healthScore';
 
 const stageLabels = {
   new_lead: 'New Lead', contacted: 'Contacted', meeting_scheduled: 'Meeting',
@@ -63,6 +65,76 @@ export default function Dashboard() {
         <StatCard label="Upcoming Events" value={upcomingEvents.length} icon={Calendar} />
         <StatCard label="Potential Matches" value={matches.filter(m => m.status === 'suggested').length} icon={Handshake} />
       </div>
+
+      {/* Needs Attention - Stale Contacts */}
+      {(() => {
+        const staleBiz = activeBiz.filter(isBusinessStale).sort((a, b) => {
+          const da = a.last_interaction_date ? differenceInDays(new Date(), new Date(a.last_interaction_date)) : 9999;
+          const db = b.last_interaction_date ? differenceInDays(new Date(), new Date(b.last_interaction_date)) : 9999;
+          return db - da;
+        });
+        return (
+          <div className="mb-6">
+            <div className="flex items-center gap-2 mb-3">
+              <AlertTriangle className="w-4 h-4 text-orange-400" />
+              <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                Needs Attention {staleBiz.length > 0 && `(${staleBiz.length})`}
+              </h2>
+            </div>
+            {staleBiz.length === 0 ? (
+              <div className="bg-emerald-500/10 text-emerald-400 rounded-xl p-3 text-sm flex items-center gap-2">
+                <CheckSquare className="w-4 h-4" /> All relationships on track
+              </div>
+            ) : (
+              <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory -mx-4 px-4 md:mx-0 md:px-0">
+                {staleBiz.map(b => {
+                  const days = daysSinceLastInteraction(b);
+                  return (
+                    <Link key={b.id} to={`/businesses/${b.id}`}
+                      className="flex-shrink-0 w-40 rounded-xl border border-orange-500/30 bg-card p-3 active:scale-95 transition-transform snap-start">
+                      <p className="text-sm font-semibold truncate">{b.name}</p>
+                      <div className="mt-1"><StageBadge stage={b.stage} /></div>
+                      <p className="text-[10px] text-orange-400 mt-2">
+                        {days !== null ? `${days} days ago` : 'Never contacted'}
+                      </p>
+                      <div className="flex justify-end mt-1">
+                        <ChevronRight className="w-3 h-3 text-orange-400" />
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        );
+      })()}
+
+      {/* At-Risk Relationships */}
+      {(() => {
+        const atRisk = activeBiz.map(b => ({ ...b, score: computeHealthScore(b) })).filter(b => b.score < 40).sort((a, b) => a.score - b.score).slice(0, 5);
+        if (atRisk.length === 0) return null;
+        return (
+          <div className="bg-card border border-border rounded-xl p-5 mb-6">
+            <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-3">At-Risk Relationships</h2>
+            <div className="space-y-2">
+              {atRisk.map(b => {
+                const days = daysSinceLastInteraction(b);
+                return (
+                  <Link key={b.id} to={`/businesses/${b.id}`}
+                    className="flex items-center justify-between bg-secondary/40 hover:bg-secondary/70 rounded-lg p-3 transition-colors">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium truncate">{b.name}</p>
+                      <p className="text-[10px] text-muted-foreground">{days !== null ? `Last: ${days} days ago` : 'Never contacted'}</p>
+                    </div>
+                    <HealthScoreBadge score={b.score} />
+                    <ChevronRight className="w-4 h-4 text-muted-foreground ml-2 flex-shrink-0" />
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })()}
 
       <div className="grid lg:grid-cols-3 gap-4 mb-6">
         {/* Pipeline Overview */}

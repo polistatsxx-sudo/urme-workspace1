@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import QuickCapture from '../shared/QuickCapture';
+import GlobalSearch from '@/components/search/GlobalSearch';
 import { cn } from '@/lib/utils';
 
 export default function AppLayout() {
@@ -19,6 +20,7 @@ export default function AppLayout() {
         </div>
       </main>
       <QuickCapture />
+      <GlobalSearch />
     </div>
   );
 }

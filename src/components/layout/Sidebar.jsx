@@ -2,20 +2,24 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, Building2, KanbanSquare, CheckSquare, Lightbulb, 
-  Calendar, MessageSquare, User, ChevronLeft, ChevronRight, Zap, Menu, X, DollarSign
+  Calendar, MessageSquare, User, ChevronLeft, ChevronRight, Zap, Menu, X, DollarSign,
+  Search, Users, BarChart3
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 const navItems = [
+  { path: '#search', icon: Search, label: 'Search', isAction: true },
   { path: '/', icon: LayoutDashboard, label: 'Dashboard' },
   { path: '/pipeline', icon: KanbanSquare, label: 'Pipeline' },
   { path: '/businesses', icon: Building2, label: 'Businesses' },
+  { path: '/contacts', icon: Users, label: 'Contacts' },
   { path: '/tasks', icon: CheckSquare, label: 'Tasks' },
   { path: '/ideas', icon: Lightbulb, label: 'Ideas' },
   { path: '/events', icon: Calendar, label: 'Events' },
   { path: '/sync', icon: MessageSquare, label: 'Sync Hub' },
   { path: '/finance', icon: DollarSign, label: 'Finance' },
+  { path: '/reports', icon: BarChart3, label: 'Reports' },
   { path: '/profile', icon: User, label: 'Profile' },
 ];
 
@@ -40,6 +44,21 @@ export default function Sidebar({ collapsed, setCollapsed }) {
       <nav className="flex-1 py-3 px-2 space-y-0.5 overflow-y-auto">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path;
+          if (item.isAction) {
+            return (
+              <button
+                key={item.path}
+                onClick={() => window.dispatchEvent(new CustomEvent('open-global-search'))}
+                className={cn(
+                  "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 w-full text-muted-foreground hover:text-foreground hover:bg-secondary active:scale-95",
+                  collapsed && "justify-center px-2"
+                )}
+              >
+                <item.icon className="w-[18px] h-[18px] flex-shrink-0" />
+                {!collapsed && <span>{item.label}</span>}
+              </button>
+            );
+          }
           return (
             <Link
               key={item.path}
@@ -75,7 +94,7 @@ export default function Sidebar({ collapsed, setCollapsed }) {
 
   return (
     <>
-      {/* Mobile hamburger */}
+      {/* Mobile header bar */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
@@ -83,9 +102,14 @@ export default function Sidebar({ collapsed, setCollapsed }) {
           </div>
           <span className="font-display font-bold text-sm">URME</span>
         </div>
-        <Button variant="ghost" size="icon" onClick={() => setMobileOpen(!mobileOpen)}>
-          {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-        </Button>
+        <div className="flex items-center gap-1">
+          <Button variant="ghost" size="icon" onClick={() => window.dispatchEvent(new CustomEvent('open-global-search'))} className="h-9 w-9">
+            <Search className="w-5 h-5" />
+          </Button>
+          <Button variant="ghost" size="icon" onClick={() => setMobileOpen(!mobileOpen)} className="h-9 w-9">
+            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </Button>
+        </div>
       </div>
 
       {/* Mobile overlay */}

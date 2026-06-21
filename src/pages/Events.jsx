@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Calendar, MapPin, Users, Clock, Edit, Trash2, Sparkles, ExternalLink, Building2, User, ChevronDown, ChevronUp } from 'lucide-react';
+import { Plus, Calendar, MapPin, Users, Clock, Edit, Trash2, Sparkles, ExternalLink, Building2, User, ChevronDown, ChevronUp, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -15,6 +15,7 @@ import PageHeader from '@/components/shared/PageHeader';
 import { toast } from 'sonner';
 import { format, isPast } from 'date-fns';
 import { useAuth } from '@/lib/AuthContext';
+import { exportToCSV } from '@/utils/csvExport';
 
 const getGoogleCalendarUrl = (ev) => {
   const base = 'https://www.google.com/calendar/render?action=TEMPLATE';
@@ -202,6 +203,15 @@ export default function Events() {
         title="Event Orchestrator"
         subtitle={`${upcoming.length} upcoming • ${past.length} past`}
         actions={
+          <>
+          <Button variant="outline" size="sm" onClick={() => exportToCSV(events, 'events_export.csv', [
+            { key: 'name', header: 'Name' },
+            { key: 'date', header: 'Date' },
+            { key: 'location', header: 'Location' },
+            { key: 'status', header: 'Status' },
+            { key: 'event_type', header: 'Type' },
+            { key: 'attendee_count', header: 'Attendees' },
+          ])} className="gap-1"><Download className="w-4 h-4" /><span className="hidden lg:inline">Export CSV</span></Button>
           <Dialog open={showAdd} onOpenChange={v => { setShowAdd(v); if (!v) resetForm(); }}>
             <DialogTrigger asChild><Button size="sm"><Plus className="w-4 h-4 mr-1" /> New Event</Button></DialogTrigger>
             <DialogContent className="max-w-md max-h-[85vh] overflow-y-auto">
@@ -209,6 +219,7 @@ export default function Events() {
               <EventForm isEdit={false} />
             </DialogContent>
           </Dialog>
+          </>
         }
       />
 

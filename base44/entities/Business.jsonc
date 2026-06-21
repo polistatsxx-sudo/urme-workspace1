@@ -81,6 +81,26 @@
     },
     "state": {
       "type": "string"
+    },
+    "health_score": {
+      "type": "number",
+      "description": "Computed relationship health score 0-100",
+      "default": 0
+    },
+    "last_interaction_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of most recent interaction"
+    },
+    "next_follow_up": {
+      "type": "string",
+      "format": "date",
+      "description": "Recommended next follow-up date"
+    },
+    "interaction_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Total number of logged interactions"
     }
   },
   "required": [

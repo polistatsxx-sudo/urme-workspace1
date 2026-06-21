@@ -10,6 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Loader2, Search, CheckSquare, Square } from 'lucide-react';
 import { toast } from 'sonner';
+import { computeHealthScore, computeNextFollowUp } from '@/utils/healthScore';
+import { format } from 'date-fns';
 
 export default function BulkLogInteractionModal({ open, onOpenChange, businesses = [], user }) {
   const qc = useQueryClient();
@@ -60,7 +62,27 @@ export default function BulkLogInteractionModal({ open, onOpenChange, businesses
           });
         })
       );
+      // Update health scores for all affected businesses
+      const today = format(new Date(), 'yyyy-MM-dd');
+      await Promise.all(
+        selected.map(async bizId => {
+          const biz = businesses.find(b => b.id === bizId);
+          try {
+            const allInteractions = await base44.entities.Interaction.filter({ business_id: bizId });
+            const count = allInteractions.length;
+            const newScore = computeHealthScore(biz, count, today);
+            const nextFU = computeNextFollowUp(biz.stage);
+            await base44.entities.Business.update(bizId, {
+              health_score: newScore,
+              last_interaction_date: today,
+              interaction_count: count,
+              next_follow_up: nextFU,
+            });
+          } catch {}
+        })
+      );
       qc.invalidateQueries({ queryKey: ['interactions'] });
+      qc.invalidateQueries({ queryKey: ['businesses'] });
       toast.success(`Logged interaction for ${selected.length} business${selected.length > 1 ? 'es' : ''}`);
       onOpenChange(false);
       setSelected([]);

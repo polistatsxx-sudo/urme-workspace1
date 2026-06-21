@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,10 +7,12 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
+import DuplicateWarning from '@/components/shared/DuplicateWarning';
+import { findPotentialDuplicates } from '@/utils/duplicateDetection';
 
 const industries = ['Technology', 'Marketing', 'Real Estate', 'Construction', 'Legal', 'Finance', 'Food & Beverage', 'Healthcare', 'Entertainment', 'Retail', 'Education', 'Media', 'Event Management', 'Transportation', 'Other'];
 
-export default function BusinessForm({ initialData, users = [], onSubmit, saving }) {
+export default function BusinessForm({ initialData, users = [], businesses = [], onSubmit, saving }) {
   const [form, setForm] = useState(initialData || {
     name: '', industry: '', description: '', needs: '', offers: '',
     contact_name: '', contact_title: '', contact_email: '', contact_phone: '',
@@ -20,6 +22,17 @@ export default function BusinessForm({ initialData, users = [], onSubmit, saving
   });
   const [tagInput, setTagInput] = useState('');
   const [isEnhancing, setIsEnhancing] = useState(false);
+  const [duplicates, setDuplicates] = useState([]);
+  const [ignoreDuplicates, setIgnoreDuplicates] = useState(false);
+
+  useEffect(() => {
+    if (ignoreDuplicates || !form.name || form.name.length < 3) { setDuplicates([]); return; }
+    const t = setTimeout(() => {
+      const found = findPotentialDuplicates(form.name, form.contact_email, businesses, 'business');
+      setDuplicates(found);
+    }, 300);
+    return () => clearTimeout(t);
+  }, [form.name, form.contact_email, businesses, ignoreDuplicates]);
 
   const set = (k, v) => setForm(prev => ({ ...prev, [k]: v }));
 
@@ -52,6 +65,11 @@ export default function BusinessForm({ initialData, users = [], onSubmit, saving
   const handleSubmit = (e) => {
     e.preventDefault();
     onSubmit(form);
+  };
+
+  const handleDismissDuplicate = () => {
+    setIgnoreDuplicates(true);
+    setDuplicates([]);
   };
 
   return (
@@ -159,6 +177,9 @@ export default function BusinessForm({ initialData, users = [], onSubmit, saving
           <Textarea value={form.notes} onChange={e => set('notes', e.target.value)} className="bg-secondary/50 mt-1 h-16 resize-none" />
         </div>
       </div>
+      {duplicates.length > 0 && (
+        <DuplicateWarning duplicates={duplicates} onDismiss={handleDismissDuplicate} entityType="business" />
+      )}
       <div className="flex gap-2">
         <Button type="button" variant="outline" onClick={handleEnhance} disabled={isEnhancing} className="flex-1 border-accent/50 text-accent hover:bg-accent/10">
           <Sparkles className="w-4 h-4 mr-1" />{isEnhancing ? 'Improving...' : 'Improve with AI'}

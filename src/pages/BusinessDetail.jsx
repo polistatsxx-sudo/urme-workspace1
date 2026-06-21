@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Edit, Trash2, Plus, Phone, Mail, Globe, MapPin, Building2, Sparkles, Loader2 } from 'lucide-react';
+import { ArrowLeft, Edit, Trash2, Plus, Phone, Mail, Globe, MapPin, Building2, Sparkles, Loader2, FileDown, MoreVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import PageHeader from '@/components/shared/PageHeader';
 import StageBadge from '@/components/shared/StageBadge';
+import HealthScoreBadge from '@/components/shared/HealthScoreBadge';
 import BusinessForm from '@/components/business/BusinessForm';
 import InteractionTimeline from '@/components/business/InteractionTimeline';
 import LogInteractionForm from '@/components/business/LogInteractionForm';
@@ -18,6 +20,9 @@ import EventEngagements from '@/components/business/EventEngagements';
 import ContactsCard from '@/components/business/ContactsCard';
 import { toast } from 'sonner';
 import { useAuth } from '@/lib/AuthContext';
+import { computeHealthScore, computeNextFollowUp } from '@/utils/healthScore';
+import { exportBusinessPDF } from '@/utils/pdfExport';
+import { format } from 'date-fns';
 
 export default function BusinessDetail() {
   const bizId = window.location.pathname.split('/businesses/')[1]?.split('/')[0];
@@ -49,7 +54,26 @@ export default function BusinessDetail() {
 
   const logMut = useMutation({
     mutationFn: (data) => base44.entities.Interaction.create({ ...data, business_id: bizId, business_name: biz?.name, logged_by_id: user?.id, logged_by_name: user?.full_name }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['interactions', bizId] }); setLogOpen(false); toast.success('Interaction logged'); },
+    onSuccess: async () => {
+      qc.invalidateQueries({ queryKey: ['interactions', bizId] });
+      setLogOpen(false);
+      toast.success('Interaction logged');
+      // Update business health score
+      try {
+        const allInteractions = await base44.entities.Interaction.filter({ business_id: bizId });
+        const count = allInteractions.length;
+        const lastDate = format(new Date(), 'yyyy-MM-dd');
+        const newScore = computeHealthScore(biz, count, lastDate);
+        const nextFU = computeNextFollowUp(biz.stage);
+        await base44.entities.Business.update(bizId, {
+          health_score: newScore,
+          last_interaction_date: lastDate,
+          interaction_count: count,
+          next_follow_up: nextFU,
+        });
+        qc.invalidateQueries({ queryKey: ['businesses'] });
+      } catch {}
+    },
   });
 
   const getInsight = async () => {
@@ -82,6 +106,7 @@ export default function BusinessDetail() {
               <div className="flex items-center gap-2 flex-wrap">
                 <h1 className="text-xl font-bold font-display">{biz.name}</h1>
                 <StageBadge stage={biz.stage} />
+                <HealthScoreBadge score={biz.health_score || 0} size="md" />
               </div>
               <p className="text-sm text-muted-foreground">{biz.industry}</p>
               {biz.description && <p className="text-sm text-muted-foreground mt-1">{biz.description}</p>}
@@ -97,8 +122,22 @@ export default function BusinessDetail() {
             <Button variant="outline" size="sm" onClick={getInsight} disabled={aiLoading}>
               {aiLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
             </Button>
-            <Button variant="outline" size="sm" onClick={() => setEditOpen(true)}><Edit className="w-4 h-4" /></Button>
-            <Button variant="outline" size="sm" className="text-destructive" onClick={() => { if (confirm('Delete this business?')) deleteMut.mutate(); }}><Trash2 className="w-4 h-4" /></Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm"><MoreVertical className="w-4 h-4" /></Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => exportBusinessPDF(biz, interactions, bizMatches)}>
+                  <FileDown className="w-3.5 h-3.5 mr-2" /> Export PDF
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setEditOpen(true)}>
+                  <Edit className="w-3.5 h-3.5 mr-2" /> Edit
+                </DropdownMenuItem>
+                <DropdownMenuItem className="text-destructive" onClick={() => { if (confirm('Delete this business?')) deleteMut.mutate(); }}>
+                  <Trash2 className="w-3.5 h-3.5 mr-2" /> Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
         {biz.tags?.length > 0 && (
@@ -162,7 +201,7 @@ export default function BusinessDetail() {
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
         <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
           <DialogHeader><DialogTitle>Edit Business</DialogTitle></DialogHeader>
-          <BusinessForm initialData={biz} users={users} onSubmit={data => updateMut.mutate(data)} saving={updateMut.isPending} />
+          <BusinessForm initialData={biz} businesses={businesses} users={users} onSubmit={data => updateMut.mutate(data)} saving={updateMut.isPending} />
         </DialogContent>
       </Dialog>
 

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { DollarSign, TrendingUp, TrendingDown, Plus, Receipt, Calculator, Trash2, CheckCircle2, BarChart3, Calendar, Building2, AlertCircle, PieChart } from 'lucide-react';
+import { DollarSign, TrendingUp, TrendingDown, Plus, Receipt, Calculator, Trash2, CheckCircle2, BarChart3, Calendar, Building2, AlertCircle, PieChart, Download, FileDown } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -11,6 +11,8 @@ import PageHeader from '@/components/shared/PageHeader';
 import FinanceEntryForm from '@/components/finance/FinanceEntryForm';
 import { toast } from 'sonner';
 import { format, startOfMonth, endOfMonth, startOfQuarter, endOfQuarter, isWithinInterval, differenceInDays } from 'date-fns';
+import { exportToCSV } from '@/utils/csvExport';
+import { exportFinanceReportPDF } from '@/utils/pdfExport';
 
 const categoryLabels = {
   event_revenue: 'Event Revenue', matchmaking_fee: 'Matchmaking Fee', sponsorship: 'Sponsorship',
@@ -103,6 +105,16 @@ export default function Finance() {
         subtitle="Revenue, expenses & financial tracking"
         actions={
           <div className="flex gap-2">
+            <Button size="sm" variant="outline" onClick={() => exportToCSV(entries, 'finance_export.csv', [
+              { key: 'date', header: 'Date' },
+              { key: 'type', header: 'Type' },
+              { key: 'category', header: 'Category' },
+              { key: 'amount', header: 'Amount' },
+              { key: 'description', header: 'Description' },
+              { key: 'payment_status', header: 'Status' },
+              { key: 'linked_business_name', header: 'Business' },
+            ])} className="gap-1"><Download className="w-4 h-4" /><span className="hidden lg:inline">Export CSV</span></Button>
+            <Button size="sm" variant="outline" onClick={() => exportFinanceReportPDF(entries, monthRange)} className="gap-1"><FileDown className="w-4 h-4" /><span className="hidden lg:inline">Export PDF</span></Button>
             <Button size="sm" variant="outline" onClick={() => { setAddType('expense'); setShowAdd(true); }}>
               <TrendingDown className="w-4 h-4 mr-1" /> Log Expense
             </Button>

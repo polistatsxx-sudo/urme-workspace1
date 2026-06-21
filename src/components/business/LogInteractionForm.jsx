@@ -5,9 +5,10 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Paperclip, Loader2, X, UserPlus, ChevronDown } from 'lucide-react';
+import { Paperclip, Loader2, X, UserPlus, ChevronDown, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { findPotentialDuplicates } from '@/utils/duplicateDetection';
 
 export default function LogInteractionForm({ onSubmit, saving, users = [], bizId, bizName }) {
   const qc = useQueryClient();
@@ -21,6 +22,18 @@ export default function LogInteractionForm({ onSubmit, saving, users = [], bizId
   const [showNewContact, setShowNewContact] = useState(false);
   const [newContact, setNewContact] = useState({ full_name: '', title: '', email: '', phone: '' });
   const [creatingContact, setCreatingContact] = useState(false);
+  const [contactDuplicates, setContactDuplicates] = useState([]);
+  const [contactNameTimer, setContactNameTimer] = useState(null);
+
+  const checkContactDuplicate = (name) => {
+    if (!name || name.length < 3) { setContactDuplicates([]); return; }
+    if (contactNameTimer) clearTimeout(contactNameTimer);
+    const timer = setTimeout(() => {
+      const found = findPotentialDuplicates(name, newContact.email, contacts, 'contact');
+      setContactDuplicates(found);
+    }, 300);
+    setContactNameTimer(timer);
+  };
 
   const { data: contacts = [] } = useQuery({
     queryKey: ['contacts', bizId],
@@ -120,7 +133,22 @@ export default function LogInteractionForm({ onSubmit, saving, users = [], bizId
         {showNewContact && (
           <div className="mt-2 p-3 bg-secondary/30 rounded-lg border border-border space-y-2">
             <p className="text-[10px] font-semibold text-muted-foreground uppercase">New Contact</p>
-            <Input placeholder="Full name *" value={newContact.full_name} onChange={e => setNewContact(p => ({ ...p, full_name: e.target.value }))} className="bg-secondary/50 h-8 text-sm" />
+            <Input placeholder="Full name *" value={newContact.full_name} onChange={e => { setNewContact(p => ({ ...p, full_name: e.target.value })); checkContactDuplicate(e.target.value); }} className="bg-secondary/50 h-8 text-sm" />
+            {contactDuplicates.length > 0 && (
+              <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-2 space-y-1">
+                <div className="flex items-center gap-1.5">
+                  <AlertTriangle className="w-3 h-3 text-amber-400 flex-shrink-0" />
+                  <p className="text-[10px] text-amber-400 font-semibold">Possible duplicate contact</p>
+                </div>
+                {contactDuplicates.map((dup, i) => (
+                  <button key={i} type="button" onClick={() => { set('contact_id', dup.entry.id); set('contact_name', dup.entry.full_name); setShowNewContact(false); setNewContact({ full_name: '', title: '', email: '', phone: '' }); setContactDuplicates([]); }}
+                    className="w-full text-left text-xs bg-amber-500/5 rounded px-2 py-1.5 hover:bg-amber-500/10 transition-colors">
+                    <span className="font-medium">{dup.entry.full_name}</span>
+                    <span className="text-[10px] text-muted-foreground ml-1">({dup.matchReason}) — Tap to use existing</span>
+                  </button>
+                ))}
+              </div>
+            )}
             <div className="grid grid-cols-2 gap-2">
               <Input placeholder="Title / Role" value={newContact.title} onChange={e => setNewContact(p => ({ ...p, title: e.target.value }))} className="bg-secondary/50 h-8 text-sm" />
               <Input placeholder="Email" value={newContact.email} onChange={e => setNewContact(p => ({ ...p, email: e.target.value }))} className="bg-secondary/50 h-8 text-sm" />
