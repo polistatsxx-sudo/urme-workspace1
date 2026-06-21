@@ -2,12 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { Building2, CheckSquare, Calendar, Handshake, AlertTriangle, TrendingUp, ArrowRight, Clock, CreditCard } from 'lucide-react';
+import { Building2, CheckSquare, Calendar, Handshake, AlertTriangle, TrendingUp, ArrowRight, Clock, CreditCard, PenLine } from 'lucide-react';
 import PageHeader from '@/components/shared/PageHeader';
 import StatCard from '@/components/shared/StatCard';
 import StageBadge from '@/components/shared/StageBadge';
 import { Button } from '@/components/ui/button';
 import { format, isPast, isToday, addDays } from 'date-fns';
+import BulkLogInteractionModal from '@/components/business/BulkLogInteractionModal';
 
 const stageLabels = {
   new_lead: 'New Lead', contacted: 'Contacted', meeting_scheduled: 'Meeting',
@@ -18,6 +19,7 @@ const CEO_EMAIL = 'macecnc@urmeinc.com';
 
 export default function Dashboard() {
   const [currentUser, setCurrentUser] = useState(null);
+  const [bulkLogOpen, setBulkLogOpen] = useState(false);
   useEffect(() => { base44.auth.me().then(setCurrentUser).catch(() => {}); }, []);
   const isCEO = currentUser?.email === CEO_EMAIL;
 
@@ -39,7 +41,15 @@ export default function Dashboard() {
 
   return (
     <div className="animate-slide-up">
-      <PageHeader title="Dashboard" subtitle={`Today is ${format(new Date(), 'EEEE, MMMM d, yyyy')} · Your URME command center`} />
+      <PageHeader
+        title="Dashboard"
+        subtitle={`Today is ${format(new Date(), 'EEEE, MMMM d, yyyy')} · Your URME command center`}
+        actions={
+          <Button size="sm" onClick={() => setBulkLogOpen(true)} className="gap-2">
+            <PenLine className="w-4 h-4" /> Log Interaction
+          </Button>
+        }
+      />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
         <StatCard label="Active Businesses" value={activeBiz.length} icon={Building2} />
@@ -152,6 +162,8 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      <BulkLogInteractionModal open={bulkLogOpen} onOpenChange={setBulkLogOpen} businesses={businesses} user={currentUser} />
 
       {isCEO && (
         <div className="mt-6 flex justify-end">
