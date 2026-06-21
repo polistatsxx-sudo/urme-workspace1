@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { Building2, CheckSquare, Calendar, Handshake, AlertTriangle, TrendingUp, ArrowRight, Clock } from 'lucide-react';
+import { Building2, CheckSquare, Calendar, Handshake, AlertTriangle, TrendingUp, ArrowRight, Clock, CreditCard } from 'lucide-react';
 import PageHeader from '@/components/shared/PageHeader';
 import StatCard from '@/components/shared/StatCard';
 import StageBadge from '@/components/shared/StageBadge';
@@ -14,7 +14,13 @@ const stageLabels = {
   in_discussion: 'Discussion', collaborating: 'Collaborating', partnered: 'Partnered', archived: 'Archived'
 };
 
+const CEO_EMAIL = 'macecnc@urmeinc.com';
+
 export default function Dashboard() {
+  const [currentUser, setCurrentUser] = useState(null);
+  useEffect(() => { base44.auth.me().then(setCurrentUser).catch(() => {}); }, []);
+  const isCEO = currentUser?.email === CEO_EMAIL;
+
   const { data: businesses = [] } = useQuery({ queryKey: ['businesses'], queryFn: () => base44.entities.Business.list() });
   const { data: tasks = [] } = useQuery({ queryKey: ['tasks'], queryFn: () => base44.entities.Task.list() });
   const { data: events = [] } = useQuery({ queryKey: ['events'], queryFn: () => base44.entities.Event.list() });
@@ -146,6 +152,20 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      {isCEO && (
+        <div className="mt-6 flex justify-end">
+          <a
+            href="https://buy.stripe.com/00wfZi6ID2uHeqw2JK3Je00"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-xs text-muted-foreground hover:text-primary transition-colors border border-border rounded-lg px-3 py-2 hover:border-primary/40"
+          >
+            <CreditCard className="w-3.5 h-3.5" />
+            Manage Workspace Hosting · $25/mo
+          </a>
+        </div>
+      )}
     </div>
   );
 }
