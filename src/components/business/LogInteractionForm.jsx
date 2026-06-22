@@ -5,10 +5,12 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Paperclip, Loader2, X, UserPlus, ChevronDown, AlertTriangle } from 'lucide-react';
+import { Paperclip, Loader2, X, UserPlus, ChevronDown, AlertTriangle, FileText } from 'lucide-react';
 import { toast } from 'sonner';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { findPotentialDuplicates } from '@/utils/duplicateDetection';
+import RichTextEditor from '@/components/shared/RichTextEditor';
+import { fillMergeFields } from '@/utils/mergeFields';
 
 export default function LogInteractionForm({ onSubmit, saving, users = [], bizId, bizName }) {
   const qc = useQueryClient();
@@ -24,6 +26,13 @@ export default function LogInteractionForm({ onSubmit, saving, users = [], bizId
   const [creatingContact, setCreatingContact] = useState(false);
   const [contactDuplicates, setContactDuplicates] = useState([]);
   const [contactNameTimer, setContactNameTimer] = useState(null);
+  const [showTemplateSheet, setShowTemplateSheet] = useState(false);
+
+  const { data: templates = [] } = useQuery({
+    queryKey: ['emailTemplates'],
+    queryFn: () => base44.entities.EmailTemplate.list('-updated_date'),
+    enabled: !!bizId,
+  });
 
   const checkContactDuplicate = (name) => {
     if (!name || name.length < 3) { setContactDuplicates([]); return; }
@@ -166,9 +175,45 @@ export default function LogInteractionForm({ onSubmit, saving, users = [], bizId
         <Input value={form.title} onChange={e => set('title', e.target.value)} className="bg-secondary/50 mt-1" />
       </div>
       <div>
-        <Label className="text-xs">Notes / Details</Label>
-        <Textarea value={form.notes} onChange={e => set('notes', e.target.value)} className="bg-secondary/50 mt-1 h-20 resize-none" />
+        <div className="flex items-center justify-between mb-1">
+          <Label className="text-xs">Notes / Details</Label>
+          <button type="button" onClick={() => setShowTemplateSheet(true)} className="text-[10px] text-primary flex items-center gap-1 hover:underline">
+            <FileText className="w-3 h-3" /> Use Template
+          </button>
+        </div>
+        <RichTextEditor value={form.notes} onChange={v => set('notes', v)} placeholder="Meeting notes, key points, outcomes..." minHeight={100} />
       </div>
+      {showTemplateSheet && (
+        <div className="bg-secondary/30 border border-border rounded-lg p-3 space-y-2">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-semibold text-muted-foreground uppercase">Select Template</p>
+            <button type="button" onClick={() => setShowTemplateSheet(false)} className="text-xs text-muted-foreground">Close</button>
+          </div>
+          {templates.length === 0 ? (
+            <p className="text-xs text-muted-foreground text-center py-2">No templates yet</p>
+          ) : (
+            <div className="space-y-1 max-h-40 overflow-y-auto">
+              {templates.map(t => (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => {
+                    const data = { business_name: bizName, contact_name: form.contact_name };
+                    const filled = fillMergeFields(t.body || '', data);
+                    set('notes', filled);
+                    setShowTemplateSheet(false);
+                    toast.success('Template applied');
+                  }}
+                  className="w-full text-left text-xs bg-card border border-border rounded-md px-2 py-1.5 hover:border-primary/30 active:scale-95 transition-all"
+                >
+                  <span className="font-medium">{t.title}</span>
+                  <span className="text-[10px] text-muted-foreground ml-1">{t.category?.replace(/_/g, ' ')}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
       <div>
         <Label className="text-xs">Linked Team Member</Label>
         <Select value={form.team_member} onValueChange={v => set('team_member', v)}>

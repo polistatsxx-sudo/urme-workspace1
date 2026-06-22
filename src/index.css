@@ -121,3 +121,27 @@
 .animate-pulse-glow {
   animation: pulse-glow 2s ease-in-out infinite;
 }
+
+/* React Quill dark theme */
+@import 'react-quill/dist/quill.snow.css';
+.ql-toolbar.ql-snow { background: hsl(var(--card)); border-color: hsl(var(--border)); border-radius: 8px 8px 0 0; }
+.ql-container.ql-snow { background: hsl(var(--card)); border-color: hsl(var(--border)); color: hsl(var(--foreground)); min-height: 120px; border-radius: 0 0 8px 8px; }
+.ql-editor.ql-blank::before { color: hsl(var(--muted-foreground)); }
+.ql-snow .ql-stroke { stroke: hsl(var(--muted-foreground)); }
+.ql-snow .ql-fill { fill: hsl(var(--muted-foreground)); }
+.ql-snow .ql-picker-label { color: hsl(var(--muted-foreground)); }
+.ql-editor { min-height: 120px; }
+.ql-snow .ql-tooltip { z-index: 100; }
+
+/* Leaflet dark theme */
+@import 'leaflet/dist/leaflet.css';
+.leaflet-container { background: hsl(var(--background)); }
+.leaflet-popup-content-wrapper { background: hsl(var(--card)); color: hsl(var(--foreground)); border: 1px solid hsl(var(--border)); border-radius: 8px; }
+.leaflet-popup-tip { background: hsl(var(--card)); }
+.leaflet-popup-content { margin: 8px 12px; }
+
+/* Rich text display */
+.rich-text-display a { color: hsl(var(--primary)); text-decoration: underline; }
+.rich-text-display ul { list-style: disc; padding-left: 1.5rem; margin: 0.25rem 0; }
+.rich-text-display ol { list-style: decimal; padding-left: 1.5rem; margin: 0.25rem 0; }
+.rich-text-display p { margin: 0.25rem 0; }

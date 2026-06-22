@@ -1,0 +1,47 @@
+{
+  "name": "EmailTemplate",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Template name"
+    },
+    "subject": {
+      "type": "string",
+      "description": "Email subject line with merge fields"
+    },
+    "body": {
+      "type": "string",
+      "description": "Email body HTML with merge fields"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "intro",
+        "follow_up",
+        "event_invite",
+        "thank_you",
+        "proposal",
+        "custom"
+      ],
+      "default": "custom"
+    },
+    "merge_fields_used": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "created_by_name": {
+      "type": "string"
+    },
+    "use_count": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "required": [
+    "title",
+    "body"
+  ]
+}

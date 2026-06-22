@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { format, isPast, isToday, addDays, differenceInDays } from 'date-fns';
 import BulkLogInteractionModal from '@/components/business/BulkLogInteractionModal';
 import { computeHealthScore, isBusinessStale, daysSinceLastInteraction } from '@/utils/healthScore';
+import { checkAndNotify } from '@/utils/notifications';
 
 const stageLabels = {
   new_lead: 'New Lead', contacted: 'Contacted', meeting_scheduled: 'Meeting',
@@ -30,6 +31,12 @@ export default function Dashboard() {
   const { data: tasks = [] } = useQuery({ queryKey: ['tasks'], queryFn: () => base44.entities.Task.list() });
   const { data: events = [] } = useQuery({ queryKey: ['events'], queryFn: () => base44.entities.Event.list() });
   const { data: matches = [] } = useQuery({ queryKey: ['matches'], queryFn: () => base44.entities.Match.list() });
+
+  useEffect(() => {
+    if (businesses.length > 0 && tasks.length > 0) {
+      checkAndNotify(tasks, businesses);
+    }
+  }, [businesses, tasks]);
 
   const activeBiz = businesses.filter(b => b.stage !== 'archived');
   const openTasks = tasks.filter(t => t.status !== 'done');

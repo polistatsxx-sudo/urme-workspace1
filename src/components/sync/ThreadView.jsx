@@ -5,6 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { format } from 'date-fns';
+import RichTextDisplay from '@/components/shared/RichTextDisplay';
 
 const catColors = {
   general: 'bg-muted text-muted-foreground',
@@ -104,8 +105,8 @@ export default function ThreadView({ disc, user, onBack, onAddReply, onPin, onAr
               <span className="text-[11px] text-muted-foreground">{format(new Date(disc.created_date), 'MMM d, h:mm a')}</span>
               <Badge variant="outline" className="text-[9px] px-1">OP</Badge>
             </div>
-            <div className="bg-secondary/40 rounded-xl rounded-tl-sm px-3 py-2.5 text-sm whitespace-pre-wrap">
-              {disc.content}
+            <div className="bg-secondary/40 rounded-xl rounded-tl-sm px-3 py-2.5 text-sm">
+              <RichTextDisplay content={disc.content} />
             </div>
           </div>
         </div>

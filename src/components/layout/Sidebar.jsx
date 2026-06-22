@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, Building2, KanbanSquare, CheckSquare, Lightbulb, 
   Calendar, MessageSquare, User, ChevronLeft, ChevronRight, Zap, Menu, X, DollarSign,
-  Search, Users, BarChart3
+  Search, Users, BarChart3, FileText, UserCog
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -15,11 +15,13 @@ const navItems = [
   { path: '/businesses', icon: Building2, label: 'Businesses' },
   { path: '/contacts', icon: Users, label: 'Contacts' },
   { path: '/tasks', icon: CheckSquare, label: 'Tasks' },
+  { path: '/templates', icon: FileText, label: 'Templates' },
   { path: '/ideas', icon: Lightbulb, label: 'Ideas' },
   { path: '/events', icon: Calendar, label: 'Events' },
   { path: '/sync', icon: MessageSquare, label: 'Sync Hub' },
   { path: '/finance', icon: DollarSign, label: 'Finance' },
   { path: '/reports', icon: BarChart3, label: 'Reports' },
+  { path: '/team', icon: UserCog, label: 'Team' },
   { path: '/profile', icon: User, label: 'Profile' },
 ];
 

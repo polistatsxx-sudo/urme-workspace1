@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { Plus, Search, Building2, Filter, Sparkles, Loader2, Download, Upload } from 'lucide-react';
+import { Plus, Search, Building2, Filter, Sparkles, Loader2, Download, Upload, List, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -15,6 +15,8 @@ import CSVImportDialog from '@/components/import/CSVImportDialog';
 import { toast } from 'sonner';
 import { exportToCSV } from '@/utils/csvExport';
 import { needsFollowUp } from '@/utils/healthScore';
+import BusinessMap from '@/components/business/BusinessMap';
+import { geocodeAddress } from '@/utils/geocode';
 
 export default function Businesses() {
   const [search, setSearch] = useState('');
@@ -27,6 +29,8 @@ export default function Businesses() {
   const [showImport, setShowImport] = useState(false);
   const [scanning, setScanning] = useState(false);
   const [followUpFilter, setFollowUpFilter] = useState(false);
+  const [viewMode, setViewMode] = useState('list');
+  const [geocoding, setGeocoding] = useState(false);
   const qc = useQueryClient();
 
   const { data: businesses = [] } = useQuery({ queryKey: ['businesses'], queryFn: () => base44.entities.Business.list() });
@@ -139,9 +143,19 @@ export default function Businesses() {
       />
 
       <div className="flex flex-col gap-2 mb-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input placeholder="Search businesses..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9 bg-card" />
+        <div className="flex items-center gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input placeholder="Search businesses..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9 bg-card" />
+          </div>
+          <div className="flex items-center gap-1 bg-card border border-border rounded-lg p-0.5">
+            <button onClick={() => setViewMode('list')} className={`p-2 rounded-md ${viewMode === 'list' ? 'bg-primary/15 text-primary' : 'text-muted-foreground'}`}>
+              <List className="w-4 h-4" />
+            </button>
+            <button onClick={() => setViewMode('map')} className={`p-2 rounded-md ${viewMode === 'map' ? 'bg-primary/15 text-primary' : 'text-muted-foreground'}`}>
+              <MapPin className="w-4 h-4" />
+            </button>
+          </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <button
@@ -198,6 +212,27 @@ export default function Businesses() {
         </div>
       </div>
 
+      {viewMode === 'map' ? (
+        <div className="space-y-3">
+          <Button variant="outline" size="sm" onClick={async () => {
+            setGeocoding(true);
+            const needGeocode = filtered.filter(b => (b.city || b.state) && (b.latitude == null || b.longitude == null));
+            for (const b of needGeocode) {
+              const result = await geocodeAddress(b.city, b.state);
+              if (result) {
+                await base44.entities.Business.update(b.id, { latitude: result.lat, longitude: result.lng });
+              }
+            }
+            qc.invalidateQueries({ queryKey: ['businesses'] });
+            setGeocoding(false);
+            toast.success('Geocoding complete');
+          }} disabled={geocoding} className="gap-1">
+            {geocoding ? <Loader2 className="w-4 h-4 animate-spin" /> : <MapPin className="w-4 h-4" />}
+            {geocoding ? 'Geocoding...' : 'Geocode All'}
+          </Button>
+          <BusinessMap businesses={filtered} height="500px" />
+        </div>
+      ) : (
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {filtered.map(biz => (
           <Link key={biz.id} to={`/businesses/${biz.id}`} className="block">
@@ -227,6 +262,7 @@ export default function Businesses() {
           </Link>
         ))}
       </div>
+      )}
       {filtered.length === 0 && <p className="text-center text-muted-foreground text-sm py-12">No businesses found</p>}
     </div>
   );

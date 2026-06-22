@@ -10,6 +10,8 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { computeHealthScore, getHealthDotColor } from '@/utils/healthScore';
 import { exportPipelineReportPDF } from '@/utils/pdfExport';
+import { runStageChangeAutomations } from '@/utils/automations';
+import { useAuth } from '@/lib/AuthContext';
 
 const stages = [
   { id: 'new_lead', label: 'New Lead', color: 'border-blue-500/40' },
@@ -22,11 +24,30 @@ const stages = [
 
 export default function Pipeline() {
   const qc = useQueryClient();
+  const { user } = useAuth();
   const { data: businesses = [] } = useQuery({ queryKey: ['businesses'], queryFn: () => base44.entities.Business.list() });
 
   const updateMut = useMutation({
     mutationFn: ({ id, data }) => base44.entities.Business.update(id, data),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['businesses'] }); toast.success('Stage updated'); },
+    onSuccess: async (updated) => {
+      qc.invalidateQueries({ queryKey: ['businesses'] });
+      toast.success('Stage updated');
+      // Run stage change automations
+      const oldStage = businesses.find(b => b.id === updated.id)?.stage;
+      const newStage = updated.stage;
+      if (oldStage && newStage && oldStage !== newStage) {
+        const autoTasksEnabled = localStorage.getItem('urme_auto_tasks') !== 'false';
+        if (autoTasksEnabled) {
+          try {
+            const promises = runStageChangeAutomations(updated, oldStage, newStage, user?.id, user?.full_name);
+            await Promise.all(promises);
+            qc.invalidateQueries({ queryKey: ['tasks'] });
+            qc.invalidateQueries({ queryKey: ['interactions'] });
+            toast.success('Stage updated + task created');
+          } catch {}
+        }
+      }
+    },
   });
 
   const handleDragEnd = (result) => {

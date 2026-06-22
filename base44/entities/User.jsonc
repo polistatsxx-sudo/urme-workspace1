@@ -33,6 +33,38 @@
     },
     "ai_api_key": {
       "type": "string"
+    },
+    "display_name": {
+      "type": "string",
+      "description": "Editable display name"
+    },
+    "linkedin": {
+      "type": "string"
+    },
+    "department": {
+      "type": "string"
+    },
+    "location": {
+      "type": "string"
+    },
+    "skills": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "inactive",
+        "on_leave"
+      ],
+      "default": "active"
+    },
+    "joined_date": {
+      "type": "string",
+      "format": "date"
     }
   }
 }

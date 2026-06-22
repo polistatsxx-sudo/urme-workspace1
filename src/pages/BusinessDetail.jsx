@@ -22,6 +22,8 @@ import { toast } from 'sonner';
 import { useAuth } from '@/lib/AuthContext';
 import { computeHealthScore, computeNextFollowUp } from '@/utils/healthScore';
 import { exportBusinessPDF } from '@/utils/pdfExport';
+import RichTextDisplay from '@/components/shared/RichTextDisplay';
+import { runStageChangeAutomations } from '@/utils/automations';
 import { format } from 'date-fns';
 
 export default function BusinessDetail() {
@@ -44,7 +46,26 @@ export default function BusinessDetail() {
 
   const updateMut = useMutation({
     mutationFn: (data) => base44.entities.Business.update(bizId, data),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['businesses'] }); setEditOpen(false); toast.success('Updated'); },
+    onSuccess: async (updated) => {
+      qc.invalidateQueries({ queryKey: ['businesses'] });
+      setEditOpen(false);
+      toast.success('Updated');
+      // Run stage change automations if stage changed
+      const oldStage = biz?.stage;
+      const newStage = updated?.stage;
+      if (oldStage && newStage && oldStage !== newStage) {
+        const autoTasksEnabled = localStorage.getItem('urme_auto_tasks') !== 'false';
+        if (autoTasksEnabled) {
+          try {
+            const promises = runStageChangeAutomations(updated, oldStage, newStage, user?.id, user?.full_name);
+            await Promise.all(promises);
+            qc.invalidateQueries({ queryKey: ['tasks'] });
+            qc.invalidateQueries({ queryKey: ['interactions', bizId] });
+            toast.success('Stage updated + task created');
+          } catch {}
+        }
+      }
+    },
   });
 
   const deleteMut = useMutation({
@@ -174,7 +195,7 @@ export default function BusinessDetail() {
         </div>
         <div className="bg-card border border-border rounded-xl p-4">
           <h3 className="text-xs font-semibold text-muted-foreground uppercase mb-2">Notes</h3>
-          <p className="text-sm">{biz.notes || 'No notes'}</p>
+          {biz.notes ? <RichTextDisplay content={biz.notes} /> : <p className="text-sm text-muted-foreground">No notes</p>}
         </div>
       </div>
 

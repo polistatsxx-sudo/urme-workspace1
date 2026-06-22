@@ -101,6 +101,12 @@
       "type": "number",
       "default": 0,
       "description": "Total number of logged interactions"
+    },
+    "latitude": {
+      "type": "number"
+    },
+    "longitude": {
+      "type": "number"
     }
   },
   "required": [

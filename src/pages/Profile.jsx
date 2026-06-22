@@ -2,19 +2,24 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { User, Shield, Key, LogOut, Save, Trash2, Users, Camera, Activity, Building2, Calendar, ChevronRight } from 'lucide-react';
+import { User, Shield, Key, LogOut, Save, Trash2, Users, Camera, Activity, Building2, Calendar, ChevronRight, Edit, Bell, BellOff, Settings, Zap } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import InteractionTimeline from '@/components/business/InteractionTimeline';
 import StageBadge from '@/components/shared/StageBadge';
+import TeamMemberEditDialog from '@/components/team/TeamMemberEditDialog';
+import RichTextDisplay from '@/components/shared/RichTextDisplay';
 import { format, isPast } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import PageHeader from '@/components/shared/PageHeader';
 import { toast } from 'sonner';
 import { useAuth } from '@/lib/AuthContext';
+import { requestNotificationPermission } from '@/utils/notifications';
 
 export default function Profile() {
   const { user } = useAuth();
@@ -22,6 +27,9 @@ export default function Profile() {
   const navigate = useNavigate();
   const [form, setForm] = useState({ bio: '', phone: '', job_title: '', ai_provider: 'none', ai_api_key: '', profile_photo: '' });
   const [saving, setSaving] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [notifEnabled, setNotifEnabled] = useState(localStorage.getItem('urme_notifications_enabled') === 'true');
+  const [autoTasksEnabled, setAutoTasksEnabled] = useState(localStorage.getItem('urme_auto_tasks') !== 'false');
 
   const { data: allUsers = [] } = useQuery({ queryKey: ['users'], queryFn: () => base44.entities.User.list() });
   const { data: myInteractions = [] } = useQuery({
@@ -48,6 +56,28 @@ export default function Profile() {
       });
     }
   }, [user]);
+
+  const handleNotifToggle = async (enabled) => {
+    if (enabled) {
+      const granted = await requestNotificationPermission();
+      if (granted) {
+        localStorage.setItem('urme_notifications_enabled', 'true');
+        setNotifEnabled(true);
+        toast.success('Notifications enabled');
+      } else {
+        toast.error('Notifications blocked. Enable in browser settings.');
+      }
+    } else {
+      localStorage.setItem('urme_notifications_enabled', 'false');
+      setNotifEnabled(false);
+    }
+  };
+
+  const handleAutoTasksToggle = (enabled) => {
+    localStorage.setItem('urme_auto_tasks', enabled ? 'true' : 'false');
+    setAutoTasksEnabled(enabled);
+    toast.success(enabled ? 'Auto-tasks enabled' : 'Auto-tasks disabled');
+  };
 
   const handlePhotoUpload = async (e) => {
     const file = e.target.files[0];
@@ -84,6 +114,7 @@ export default function Profile() {
           <TabsTrigger value="businesses">My Businesses ({myBusinesses.length})</TabsTrigger>
           <TabsTrigger value="activity">Activity ({myInteractions.length})</TabsTrigger>
           <TabsTrigger value="ai">AI Settings</TabsTrigger>
+          <TabsTrigger value="settings">Settings</TabsTrigger>
           {isAdmin && <TabsTrigger value="team">Team</TabsTrigger>}
         </TabsList>
 
@@ -103,14 +134,20 @@ export default function Profile() {
                   <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
                 </label>
               </div>
-              <div>
-                <h2 className="text-lg font-bold">{user?.full_name}</h2>
+              <div className="flex-1 min-w-0">
+                <h2 className="text-lg font-bold">{user?.display_name || user?.full_name}</h2>
                 <p className="text-xs text-muted-foreground">{user?.email}</p>
                 <div className="flex items-center gap-1 mt-1">
                   <Shield className="w-3 h-3 text-primary" />
                   <span className="text-[10px] text-primary font-semibold uppercase">{user?.role}</span>
                 </div>
+                {user?.job_title && <p className="text-xs text-muted-foreground mt-1">{user.job_title}</p>}
+                {user?.department && <p className="text-xs text-muted-foreground">{user.department}</p>}
+                {user?.location && <p className="text-xs text-muted-foreground">{user.location}</p>}
               </div>
+              <Button variant="outline" size="sm" onClick={() => setEditDialogOpen(true)}>
+                <Edit className="w-3.5 h-3.5 mr-1" /> Edit
+              </Button>
             </div>
             <div className="space-y-3">
               <div>
@@ -125,12 +162,36 @@ export default function Profile() {
                 <Label className="text-xs">Bio</Label>
                 <Textarea value={form.bio} onChange={e => setForm(p => ({...p, bio: e.target.value}))} className="bg-secondary/50 mt-1 h-24 resize-none" />
               </div>
+              {user?.linkedin && (
+                <div>
+                  <Label className="text-xs">LinkedIn</Label>
+                  <p className="text-xs text-primary truncate">{user.linkedin}</p>
+                </div>
+              )}
+              {user?.skills?.length > 0 && (
+                <div>
+                  <Label className="text-xs">Skills</Label>
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {user.skills.map(s => <span key={s} className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">{s}</span>)}
+                  </div>
+                </div>
+              )}
               <div className="flex gap-2">
                 <Button onClick={handleSave} disabled={saving}><Save className="w-4 h-4 mr-1" /> {saving ? 'Saving...' : 'Save Profile'}</Button>
                 <Button variant="outline" onClick={() => base44.auth.logout()} className="text-destructive"><LogOut className="w-4 h-4 mr-1" /> Logout</Button>
               </div>
             </div>
+            <Link to="/team" className="flex items-center justify-between mt-4 pt-4 border-t border-border text-sm text-primary hover:underline">
+              View Full Team <ChevronRight className="w-4 h-4" />
+            </Link>
           </div>
+          <TeamMemberEditDialog
+            member={user}
+            open={editDialogOpen}
+            onOpenChange={setEditDialogOpen}
+            canEdit={true}
+            onSaved={() => qc.invalidateQueries({ queryKey: ['users'] })}
+          />
         </TabsContent>
 
         <TabsContent value="businesses">
@@ -243,6 +304,37 @@ export default function Profile() {
                 </div>
               )}
               <Button onClick={handleSave} disabled={saving}><Save className="w-4 h-4 mr-1" /> {saving ? 'Saving...' : 'Save Settings'}</Button>
+            </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="settings">
+          <div className="bg-card border border-border rounded-xl p-5 max-w-lg space-y-4">
+            <div className="flex items-center gap-2 mb-4">
+              <Settings className="w-5 h-5 text-primary" />
+              <h3 className="font-semibold">Settings</h3>
+            </div>
+            {/* Notifications */}
+            <div className="flex items-center justify-between bg-secondary/40 rounded-lg p-3">
+              <div className="flex items-center gap-3">
+                {notifEnabled ? <Bell className="w-4 h-4 text-primary" /> : <BellOff className="w-4 h-4 text-muted-foreground" />}
+                <div>
+                  <p className="text-sm font-medium">Push Notifications</p>
+                  <p className="text-[10px] text-muted-foreground">Get alerts for overdue tasks and stale contacts</p>
+                </div>
+              </div>
+              <Switch checked={notifEnabled} onCheckedChange={handleNotifToggle} />
+            </div>
+            {/* Auto-tasks on stage change */}
+            <div className="flex items-center justify-between bg-secondary/40 rounded-lg p-3">
+              <div className="flex items-center gap-3">
+                <Zap className="w-4 h-4 text-primary" />
+                <div>
+                  <p className="text-sm font-medium">Auto-create tasks on stage change</p>
+                  <p className="text-[10px] text-muted-foreground">Automatically create follow-up tasks when businesses move stages</p>
+                </div>
+              </div>
+              <Switch checked={autoTasksEnabled} onCheckedChange={handleAutoTasksToggle} />
             </div>
           </div>
         </TabsContent>

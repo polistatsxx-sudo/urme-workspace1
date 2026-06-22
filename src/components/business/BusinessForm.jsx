@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import DuplicateWarning from '@/components/shared/DuplicateWarning';
+import RichTextEditor from '@/components/shared/RichTextEditor';
 import { findPotentialDuplicates } from '@/utils/duplicateDetection';
 
 const industries = ['Technology', 'Marketing', 'Real Estate', 'Construction', 'Legal', 'Finance', 'Food & Beverage', 'Healthcare', 'Entertainment', 'Retail', 'Education', 'Media', 'Event Management', 'Transportation', 'Other'];
@@ -174,7 +175,9 @@ export default function BusinessForm({ initialData, users = [], businesses = [],
         </div>
         <div className="col-span-2">
           <Label className="text-xs">Notes</Label>
-          <Textarea value={form.notes} onChange={e => set('notes', e.target.value)} className="bg-secondary/50 mt-1 h-16 resize-none" />
+          <div className="mt-1">
+            <RichTextEditor value={form.notes} onChange={v => set('notes', v)} placeholder="Internal notes..." minHeight={80} />
+          </div>
         </div>
       </div>
       {duplicates.length > 0 && (

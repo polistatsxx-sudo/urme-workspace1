@@ -28,6 +28,8 @@ import BusinessStrategy from '@/pages/BusinessStrategy';
 import ContactProfile from '@/pages/ContactProfile';
 import Contacts from '@/pages/Contacts';
 import Reports from '@/pages/Reports';
+import Team from '@/pages/Team';
+import Templates from '@/pages/Templates';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -69,6 +71,8 @@ const AuthenticatedApp = () => {
           <Route path="/contacts" element={<Contacts />} />
           <Route path="/contacts/:id" element={<ContactProfile />} />
           <Route path="/reports" element={<Reports />} />
+          <Route path="/team" element={<Team />} />
+          <Route path="/templates" element={<Templates />} />
           <Route path="/tasks" element={<Tasks />} />
           <Route path="/ideas" element={<Ideas />} />
           <Route path="/events" element={<Events />} />

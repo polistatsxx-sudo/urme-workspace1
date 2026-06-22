@@ -10,6 +10,8 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import PageHeader from '@/components/shared/PageHeader';
+import RichTextEditor from '@/components/shared/RichTextEditor';
+import RichTextDisplay from '@/components/shared/RichTextDisplay';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { useAuth } from '@/lib/AuthContext';
@@ -113,7 +115,7 @@ export default function Ideas() {
               <DialogHeader><DialogTitle>Share an Idea</DialogTitle></DialogHeader>
               <form onSubmit={e => { e.preventDefault(); createMut.mutate(form); }} className="space-y-3">
                 <div><Label className="text-xs">Title *</Label><Input value={form.title} onChange={e => setForm(p => ({...p, title: e.target.value}))} required className="bg-secondary/50 mt-1" /></div>
-                <div><Label className="text-xs">Description</Label><Textarea value={form.description} onChange={e => setForm(p => ({...p, description: e.target.value}))} className="bg-secondary/50 mt-1 h-24 resize-none" /></div>
+                <div><Label className="text-xs">Description</Label><div className="mt-1"><RichTextEditor value={form.description} onChange={v => setForm(p => ({...p, description: v}))} placeholder="Describe your idea..." minHeight={100} /></div></div>
                 <div><Label className="text-xs">Category</Label>
                   <Select value={form.category} onValueChange={v => setForm(p => ({...p, category: v}))}>
                     <SelectTrigger className="bg-secondary/50 mt-1"><SelectValue /></SelectTrigger>
@@ -148,7 +150,7 @@ export default function Ideas() {
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold">{idea.title}</p>
-                    {idea.description && <p className="text-xs text-muted-foreground mt-1">{idea.description}</p>}
+                    {idea.description && <RichTextDisplay content={idea.description} className="mt-1" />}
                   </div>
                   <div className="flex items-center gap-1 flex-shrink-0">
                     <Badge variant="outline" className={`text-[10px] ${categoryColors[idea.category] || categoryColors.other}`}>
@@ -208,7 +210,7 @@ export default function Ideas() {
           <DialogHeader><DialogTitle>Edit Idea</DialogTitle></DialogHeader>
           <form onSubmit={e => { e.preventDefault(); updateMut.mutate({ id: editingIdea, data: editForm }); }} className="space-y-3">
             <div><Label className="text-xs">Title *</Label><Input value={editForm.title || ''} onChange={e => setEditForm(p => ({...p, title: e.target.value}))} required className="bg-secondary/50 mt-1" /></div>
-            <div><Label className="text-xs">Description</Label><Textarea value={editForm.description || ''} onChange={e => setEditForm(p => ({...p, description: e.target.value}))} className="bg-secondary/50 mt-1 h-24 resize-none" /></div>
+            <div><Label className="text-xs">Description</Label><div className="mt-1"><RichTextEditor value={editForm.description || ''} onChange={v => setEditForm(p => ({...p, description: v}))} placeholder="Describe your idea..." minHeight={100} /></div></div>
             <div><Label className="text-xs">Category</Label>
               <Select value={editForm.category || 'other'} onValueChange={v => setEditForm(p => ({...p, category: v}))}>
                 <SelectTrigger className="bg-secondary/50 mt-1"><SelectValue /></SelectTrigger>

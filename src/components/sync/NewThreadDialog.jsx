@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Building2, Calendar, Lightbulb } from 'lucide-react';
+import RichTextEditor from '@/components/shared/RichTextEditor';
 
 export default function NewThreadDialog({ open, onOpenChange, onSubmit, saving, businesses = [], events = [], ideas = [] }) {
   const [form, setForm] = useState({
@@ -45,7 +46,9 @@ export default function NewThreadDialog({ open, onOpenChange, onSubmit, saving, 
 
           <div>
             <Label className="text-xs">Opening Message *</Label>
-            <Textarea value={form.content} onChange={e => set('content', e.target.value)} required placeholder="Share context, a question, or an update..." className="bg-secondary/50 mt-1 h-24 resize-none" />
+            <div className="mt-1">
+              <RichTextEditor value={form.content} onChange={v => set('content', v)} placeholder="Share context, a question, or an update..." minHeight={100} />
+            </div>
           </div>
 
           <div>
