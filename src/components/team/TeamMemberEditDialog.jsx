@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Lock, X } from 'lucide-react';
 import { toast } from 'sonner';
+import { useAuth } from '@/lib/AuthContext';
 
 const statusConfig = {
   active: { label: 'Active', color: 'bg-emerald-500/15 text-emerald-400' },
@@ -19,6 +20,7 @@ export default function TeamMemberEditDialog({ member, open, onOpenChange, canEd
   const [form, setForm] = useState({});
   const [skillInput, setSkillInput] = useState('');
   const [saving, setSaving] = useState(false);
+  const { user: currentUser } = useAuth();
 
   useEffect(() => {
     if (member) {
@@ -33,6 +35,8 @@ export default function TeamMemberEditDialog({ member, open, onOpenChange, canEd
         skills: member.skills || [],
         status: member.status || 'active',
         profile_photo: member.profile_photo || '',
+        subscription_status: member.subscription_status || 'none',
+        paid_through_date: member.paid_through_date || '',
       });
       setSkillInput('');
     }
@@ -172,6 +176,29 @@ export default function TeamMemberEditDialog({ member, open, onOpenChange, canEd
                 </SelectContent>
               </Select>
             </div>
+            {currentUser?.role === 'admin' && member?.role !== 'admin' && (
+              <div className="border-t border-border/50 pt-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <Lock className="w-4 h-4 text-primary" />
+                  <p className="text-xs font-semibold">Subscription Management</p>
+                </div>
+                <div>
+                  <Label className="text-xs">Subscription Status</Label>
+                  <Select value={form.subscription_status} onValueChange={v => set('subscription_status', v)}>
+                    <SelectTrigger className="bg-secondary/50 mt-1"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">None</SelectItem>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="expired">Expired</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-xs">Paid Through Date</Label>
+                  <Input type="date" value={form.paid_through_date} onChange={e => set('paid_through_date', e.target.value)} className="bg-secondary/50 mt-1" />
+                </div>
+              </div>
+            )}
             <Button onClick={handleSave} disabled={saving} className="w-full">
               {saving ? 'Saving...' : 'Save Changes'}
             </Button>

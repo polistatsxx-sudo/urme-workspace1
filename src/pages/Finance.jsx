@@ -13,6 +13,7 @@ import { toast } from 'sonner';
 import { format, startOfMonth, endOfMonth, startOfQuarter, endOfQuarter, isWithinInterval, differenceInDays } from 'date-fns';
 import { exportToCSV } from '@/utils/csvExport';
 import { exportFinanceReportPDF } from '@/utils/pdfExport';
+import PaymentButton from '@/components/shared/PaymentButton';
 
 const categoryLabels = {
   event_revenue: 'Event Revenue', matchmaking_fee: 'Matchmaking Fee', sponsorship: 'Sponsorship',
@@ -124,6 +125,14 @@ export default function Finance() {
           </div>
         }
       />
+
+      {/* Payment Collection */}
+      <div className="mb-6">
+        <div className="bg-card border border-border rounded-xl p-4">
+          <p className="text-sm font-semibold mb-3">Collect Payment</p>
+          <PaymentButton />
+        </div>
+      </div>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">

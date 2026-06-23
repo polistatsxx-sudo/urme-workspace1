@@ -30,6 +30,9 @@ import Contacts from '@/pages/Contacts';
 import Reports from '@/pages/Reports';
 import Team from '@/pages/Team';
 import Templates from '@/pages/Templates';
+import Settings from '@/pages/Settings';
+import Subscribe from '@/pages/Subscribe';
+import SubscriptionGate from '@/components/SubscriptionGate';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -62,7 +65,8 @@ const AuthenticatedApp = () => {
       <Route path="/reset-password" element={<ResetPassword />} />
 
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
-        <Route element={<AppLayout />}>
+        <Route path="/subscribe" element={<Subscribe />} />
+        <Route element={<SubscriptionGate><AppLayout /></SubscriptionGate>}>
           <Route path="/" element={<Dashboard />} />
           <Route path="/pipeline" element={<Pipeline />} />
           <Route path="/businesses" element={<Businesses />} />
@@ -79,6 +83,7 @@ const AuthenticatedApp = () => {
           <Route path="/sync" element={<SyncHub />} />
           <Route path="/finance" element={<Finance />} />
           <Route path="/task-ai-chat" element={<TaskAIChat />} />
+          <Route path="/settings" element={<Settings />} />
           <Route path="/profile" element={<Profile />} />
         </Route>
       </Route>

@@ -3,10 +3,11 @@ import { Link, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, Building2, KanbanSquare, CheckSquare, Lightbulb, 
   Calendar, MessageSquare, User, ChevronLeft, ChevronRight, Zap, Menu, X, DollarSign,
-  Search, Users, BarChart3, FileText, UserCog
+  Search, Users, BarChart3, FileText, UserCog, Settings as SettingsIcon
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/lib/AuthContext';
 
 const navItems = [
   { path: '#search', icon: Search, label: 'Search', isAction: true },
@@ -22,12 +23,14 @@ const navItems = [
   { path: '/finance', icon: DollarSign, label: 'Finance' },
   { path: '/reports', icon: BarChart3, label: 'Reports' },
   { path: '/team', icon: UserCog, label: 'Team' },
+  { path: '/settings', icon: SettingsIcon, label: 'Settings', adminOnly: true },
   { path: '/profile', icon: User, label: 'Profile' },
 ];
 
 export default function Sidebar({ collapsed, setCollapsed }) {
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { user } = useAuth();
 
   const NavContent = () => (
     <div className="flex flex-col h-full">
@@ -45,6 +48,7 @@ export default function Sidebar({ collapsed, setCollapsed }) {
 
       <nav className="flex-1 py-3 px-2 space-y-0.5 overflow-y-auto">
         {navItems.map((item) => {
+          if (item.adminOnly && user?.role !== 'admin') return null;
           const isActive = location.pathname === item.path;
           if (item.isAction) {
             return (

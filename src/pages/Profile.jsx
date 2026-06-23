@@ -20,6 +20,8 @@ import PageHeader from '@/components/shared/PageHeader';
 import { toast } from 'sonner';
 import { useAuth } from '@/lib/AuthContext';
 import { requestNotificationPermission } from '@/utils/notifications';
+import { hasActiveAccess, isExpiringSoon, getDaysRemaining } from '@/utils/subscription';
+import { CreditCard, Calendar as CalendarIcon } from 'lucide-react';
 
 export default function Profile() {
   const { user } = useAuth();
@@ -104,6 +106,17 @@ export default function Profile() {
 
   const isAdmin = user?.role === 'admin';
 
+  const daysRemaining = getDaysRemaining(user);
+  const expiringSoon = isExpiringSoon(user);
+  const hasAccess = hasActiveAccess(user);
+  const subStatus = user?.subscription_status || 'none';
+  const isExpired = !hasAccess && subStatus !== 'none' || (subStatus === 'expired');
+  const subBadge = hasAccess && !expiringSoon
+    ? { label: `Active${user?.paid_through_date ? ` — paid through ${format(new Date(user.paid_through_date), 'MMM d, yyyy')}` : ''}`, color: 'bg-emerald-500/15 text-emerald-400', dot: 'bg-emerald-400' }
+    : expiringSoon
+    ? { label: `Expires in ${daysRemaining} day${daysRemaining !== 1 ? 's' : ''}`, color: 'bg-amber-500/15 text-amber-400', dot: 'bg-amber-400' }
+    : { label: 'Expired', color: 'bg-destructive/15 text-destructive', dot: 'bg-destructive' };
+
   return (
     <div className="animate-slide-up">
       <PageHeader title="Profile" subtitle={user?.email} />
@@ -111,6 +124,7 @@ export default function Profile() {
       <Tabs defaultValue="profile">
         <TabsList className="bg-card border border-border mb-4">
           <TabsTrigger value="profile">My Profile</TabsTrigger>
+          <TabsTrigger value="subscription">Subscription</TabsTrigger>
           <TabsTrigger value="businesses">My Businesses ({myBusinesses.length})</TabsTrigger>
           <TabsTrigger value="activity">Activity ({myInteractions.length})</TabsTrigger>
           <TabsTrigger value="ai">AI Settings</TabsTrigger>
@@ -192,6 +206,43 @@ export default function Profile() {
             canEdit={true}
             onSaved={() => qc.invalidateQueries({ queryKey: ['users'] })}
           />
+        </TabsContent>
+
+        <TabsContent value="subscription">
+          <div className="bg-card border border-border rounded-xl p-5 max-w-lg">
+            <div className="flex items-center gap-2 mb-4">
+              <CreditCard className="w-5 h-5 text-primary" />
+              <h3 className="font-semibold">Subscription</h3>
+            </div>
+            <div className="flex items-center gap-2 mb-4">
+              <span className={`w-2 h-2 rounded-full ${subBadge.dot}`} />
+              <span className={`text-sm font-medium px-2.5 py-1 rounded-full ${subBadge.color}`}>
+                {subBadge.label}
+              </span>
+            </div>
+            {user?.paid_through_date && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
+                <CalendarIcon className="w-4 h-4 text-primary" />
+                Paid through: <span className="text-foreground font-medium">{format(new Date(user.paid_through_date), 'MMM d, yyyy')}</span>
+              </div>
+            )}
+            {(isExpired || subStatus === 'none') && (
+              <a
+                href="https://buy.stripe.com/00wfZi6ID2uHeqw2JK3Je00"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground font-semibold text-sm rounded-xl px-6 py-3 min-h-[44px] hover:bg-primary/90 transition-colors"
+              >
+                <CreditCard className="w-4 h-4" /> Reactivate — $25/month
+              </a>
+            )}
+            {isAdmin && (
+              <div className="mt-4 bg-primary/10 border border-primary/20 rounded-lg p-3">
+                <p className="text-xs text-muted-foreground">Admin: Manage subscriptions from the Team page</p>
+                <Link to="/team" className="text-xs text-primary font-medium hover:underline mt-1 block">Go to Team →</Link>
+              </div>
+            )}
+          </div>
         </TabsContent>
 
         <TabsContent value="businesses">

@@ -65,6 +65,25 @@
     "joined_date": {
       "type": "string",
       "format": "date"
+    },
+    "subscription_status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "expired",
+        "none"
+      ],
+      "default": "none",
+      "description": "Subscription status"
+    },
+    "paid_through_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date until which access is granted (from upfront payment or active subscription)"
+    },
+    "stripe_customer_id": {
+      "type": "string",
+      "description": "Optional Stripe customer ID for future webhook integration"
     }
   }
 }

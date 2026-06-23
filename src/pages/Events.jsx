@@ -16,6 +16,7 @@ import { toast } from 'sonner';
 import { format, isPast } from 'date-fns';
 import { useAuth } from '@/lib/AuthContext';
 import { exportToCSV } from '@/utils/csvExport';
+import PaymentButton from '@/components/shared/PaymentButton';
 
 const getGoogleCalendarUrl = (ev) => {
   const base = 'https://www.google.com/calendar/render?action=TEMPLATE';
@@ -159,6 +160,13 @@ export default function Events() {
         </div>
         {ev.objectives && <p className="text-xs text-muted-foreground mt-2 border-t border-border/50 pt-2"><span className="font-semibold text-foreground/70">Objectives:</span> {ev.objectives}</p>}
         {ev.post_event_notes && <p className="text-xs text-primary mt-1"><span className="font-semibold">Post-Event:</span> {ev.post_event_notes}</p>}
+
+        {/* Collect Event Fee */}
+        {attendingBiz.length > 0 && (
+          <div className="mt-3 border-t border-border/50 pt-3">
+            <PaymentButton label="Collect Event Fee" />
+          </div>
+        )}
 
         {/* Participating Businesses */}
         {attendingBiz.length > 0 && (

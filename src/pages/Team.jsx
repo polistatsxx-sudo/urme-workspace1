@@ -15,6 +15,12 @@ const statusConfig = {
   on_leave: { label: 'On Leave', color: 'bg-yellow-500/15 text-yellow-400', dot: 'bg-yellow-400' },
 };
 
+const subStatusConfig = {
+  active: { label: 'Sub: Active', color: 'bg-emerald-500/15 text-emerald-400' },
+  expired: { label: 'Sub: Expired', color: 'bg-destructive/15 text-destructive' },
+  none: { label: 'Sub: None', color: 'bg-muted text-muted-foreground' },
+};
+
 export default function Team() {
   const { user } = useAuth();
   const qc = useQueryClient();
@@ -87,9 +93,14 @@ export default function Team() {
                   {!canEdit && <Lock className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />}
                 </div>
                 <div className="flex items-center justify-between mt-3 pt-3 border-t border-border/50">
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-1.5 flex-wrap">
                     <span className={`w-1.5 h-1.5 rounded-full ${status.dot}`} />
                     <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full ${status.color}`}>{status.label}</span>
+                    {member.role !== 'admin' && (
+                      <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${(subStatusConfig[member.subscription_status] || subStatusConfig.none).color}`}>
+                        {(subStatusConfig[member.subscription_status] || subStatusConfig.none).label}
+                      </span>
+                    )}
                   </div>
                   {member.updated_date && (
                     <span className="text-[9px] text-muted-foreground">Updated {format(new Date(member.updated_date), 'MMM d')}</span>

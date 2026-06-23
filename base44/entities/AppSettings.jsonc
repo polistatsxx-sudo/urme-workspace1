@@ -1,0 +1,25 @@
+{
+  "name": "AppSettings",
+  "type": "object",
+  "properties": {
+    "key": {
+      "type": "string",
+      "description": "Setting key identifier"
+    },
+    "value": {
+      "type": "string",
+      "description": "Setting value"
+    },
+    "label": {
+      "type": "string",
+      "description": "Human-readable label"
+    },
+    "updated_by_name": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "key",
+    "value"
+  ]
+}
