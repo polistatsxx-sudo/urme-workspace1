@@ -124,7 +124,7 @@ export default function Sidebar({ collapsed, setCollapsed }) {
 
       {/* Mobile overlay */}
       {mobileOpen && (
-        <div className="fixed top-14 left-0 bottom-0 w-56 bg-card border-r border-border overflow-y-auto z-50" onClick={() => setMobileOpen(false)}>
+        <div className="fixed top-14 left-0 w-56 bg-card border-r border-border overflow-y-auto z-50 pb-24" style={{ height: 'calc(100dvh - 3.5rem)' }} onClick={() => setMobileOpen(false)}>
           <div className="w-64 h-full bg-background border-r border-border" onClick={e => e.stopPropagation()}>
             <div className="pt-14">
               <NavContent />
