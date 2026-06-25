@@ -27,7 +27,7 @@ export default function Profile() {
   const { user } = useAuth();
   const qc = useQueryClient();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ bio: '', phone: '', job_title: '', ai_provider: 'none', ai_api_key: '', profile_photo: '' });
+  const [form, setForm] = useState({ full_name: '', bio: '', phone: '', job_title: '', ai_provider: 'none', ai_api_key: '', profile_photo: '' });
   const [saving, setSaving] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [notifEnabled, setNotifEnabled] = useState(localStorage.getItem('urme_notifications_enabled') === 'true');
@@ -49,6 +49,7 @@ export default function Profile() {
   useEffect(() => {
     if (user) {
       setForm({
+        full_name: user.full_name || '',
         bio: user.bio || '',
         phone: user.phone || '',
         job_title: user.job_title || '',
@@ -86,13 +87,14 @@ export default function Profile() {
     if (!file) return;
     const { file_url } = await base44.integrations.Core.UploadFile({ file });
     setForm(p => ({ ...p, profile_photo: file_url }));
-    await base44.auth.updateMe({ profile_photo: file_url });
+    await base44.entities.User.update(user.id, { profile_photo: file_url });
     toast.success('Photo updated!');
   };
 
   const handleSave = async () => {
     setSaving(true);
-    await base44.auth.updateMe(form);
+    await base44.entities.User.update(user.id, form);
+    qc.invalidateQueries({ queryKey: ['users'] });
     toast.success('Profile updated!');
     setSaving(false);
   };
@@ -149,7 +151,7 @@ export default function Profile() {
                 </label>
               </div>
               <div className="flex-1 min-w-0">
-                <h2 className="text-lg font-bold">{user?.display_name || user?.full_name}</h2>
+                <h2 className="text-lg font-bold">{user?.display_name || user?.full_name || 'Set your name'}</h2>
                 <p className="text-xs text-muted-foreground">{user?.email}</p>
                 <div className="flex items-center gap-1 mt-1">
                   <Shield className="w-3 h-3 text-primary" />
@@ -164,6 +166,10 @@ export default function Profile() {
               </Button>
             </div>
             <div className="space-y-3">
+              <div>
+                <Label className="text-xs">Full Name</Label>
+                <Input value={form.full_name} onChange={e => setForm(p => ({...p, full_name: e.target.value}))} placeholder="Your full name" className="bg-secondary/50 mt-1" />
+              </div>
               <div>
                 <Label className="text-xs">Job Title</Label>
                 <Input value={form.job_title} onChange={e => setForm(p => ({...p, job_title: e.target.value}))} className="bg-secondary/50 mt-1" />
@@ -247,7 +253,6 @@ export default function Profile() {
 
         <TabsContent value="businesses">
           <div className="space-y-4">
-            {/* Managed Businesses */}
             <div className="bg-card border border-border rounded-xl p-5">
               <div className="flex items-center gap-2 mb-4">
                 <Building2 className="w-5 h-5 text-primary" />
@@ -275,7 +280,6 @@ export default function Profile() {
               )}
             </div>
 
-            {/* Related Events */}
             <div className="bg-card border border-border rounded-xl p-5">
               <div className="flex items-center gap-2 mb-4">
                 <Calendar className="w-5 h-5 text-primary" />
@@ -365,7 +369,6 @@ export default function Profile() {
               <Settings className="w-5 h-5 text-primary" />
               <h3 className="font-semibold">Settings</h3>
             </div>
-            {/* Notifications */}
             <div className="flex items-center justify-between bg-secondary/40 rounded-lg p-3">
               <div className="flex items-center gap-3">
                 {notifEnabled ? <Bell className="w-4 h-4 text-primary" /> : <BellOff className="w-4 h-4 text-muted-foreground" />}
@@ -376,7 +379,6 @@ export default function Profile() {
               </div>
               <Switch checked={notifEnabled} onCheckedChange={handleNotifToggle} />
             </div>
-            {/* Auto-tasks on stage change */}
             <div className="flex items-center justify-between bg-secondary/40 rounded-lg p-3">
               <div className="flex items-center gap-3">
                 <Zap className="w-4 h-4 text-primary" />

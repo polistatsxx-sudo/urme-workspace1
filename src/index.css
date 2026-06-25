@@ -1,3 +1,6 @@
+@import 'react-quill/dist/quill.snow.css';
+@import 'leaflet/dist/leaflet.css';
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 @tailwind base;
@@ -123,7 +126,6 @@
 }
 
 /* React Quill dark theme */
-@import 'react-quill/dist/quill.snow.css';
 .ql-toolbar.ql-snow { background: hsl(var(--card)); border-color: hsl(var(--border)); border-radius: 8px 8px 0 0; }
 .ql-container.ql-snow { background: hsl(var(--card)); border-color: hsl(var(--border)); color: hsl(var(--foreground)); min-height: 120px; border-radius: 0 0 8px 8px; }
 .ql-editor.ql-blank::before { color: hsl(var(--muted-foreground)); }
@@ -134,7 +136,6 @@
 .ql-snow .ql-tooltip { z-index: 100; }
 
 /* Leaflet dark theme */
-@import 'leaflet/dist/leaflet.css';
 .leaflet-container { background: hsl(var(--background)); }
 .leaflet-popup-content-wrapper { background: hsl(var(--card)); color: hsl(var(--foreground)); border: 1px solid hsl(var(--border)); border-radius: 8px; }
 .leaflet-popup-tip { background: hsl(var(--card)); }

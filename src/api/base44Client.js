@@ -1,6 +1,5 @@
 import { supabase } from '@/lib/supabaseClient';
 
-// Table name mapping (entity name → Supabase table)
 const TABLE_MAP = {
   Business: 'businesses',
   Contact: 'contacts',
@@ -16,7 +15,6 @@ const TABLE_MAP = {
   User: 'profiles',
 };
 
-// Create entity adapter that mimics Base44's API
 function createEntityAdapter(tableName) {
   return {
     async list(orderBy) {
@@ -65,21 +63,16 @@ function createEntityAdapter(tableName) {
 
     async filter(filters, orderBy) {
       let query = supabase.from(tableName).select('*');
-      
-      // Apply filters
       Object.entries(filters).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
           query = query.eq(key, value);
         }
       });
-
-      // Apply ordering
       if (orderBy) {
         const desc = orderBy.startsWith('-');
         const col = desc ? orderBy.slice(1) : orderBy;
         query = query.order(col, { ascending: !desc });
       }
-
       const { data, error } = await query;
       if (error) throw error;
       return data || [];
@@ -87,25 +80,16 @@ function createEntityAdapter(tableName) {
   };
 }
 
-// Auth adapter
 const authAdapter = {
   async me() {
     const { data: { user }, error } = await supabase.auth.getUser();
     if (error || !user) throw new Error('Not authenticated');
-    
-    // Get profile data
     const { data: profile } = await supabase
       .from('profiles')
       .select('*')
       .eq('id', user.id)
       .single();
-    
-    return {
-      id: user.id,
-      email: user.email,
-      full_name: profile?.full_name || '',
-      ...profile,
-    };
+    return { id: user.id, email: user.email, full_name: profile?.full_name || '', ...profile };
   },
 
   async login({ email, password }) {
@@ -116,9 +100,7 @@ const authAdapter = {
 
   async register({ email, password, full_name }) {
     const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { data: { full_name } },
+      email, password, options: { data: { full_name } },
     });
     if (error) throw error;
     return data;
@@ -144,11 +126,9 @@ const authAdapter = {
   },
 };
 
-// Integrations adapter (LLM, file upload)
 const integrationsAdapter = {
   Core: {
     async InvokeLLM({ prompt, response_json_schema }) {
-      // Call Supabase Edge Function
       const { data, error } = await supabase.functions.invoke('invoke-llm', {
         body: { prompt, response_json_schema },
       });
@@ -162,17 +142,14 @@ const integrationsAdapter = {
         .from('uploads')
         .upload(fileName, file);
       if (error) throw error;
-      
       const { data: urlData } = supabase.storage
         .from('uploads')
         .getPublicUrl(fileName);
-      
       return { file_url: urlData.publicUrl };
     },
   },
 };
 
-// Functions adapter
 const functionsAdapter = {
   async invoke(functionName, payload) {
     const { data, error } = await supabase.functions.invoke(functionName, {
@@ -183,13 +160,11 @@ const functionsAdapter = {
   },
 };
 
-// Build entities proxy
 const entities = {};
 Object.entries(TABLE_MAP).forEach(([entityName, tableName]) => {
   entities[entityName] = createEntityAdapter(tableName);
 });
 
-// Export the adapter with same shape as base44 client
 export const base44 = {
   auth: authAdapter,
   entities,
