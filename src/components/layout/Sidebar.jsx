@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, Building2, KanbanSquare, CheckSquare, Lightbulb, 
-  Calendar, MessageSquare, User, ChevronLeft, ChevronRight, Zap, Menu, X, DollarSign,
+  Calendar, MessageSquare, User, ChevronLeft, ChevronRight, Menu, X, DollarSign,
   Search, Users, BarChart3, FileText, UserCog, Settings as SettingsIcon
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -35,9 +35,11 @@ export default function Sidebar({ collapsed, setCollapsed }) {
   const NavContent = () => (
     <div className="flex flex-col h-full">
       <div className={cn("flex items-center gap-2 px-4 py-5 border-b border-border/50", collapsed && "justify-center px-2")}>
-        <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
-          <Zap className="w-4 h-4 text-primary-foreground" />
-        </div>
+        <img
+          src="https://media.base44.com/images/public/6a2e6b5c552bd19313d69f46/b43319c91_1choice.png"
+          alt="URME"
+          className="w-8 h-8 rounded-lg object-cover flex-shrink-0"
+        />
         {!collapsed && (
           <div className="overflow-hidden">
             <h1 className="font-display font-bold text-sm tracking-tight text-foreground">URME</h1>
@@ -103,9 +105,11 @@ export default function Sidebar({ collapsed, setCollapsed }) {
       {/* Mobile header bar */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
-            <Zap className="w-3.5 h-3.5 text-primary-foreground" />
-          </div>
+          <img
+            src="https://media.base44.com/images/public/6a2e6b5c552bd19313d69f46/b43319c91_1choice.png"
+            alt="URME"
+            className="w-7 h-7 rounded-lg object-cover"
+          />
           <span className="font-display font-bold text-sm">URME</span>
         </div>
         <div className="flex items-center gap-1">
