@@ -75,8 +75,8 @@ export default function BusinessForm({ initialData, users = [], businesses = [],
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid grid-cols-2 gap-3">
-        <div className="col-span-2">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="sm:col-span-2">
           <Label className="text-xs">Company Name *</Label>
           <Input value={form.name} onChange={e => set('name', e.target.value)} required className="bg-secondary/50 mt-1" />
         </div>
@@ -102,15 +102,15 @@ export default function BusinessForm({ initialData, users = [], businesses = [],
             </SelectContent>
           </Select>
         </div>
-        <div className="col-span-2">
+        <div className="sm:col-span-2">
           <Label className="text-xs">Description</Label>
           <Textarea value={form.description} onChange={e => set('description', e.target.value)} className="bg-secondary/50 mt-1 h-16 resize-none" />
         </div>
-        <div className="col-span-2">
+        <div className="sm:col-span-2">
           <Label className="text-xs">Needs</Label>
           <Textarea value={form.needs} onChange={e => set('needs', e.target.value)} placeholder="What does this business need?" className="bg-secondary/50 mt-1 h-16 resize-none" />
         </div>
-        <div className="col-span-2">
+        <div className="sm:col-span-2">
           <Label className="text-xs">Offers</Label>
           <Textarea value={form.offers} onChange={e => set('offers', e.target.value)} placeholder="What does this business offer?" className="bg-secondary/50 mt-1 h-16 resize-none" />
         </div>
@@ -138,7 +138,7 @@ export default function BusinessForm({ initialData, users = [], businesses = [],
           <Label className="text-xs">Website</Label>
           <Input value={form.website} onChange={e => set('website', e.target.value)} className="bg-secondary/50 mt-1" />
         </div>
-        <div className="col-span-2">
+        <div className="sm:col-span-2">
           <Label className="text-xs">Address</Label>
           <Input value={form.address} onChange={e => set('address', e.target.value)} className="bg-secondary/50 mt-1" />
         </div>
@@ -150,14 +150,14 @@ export default function BusinessForm({ initialData, users = [], businesses = [],
           <Label className="text-xs">State</Label>
           <Input value={form.state} onChange={e => set('state', e.target.value)} className="bg-secondary/50 mt-1" />
         </div>
-        <div className="col-span-2">
+        <div className="sm:col-span-2">
           <Label className="text-xs">Account Manager</Label>
           <Select value={form.assigned_to} onValueChange={handleAssign}>
             <SelectTrigger className="bg-secondary/50 mt-1"><SelectValue placeholder="Assign a relationship manager..." /></SelectTrigger>
             <SelectContent>{users.map(u => <SelectItem key={u.id} value={u.id}>{u.full_name}</SelectItem>)}</SelectContent>
           </Select>
         </div>
-        <div className="col-span-2">
+        <div className="sm:col-span-2">
           <Label className="text-xs">Tags</Label>
           <div className="flex gap-2 mt-1">
             <Input value={tagInput} onChange={e => setTagInput(e.target.value)} placeholder="Add tag..." className="bg-secondary/50" onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addTag())} />
@@ -173,7 +173,7 @@ export default function BusinessForm({ initialData, users = [], businesses = [],
             </div>
           )}
         </div>
-        <div className="col-span-2">
+        <div className="sm:col-span-2">
           <Label className="text-xs">Notes</Label>
           <div className="mt-1">
             <RichTextEditor value={form.notes} onChange={v => set('notes', v)} placeholder="Internal notes..." minHeight={80} />

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { supabase } from '@/lib/supabaseClient';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { User, Shield, Key, LogOut, Save, Trash2, Users, Camera, Activity, Building2, Calendar, ChevronRight, Edit, Bell, BellOff, Settings, Zap } from 'lucide-react';
@@ -7,12 +8,12 @@ import { Link } from 'react-router-dom';
 import InteractionTimeline from '@/components/business/InteractionTimeline';
 import StageBadge from '@/components/shared/StageBadge';
 import TeamMemberEditDialog from '@/components/team/TeamMemberEditDialog';
-import RichTextDisplay from '@/components/shared/RichTextDisplay';
 import { format, isPast } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -22,16 +23,22 @@ import { useAuth } from '@/lib/AuthContext';
 import { requestNotificationPermission } from '@/utils/notifications';
 import { hasActiveAccess, isExpiringSoon, getDaysRemaining } from '@/utils/subscription';
 import { CreditCard, Calendar as CalendarIcon } from 'lucide-react';
+import { canDeleteTarget, canEditTarget } from '@/lib/permissions';
 
 export default function Profile() {
-  const { user } = useAuth();
+  const { user, refreshProfile } = useAuth();
   const qc = useQueryClient();
   const navigate = useNavigate();
   const [form, setForm] = useState({ full_name: '', bio: '', phone: '', job_title: '', ai_provider: 'none', ai_api_key: '', profile_photo: '' });
+  const [credentials, setCredentials] = useState({ email: '', password: '' });
   const [saving, setSaving] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [notifEnabled, setNotifEnabled] = useState(localStorage.getItem('urme_notifications_enabled') === 'true');
   const [autoTasksEnabled, setAutoTasksEnabled] = useState(localStorage.getItem('urme_auto_tasks') !== 'false');
+  const [mfaFactorId, setMfaFactorId] = useState('');
+  const [mfaQrSvg, setMfaQrSvg] = useState('');
+  const [mfaCode, setMfaCode] = useState('');
+  const [mfaBusy, setMfaBusy] = useState(false);
 
   const { data: allUsers = [] } = useQuery({ queryKey: ['users'], queryFn: () => base44.entities.User.list() });
   const { data: myInteractions = [] } = useQuery({
@@ -45,6 +52,7 @@ export default function Profile() {
   const myBusinesses = allBusinesses.filter(b => b.assigned_to === user?.id);
   const myBusinessIds = new Set(myBusinesses.map(b => b.id));
   const myEvents = allEvents.filter(e => e.attendee_business_ids?.some(bid => myBusinessIds.has(bid)));
+  const isStandardUser = user?.role === 'user';
 
   useEffect(() => {
     if (user) {
@@ -57,6 +65,7 @@ export default function Profile() {
         ai_api_key: user.ai_api_key || '',
         profile_photo: user.profile_photo || '',
       });
+      setCredentials({ email: user.email || '', password: '' });
     }
   }, [user]);
 
@@ -92,6 +101,10 @@ export default function Profile() {
   };
 
   const handleSave = async () => {
+    if (isStandardUser) {
+      toast.error('Standard team members can only edit their own email and password.');
+      return;
+    }
     setSaving(true);
     await base44.entities.User.update(user.id, form);
     qc.invalidateQueries({ queryKey: ['users'] });
@@ -99,14 +112,105 @@ export default function Profile() {
     setSaving(false);
   };
 
-  const handleDeleteUser = async (userId) => {
-    if (!confirm('Delete this user? This cannot be undone.')) return;
-    await base44.entities.User.delete(userId);
-    qc.invalidateQueries({ queryKey: ['users'] });
-    toast.success('User removed');
+  const handleSaveCredentials = async () => {
+    setSaving(true);
+    try {
+      if (credentials.email && credentials.email !== user?.email) {
+        const { error: emailError } = await supabase.auth.updateUser({ email: credentials.email });
+        if (emailError) throw emailError;
+      }
+      if (credentials.password) {
+        const { error: passwordError } = await supabase.auth.updateUser({ password: credentials.password });
+        if (passwordError) throw passwordError;
+      }
+      await refreshProfile();
+      toast.success('Security settings updated');
+      setCredentials((p) => ({ ...p, password: '' }));
+    } catch (error) {
+      toast.error(error.message || 'Failed to update credentials');
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const isAdmin = user?.role === 'admin';
+  const handleStartMfaEnroll = async () => {
+    setMfaBusy(true);
+    try {
+      const enroll = await supabase.auth.mfa.enroll({ factorType: 'totp' });
+      if (enroll.error) throw enroll.error;
+      setMfaFactorId(enroll.data.id);
+      setMfaQrSvg(enroll.data.totp.qr_code);
+      setMfaCode('');
+    } catch (error) {
+      toast.error(error.message || 'Failed to start 2FA enrollment');
+    } finally {
+      setMfaBusy(false);
+    }
+  };
+
+  const handleVerifyMfa = async () => {
+    if (!mfaFactorId || mfaCode.length < 6) return;
+    setMfaBusy(true);
+    try {
+      const challenge = await supabase.auth.mfa.challenge({ factorId: mfaFactorId });
+      if (challenge.error) throw challenge.error;
+      const verify = await supabase.auth.mfa.verify({
+        factorId: mfaFactorId,
+        challengeId: challenge.data.id,
+        code: mfaCode,
+      });
+      if (verify.error) throw verify.error;
+
+      await base44.entities.User.update(user.id, { mfa_enabled: true });
+      await qc.invalidateQueries({ queryKey: ['users'] });
+      await refreshProfile();
+
+      setMfaQrSvg('');
+      setMfaFactorId('');
+      setMfaCode('');
+      toast.success('2FA enabled');
+    } catch (error) {
+      toast.error(error.message || 'Failed to verify 2FA code');
+    } finally {
+      setMfaBusy(false);
+    }
+  };
+
+  const handleDisableMfa = async () => {
+    setMfaBusy(true);
+    try {
+      const factors = await supabase.auth.mfa.listFactors();
+      const enrolledTotp = factors?.data?.totp || [];
+      for (const factor of enrolledTotp) {
+        const res = await supabase.auth.mfa.unenroll({ factorId: factor.id });
+        if (res.error) throw res.error;
+      }
+      await base44.entities.User.update(user.id, { mfa_enabled: false });
+      await qc.invalidateQueries({ queryKey: ['users'] });
+      await refreshProfile();
+      setMfaQrSvg('');
+      setMfaFactorId('');
+      setMfaCode('');
+      toast.success('2FA disabled');
+    } catch (error) {
+      toast.error(error.message || 'Failed to disable 2FA');
+    } finally {
+      setMfaBusy(false);
+    }
+  };
+
+  const handleDeleteUser = async (userId) => {
+    if (!confirm('Delete this user? This cannot be undone.')) return;
+    try {
+      await base44.functions.invoke('delete-user', { targetUserId: userId });
+      qc.invalidateQueries({ queryKey: ['users'] });
+      toast.success('User removed');
+    } catch (error) {
+      toast.error(error.message || 'Failed to remove user');
+    }
+  };
+
+  const isAdmin = ['admin', 'ceo'].includes(user?.role);
 
   const daysRemaining = getDaysRemaining(user);
   const expiringSoon = isExpiringSoon(user);
@@ -168,19 +272,19 @@ export default function Profile() {
             <div className="space-y-3">
               <div>
                 <Label className="text-xs">Full Name</Label>
-                <Input value={form.full_name} onChange={e => setForm(p => ({...p, full_name: e.target.value}))} placeholder="Your full name" className="bg-secondary/50 mt-1" />
+                <Input disabled={isStandardUser} value={form.full_name} onChange={e => setForm(p => ({...p, full_name: e.target.value}))} placeholder="Your full name" className="bg-secondary/50 mt-1" />
               </div>
               <div>
                 <Label className="text-xs">Job Title</Label>
-                <Input value={form.job_title} onChange={e => setForm(p => ({...p, job_title: e.target.value}))} className="bg-secondary/50 mt-1" />
+                <Input disabled={isStandardUser} value={form.job_title} onChange={e => setForm(p => ({...p, job_title: e.target.value}))} className="bg-secondary/50 mt-1" />
               </div>
               <div>
                 <Label className="text-xs">Phone</Label>
-                <Input value={form.phone} onChange={e => setForm(p => ({...p, phone: e.target.value}))} className="bg-secondary/50 mt-1" />
+                <Input disabled={isStandardUser} value={form.phone} onChange={e => setForm(p => ({...p, phone: e.target.value}))} className="bg-secondary/50 mt-1" />
               </div>
               <div>
                 <Label className="text-xs">Bio</Label>
-                <Textarea value={form.bio} onChange={e => setForm(p => ({...p, bio: e.target.value}))} className="bg-secondary/50 mt-1 h-24 resize-none" />
+                <Textarea disabled={isStandardUser} value={form.bio} onChange={e => setForm(p => ({...p, bio: e.target.value}))} className="bg-secondary/50 mt-1 h-24 resize-none" />
               </div>
               {user?.linkedin && (
                 <div>
@@ -197,8 +301,54 @@ export default function Profile() {
                 </div>
               )}
               <div className="flex gap-2">
-                <Button onClick={handleSave} disabled={saving}><Save className="w-4 h-4 mr-1" /> {saving ? 'Saving...' : 'Save Profile'}</Button>
+                {!isStandardUser && <Button onClick={handleSave} disabled={saving}><Save className="w-4 h-4 mr-1" /> {saving ? 'Saving...' : 'Save Profile'}</Button>}
                 <Button variant="outline" onClick={() => base44.auth.logout()} className="text-destructive"><LogOut className="w-4 h-4 mr-1" /> Logout</Button>
+              </div>
+            </div>
+
+            <div className="mt-4 pt-4 border-t border-border/50 space-y-3">
+              <h3 className="text-sm font-semibold">Account Security</h3>
+              <div>
+                <Label className="text-xs">Email</Label>
+                <Input type="email" value={credentials.email} onChange={e => setCredentials(p => ({ ...p, email: e.target.value }))} className="bg-secondary/50 mt-1" />
+              </div>
+              <div>
+                <Label className="text-xs">New Password</Label>
+                <Input type="password" minLength={8} value={credentials.password} onChange={e => setCredentials(p => ({ ...p, password: e.target.value }))} className="bg-secondary/50 mt-1" placeholder="Leave blank to keep current password" />
+              </div>
+              <Button onClick={handleSaveCredentials} disabled={saving}><Save className="w-4 h-4 mr-1" /> Update Credentials</Button>
+
+              <div className="pt-2 border-t border-border/50">
+                <div className="flex items-center justify-between gap-2">
+                  <div>
+                    <p className="text-sm font-medium">Two-factor authentication (TOTP)</p>
+                    <p className="text-xs text-muted-foreground">Use Google Authenticator, Authy, or another TOTP app.</p>
+                  </div>
+                  {user?.mfa_enabled ? (
+                    <Button variant="outline" onClick={handleDisableMfa} disabled={mfaBusy}>Disable 2FA</Button>
+                  ) : (
+                    <Button variant="outline" onClick={handleStartMfaEnroll} disabled={mfaBusy}>Enable 2FA</Button>
+                  )}
+                </div>
+
+                {mfaQrSvg && (
+                  <div className="mt-3 space-y-3">
+                    <div className="rounded-lg border border-border bg-background p-3 flex justify-center" dangerouslySetInnerHTML={{ __html: mfaQrSvg }} />
+                    <div className="flex justify-center">
+                      <InputOTP maxLength={6} value={mfaCode} onChange={setMfaCode}>
+                        <InputOTPGroup>
+                          <InputOTPSlot index={0} />
+                          <InputOTPSlot index={1} />
+                          <InputOTPSlot index={2} />
+                          <InputOTPSlot index={3} />
+                          <InputOTPSlot index={4} />
+                          <InputOTPSlot index={5} />
+                        </InputOTPGroup>
+                      </InputOTP>
+                    </div>
+                    <Button onClick={handleVerifyMfa} disabled={mfaBusy || mfaCode.length < 6}>Verify 2FA Code</Button>
+                  </div>
+                )}
               </div>
             </div>
             <Link to="/team" className="flex items-center justify-between mt-4 pt-4 border-t border-border text-sm text-primary hover:underline">
@@ -209,7 +359,7 @@ export default function Profile() {
             member={user}
             open={editDialogOpen}
             onOpenChange={setEditDialogOpen}
-            canEdit={true}
+            canEdit={canEditTarget(user, user)}
             onSaved={() => qc.invalidateQueries({ queryKey: ['users'] })}
           />
         </TabsContent>
@@ -411,7 +561,7 @@ export default function Profile() {
                         <p className="text-[10px] text-muted-foreground">{u.email} • {u.role} {u.job_title ? `• ${u.job_title}` : ''}</p>
                       </div>
                     </div>
-                    {u.id !== user?.id && (
+                    {canDeleteTarget(user, u) && (
                       <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => handleDeleteUser(u.id)}>
                         <Trash2 className="w-3.5 h-3.5" />
                       </Button>

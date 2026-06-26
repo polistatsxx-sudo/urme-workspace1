@@ -7,6 +7,7 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isMfaVerified, setIsMfaVerified] = useState(true);
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
   const [isLoadingPublicSettings, setIsLoadingPublicSettings] = useState(false);
   const [authError, setAuthError] = useState(null);
@@ -23,6 +24,7 @@ export const AuthProvider = ({ children }) => {
         } else {
           setUser(null);
           setIsAuthenticated(false);
+          setIsMfaVerified(true);
         }
       }
     );
@@ -37,6 +39,7 @@ export const AuthProvider = ({ children }) => {
         await loadProfile(session.user.id);
       } else {
         setIsAuthenticated(false);
+        setIsMfaVerified(true);
       }
     } catch (err) {
       setAuthError({ type: 'auth_required', message: 'Auth required' });
@@ -60,6 +63,12 @@ export const AuthProvider = ({ children }) => {
       full_name: profile?.full_name || '',
       ...profile,
     });
+
+    const { data: assurance } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+    const needsAal2 = profile?.mfa_enabled === true;
+    const aal2Satisfied = assurance?.currentLevel === 'aal2';
+    setIsMfaVerified(!needsAal2 || aal2Satisfied);
+
     setIsAuthenticated(true);
   };
 
@@ -81,6 +90,7 @@ export const AuthProvider = ({ children }) => {
     await supabase.auth.signOut();
     setUser(null);
     setIsAuthenticated(false);
+    setIsMfaVerified(true);
   };
 
   const navigateToLogin = () => {
@@ -91,6 +101,7 @@ export const AuthProvider = ({ children }) => {
     <AuthContext.Provider value={{
       user,
       isAuthenticated,
+      isMfaVerified,
       isLoadingAuth,
       isLoadingPublicSettings,
       authError,

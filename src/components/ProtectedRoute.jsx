@@ -3,7 +3,7 @@ import { Outlet, Navigate } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 
 export default function ProtectedRoute({ unauthenticatedElement }) {
-  const { isAuthenticated, isLoadingAuth } = useAuth();
+  const { isAuthenticated, isLoadingAuth, user, isMfaVerified } = useAuth();
 
   if (isLoadingAuth) {
     return (
@@ -18,6 +18,10 @@ export default function ProtectedRoute({ unauthenticatedElement }) {
 
   if (!isAuthenticated) {
     return unauthenticatedElement || <Navigate to="/login" replace />;
+  }
+
+  if (user?.mfa_enabled && !isMfaVerified) {
+    return <Navigate to="/login" replace />;
   }
 
   return <Outlet />;

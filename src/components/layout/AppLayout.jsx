@@ -12,10 +12,10 @@ export default function AppLayout() {
     <div className="min-h-screen bg-background">
       <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
       <main className={cn(
-        "transition-all duration-300 pt-14 lg:pt-0",
+        "transition-all duration-300 pt-16 sm:pt-14 lg:pt-0",
         collapsed ? "lg:ml-16" : "lg:ml-56"
       )}>
-        <div className="p-4 md:p-6 lg:p-8 max-w-[1600px] mx-auto">
+        <div className="px-3 py-3 sm:px-4 md:px-6 lg:px-8 pb-24 sm:pb-8 max-w-[1600px] mx-auto">
           <Outlet />
         </div>
       </main>

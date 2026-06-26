@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { supabase } from '@/lib/supabaseClient';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,6 +19,7 @@ const statusConfig = {
 
 export default function TeamMemberEditDialog({ member, open, onOpenChange, canEdit, onSaved }) {
   const [form, setForm] = useState({});
+  const [credentials, setCredentials] = useState({ email: '', password: '' });
   const [skillInput, setSkillInput] = useState('');
   const [saving, setSaving] = useState(false);
   const { user: currentUser } = useAuth();
@@ -38,11 +40,15 @@ export default function TeamMemberEditDialog({ member, open, onOpenChange, canEd
         subscription_status: member.subscription_status || 'none',
         paid_through_date: member.paid_through_date || '',
       });
+      setCredentials({ email: member.email || '', password: '' });
       setSkillInput('');
     }
   }, [member]);
 
   const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
+  const setCredentialsField = (k, v) => setCredentials((p) => ({ ...p, [k]: v }));
+  const isSelfEdit = currentUser?.id === member?.id;
+  const isUserSelfEdit = isSelfEdit && currentUser?.role === 'user';
 
   const addSkill = () => {
     const s = skillInput.trim();
@@ -53,6 +59,7 @@ export default function TeamMemberEditDialog({ member, open, onOpenChange, canEd
   };
 
   const handleSave = async () => {
+    if (isUserSelfEdit) return;
     setSaving(true);
     try {
       await base44.entities.User.update(member.id, form);
@@ -61,6 +68,27 @@ export default function TeamMemberEditDialog({ member, open, onOpenChange, canEd
       onOpenChange(false);
     } catch {
       toast.error('Failed to update profile');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSaveCredentials = async () => {
+    setSaving(true);
+    try {
+      if (credentials.email && credentials.email !== member.email) {
+        const { error: emailError } = await supabase.auth.updateUser({ email: credentials.email });
+        if (emailError) throw emailError;
+      }
+      if (credentials.password) {
+        const { error: passError } = await supabase.auth.updateUser({ password: credentials.password });
+        if (passError) throw passError;
+      }
+      toast.success('Security settings updated');
+      onSaved?.();
+      onOpenChange(false);
+    } catch (error) {
+      toast.error(error.message || 'Failed to update credentials');
     } finally {
       setSaving(false);
     }
@@ -90,6 +118,35 @@ export default function TeamMemberEditDialog({ member, open, onOpenChange, canEd
           <div className="flex flex-col items-center justify-center py-8 gap-2">
             <Lock className="w-8 h-8 text-muted-foreground" />
             <p className="text-sm text-muted-foreground text-center">Contact admin to edit this profile</p>
+          </div>
+        ) : isUserSelfEdit ? (
+          <div className="space-y-4">
+            <div className="rounded-lg bg-secondary/40 border border-border p-3">
+              <p className="text-xs text-muted-foreground">Standard team members can only update their own email and password.</p>
+            </div>
+            <div>
+              <Label className="text-xs">Email</Label>
+              <Input
+                type="email"
+                className="bg-secondary/50 mt-1"
+                value={credentials.email}
+                onChange={(e) => setCredentialsField('email', e.target.value)}
+              />
+            </div>
+            <div>
+              <Label className="text-xs">New Password</Label>
+              <Input
+                type="password"
+                minLength={8}
+                className="bg-secondary/50 mt-1"
+                value={credentials.password}
+                onChange={(e) => setCredentialsField('password', e.target.value)}
+                placeholder="Leave blank to keep current password"
+              />
+            </div>
+            <Button onClick={handleSaveCredentials} disabled={saving} className="w-full">
+              {saving ? 'Saving...' : 'Save Security Settings'}
+            </Button>
           </div>
         ) : (
           <div className="space-y-4">
@@ -176,7 +233,7 @@ export default function TeamMemberEditDialog({ member, open, onOpenChange, canEd
                 </SelectContent>
               </Select>
             </div>
-            {currentUser?.role === 'admin' && member?.role !== 'admin' && (
+            {['admin', 'ceo'].includes(currentUser?.role) && member?.role === 'user' && (
               <div className="border-t border-border/50 pt-4 space-y-3">
                 <div className="flex items-center gap-2">
                   <Lock className="w-4 h-4 text-primary" />

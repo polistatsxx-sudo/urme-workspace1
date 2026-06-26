@@ -47,7 +47,7 @@ export default function QuickCapture() {
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed bottom-20 right-4 md:right-8 z-50 w-[calc(100%-2rem)] max-w-sm bg-card border border-border rounded-2xl shadow-2xl p-4"
+            className="fixed bottom-20 left-1/2 z-50 w-[calc(100%-1rem)] max-w-sm -translate-x-1/2 bg-card border border-border rounded-2xl shadow-2xl p-4 max-h-[85dvh] overflow-y-auto"
           >
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-sm font-semibold">Quick Capture</h3>
@@ -90,7 +90,7 @@ export default function QuickCapture() {
 
       <button
         onClick={() => setOpen(!open)}
-        className="fixed bottom-6 right-4 md:right-8 z-50 w-12 h-12 bg-primary text-primary-foreground rounded-full shadow-lg flex items-center justify-center hover:scale-105 active:scale-95 transition-transform animate-pulse-glow"
+        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 h-14 w-14 bg-primary text-primary-foreground rounded-full shadow-lg flex items-center justify-center hover:scale-105 active:scale-95 transition-transform animate-pulse-glow touch-manipulation"
       >
         {open ? <X className="w-5 h-5" /> : <Zap className="w-5 h-5" />}
       </button>

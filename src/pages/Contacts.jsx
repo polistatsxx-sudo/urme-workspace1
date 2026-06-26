@@ -50,12 +50,14 @@ export default function Contacts() {
         title="Contacts"
         subtitle={`${contacts.length} contacts in your network`}
         actions={
-          <Button size="sm" onClick={() => setShowAdd(true)}><Plus className="w-4 h-4 mr-1" /> Add Contact</Button>
+          <div className="flex w-full sm:w-auto">
+            <Button size="sm" className="w-full sm:w-auto justify-center" onClick={() => setShowAdd(true)}><Plus className="w-4 h-4 mr-1" /> Add Contact</Button>
+          </div>
         }
       />
 
       {/* Search bar - sticky */}
-      <div className="sticky top-14 lg:top-0 z-10 bg-background pt-2 pb-3 -mx-4 px-4 md:mx-0 md:px-0">
+      <div className="sticky top-14 sm:top-0 z-20 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 pt-2 pb-3 -mx-3 px-3 sm:-mx-0 sm:px-0">
         <div className="relative mb-2">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input placeholder="Search contacts..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9 bg-card" />
@@ -130,7 +132,7 @@ export default function Contacts() {
 
       {/* Add contact dialog */}
       <Dialog open={showAdd} onOpenChange={setShowAdd}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="w-[calc(100%-1rem)] max-w-md max-h-[90dvh] overflow-y-auto rounded-xl p-4 sm:p-6">
           <DialogHeader><DialogTitle>Add Contact</DialogTitle></DialogHeader>
           <form onSubmit={e => { e.preventDefault(); createMut.mutate(form); }} className="space-y-3">
             <div>

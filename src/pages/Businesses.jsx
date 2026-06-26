@@ -108,7 +108,7 @@ export default function Businesses() {
         title="Business Network"
         subtitle={`${businesses.length} businesses in your network`}
         actions={
-          <>
+          <div className="flex flex-col gap-2 w-full sm:flex-row sm:flex-wrap sm:justify-end sm:w-auto">
             <Button variant="outline" size="sm" onClick={() => exportToCSV(filtered, 'businesses_export.csv', [
               { key: 'name', header: 'Name' },
               { key: 'industry', header: 'Industry' },
@@ -122,33 +122,33 @@ export default function Businesses() {
               { key: 'offers', header: 'Offers' },
               { key: 'health_score', header: 'Health Score' },
               { key: 'last_interaction_date', header: 'Last Contact' },
-            ])} className="gap-1"><Download className="w-4 h-4" /><span className="hidden lg:inline">Export CSV</span></Button>
-            <Button variant="outline" size="sm" onClick={() => setShowImport(true)} className="gap-1"><Upload className="w-4 h-4" /><span className="hidden lg:inline">Import CSV</span></Button>
-            <Button variant="outline" size="sm" onClick={runSynergyScanner} disabled={scanning}>
+            ])} className="gap-1 justify-center sm:justify-start"><Download className="w-4 h-4" /><span className="hidden sm:inline">Export CSV</span></Button>
+            <Button variant="outline" size="sm" onClick={() => setShowImport(true)} className="gap-1 justify-center sm:justify-start"><Upload className="w-4 h-4" /><span className="hidden sm:inline">Import CSV</span></Button>
+            <Button variant="outline" size="sm" onClick={runSynergyScanner} disabled={scanning} className="justify-center sm:justify-start">
               {scanning ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Sparkles className="w-4 h-4 mr-1" />}
               Synergy Scanner
             </Button>
             <Dialog open={showAdd} onOpenChange={setShowAdd}>
               <DialogTrigger asChild>
-                <Button size="sm"><Plus className="w-4 h-4 mr-1" /> Add Business</Button>
+                <Button size="sm" className="justify-center sm:justify-start"><Plus className="w-4 h-4 mr-1" /> Add Business</Button>
               </DialogTrigger>
-              <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+              <DialogContent className="w-[calc(100%-1rem)] max-w-lg max-h-[90dvh] overflow-y-auto rounded-xl p-4 sm:p-6">
                 <DialogHeader><DialogTitle>Add New Business</DialogTitle></DialogHeader>
                 <BusinessForm businesses={businesses} users={users} onSubmit={data => createMut.mutate(data)} saving={createMut.isPending} />
               </DialogContent>
             </Dialog>
             <CSVImportDialog open={showImport} onOpenChange={setShowImport} />
-          </>
+          </div>
         }
       />
 
       <div className="flex flex-col gap-2 mb-4">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input placeholder="Search businesses..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9 bg-card" />
           </div>
-          <div className="flex items-center gap-1 bg-card border border-border rounded-lg p-0.5">
+          <div className="flex items-center gap-1 bg-card border border-border rounded-lg p-0.5 self-start sm:self-auto">
             <button onClick={() => setViewMode('list')} className={`p-2 rounded-md ${viewMode === 'list' ? 'bg-primary/15 text-primary' : 'text-muted-foreground'}`}>
               <List className="w-4 h-4" />
             </button>
@@ -157,7 +157,7 @@ export default function Businesses() {
             </button>
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
           <button
             onClick={() => setFollowUpFilter(!followUpFilter)}
             className={`px-3 py-1.5 rounded-full text-xs font-medium ${followUpFilter ? 'bg-orange-500/20 text-orange-400' : 'bg-card border border-border text-muted-foreground'}`}
@@ -166,7 +166,7 @@ export default function Businesses() {
           </button>
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><Filter className="w-3.5 h-3.5" /> Filters:</div>
           <Select value={stageFilter} onValueChange={setStageFilter}>
-            <SelectTrigger className="w-auto min-w-32 h-8 text-xs bg-card"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-full sm:w-auto min-w-0 sm:min-w-32 h-8 text-xs bg-card"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Stages</SelectItem>
               <SelectItem value="new_lead">New Lead</SelectItem>
@@ -179,54 +179,60 @@ export default function Businesses() {
             </SelectContent>
           </Select>
           <Select value={managerFilter} onValueChange={setManagerFilter}>
-            <SelectTrigger className="w-auto min-w-32 h-8 text-xs bg-card"><SelectValue placeholder="Manager" /></SelectTrigger>
+            <SelectTrigger className="w-full sm:w-auto min-w-0 sm:min-w-32 h-8 text-xs bg-card"><SelectValue placeholder="Manager" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Managers</SelectItem>
               {managers.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}
             </SelectContent>
           </Select>
           <Select value={industryFilter} onValueChange={setIndustryFilter}>
-            <SelectTrigger className="w-auto min-w-32 h-8 text-xs bg-card"><SelectValue placeholder="Industry" /></SelectTrigger>
+            <SelectTrigger className="w-full sm:w-auto min-w-0 sm:min-w-32 h-8 text-xs bg-card"><SelectValue placeholder="Industry" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Industries</SelectItem>
               {industries.map(i => <SelectItem key={i} value={i}>{i}</SelectItem>)}
             </SelectContent>
           </Select>
           <Select value={cityFilter} onValueChange={setCityFilter}>
-            <SelectTrigger className="w-auto min-w-28 h-8 text-xs bg-card"><SelectValue placeholder="City" /></SelectTrigger>
+            <SelectTrigger className="w-full sm:w-auto min-w-0 sm:min-w-28 h-8 text-xs bg-card"><SelectValue placeholder="City" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Cities</SelectItem>
               {cities.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
             </SelectContent>
           </Select>
           <Select value={stateFilter} onValueChange={setStateFilter}>
-            <SelectTrigger className="w-auto min-w-24 h-8 text-xs bg-card"><SelectValue placeholder="State" /></SelectTrigger>
+            <SelectTrigger className="w-full sm:w-auto min-w-0 sm:min-w-24 h-8 text-xs bg-card"><SelectValue placeholder="State" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All States</SelectItem>
               {states.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
             </SelectContent>
           </Select>
           {activeFilters > 0 && (
-            <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={clearFilters}>Clear ({activeFilters})</Button>
+            <Button variant="ghost" size="sm" className="h-8 text-xs w-full sm:w-auto justify-center" onClick={clearFilters}>Clear ({activeFilters})</Button>
           )}
         </div>
       </div>
 
       {viewMode === 'map' ? (
         <div className="space-y-3">
-          <Button variant="outline" size="sm" onClick={async () => {
-            setGeocoding(true);
-            const needGeocode = filtered.filter(b => (b.city || b.state) && (b.latitude == null || b.longitude == null));
-            for (const b of needGeocode) {
-              const result = await geocodeAddress(b.city, b.state);
-              if (result) {
-                await base44.entities.Business.update(b.id, { latitude: result.lat, longitude: result.lng });
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full sm:w-auto gap-1"
+            onClick={async () => {
+              setGeocoding(true);
+              const needGeocode = filtered.filter(b => (b.city || b.state) && (b.latitude == null || b.longitude == null));
+              for (const b of needGeocode) {
+                const result = await geocodeAddress(b.city, b.state);
+                if (result) {
+                  await base44.entities.Business.update(b.id, { latitude: result.lat, longitude: result.lng });
+                }
               }
-            }
-            qc.invalidateQueries({ queryKey: ['businesses'] });
-            setGeocoding(false);
-            toast.success('Geocoding complete');
-          }} disabled={geocoding} className="gap-1">
+              qc.invalidateQueries({ queryKey: ['businesses'] });
+              setGeocoding(false);
+              toast.success('Geocoding complete');
+            }}
+            disabled={geocoding}
+          >
             {geocoding ? <Loader2 className="w-4 h-4 animate-spin" /> : <MapPin className="w-4 h-4" />}
             {geocoding ? 'Geocoding...' : 'Geocode All'}
           </Button>

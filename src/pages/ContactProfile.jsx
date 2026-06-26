@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, User, Mail, Phone, Briefcase, Linkedin, Edit, Trash2, Plus, Building2 } from 'lucide-react';
+import { ArrowLeft, User, Mail, Phone, Linkedin, Edit, Trash2, Building2, Sparkles, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -17,6 +17,8 @@ export default function ContactProfile() {
   const qc = useQueryClient();
   const [editOpen, setEditOpen] = useState(false);
   const [form, setForm] = useState({});
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiBrief, setAiBrief] = useState(null);
   const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
 
   const { data: contact } = useQuery({
@@ -47,6 +49,48 @@ export default function ContactProfile() {
   const openEdit = () => {
     setForm({ ...contact });
     setEditOpen(true);
+  };
+
+  const generateBrief = async () => {
+    if (!contact) return;
+    setAiLoading(true);
+    try {
+      const recentInteractions = interactions
+        .slice(0, 5)
+        .map(i => `- ${i.type} on ${i.interaction_date ? new Date(i.interaction_date).toLocaleDateString() : 'unknown date'}: ${i.notes || i.title || i.outcome || 'No details'}`)
+        .join('\n');
+
+      const result = await base44.integrations.Core.InvokeLLM({
+        prompt: `You are a relationship strategist for a B2B networking platform.
+
+Create a concise contact brief that helps the user prepare for the next interaction.
+
+Contact: ${contact.full_name}
+Role: ${contact.title || 'Not specified'}
+Business: ${contact.business_name || 'Not specified'}
+Email: ${contact.email || 'Not specified'}
+Phone: ${contact.phone || 'Not specified'}
+LinkedIn: ${contact.linkedin || 'Not specified'}
+Notes: ${contact.notes || 'None'}
+Recent interactions:
+${recentInteractions || 'No interactions logged yet.'}
+
+Return only useful, actionable output.`,
+        response_json_schema: {
+          type: 'object',
+          properties: {
+            summary: { type: 'string' },
+            best_next_step: { type: 'string' },
+            outreach_draft: { type: 'string' },
+            talking_points: { type: 'array', items: { type: 'string' } },
+            watchouts: { type: 'array', items: { type: 'string' } },
+          },
+        },
+      });
+      setAiBrief(result);
+    } finally {
+      setAiLoading(false);
+    }
   };
 
   if (!contact) return <div className="text-center py-12 text-muted-foreground">Loading...</div>;
@@ -108,6 +152,70 @@ export default function ContactProfile() {
             <p className="text-xs text-muted-foreground font-semibold uppercase mb-1">Notes</p>
             <p className="text-sm">{contact.notes}</p>
           </div>
+        )}
+      </div>
+
+      <div className="bg-accent/10 border border-accent/20 rounded-xl p-4 mb-4 space-y-4">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h3 className="text-xs font-semibold text-accent uppercase tracking-wider">AI Contact Brief</h3>
+            <p className="text-sm text-foreground/80 mt-1">Use AI to prep the next outreach or meeting.</p>
+          </div>
+          <Button variant="outline" size="sm" onClick={generateBrief} disabled={aiLoading || !contact} className="gap-1.5">
+            {aiLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+            {aiBrief ? 'Regenerate' : 'Generate'}
+          </Button>
+        </div>
+
+        {aiBrief ? (
+          <>
+            {aiBrief.summary && <p className="text-sm text-foreground/80 whitespace-pre-wrap">{aiBrief.summary}</p>}
+
+            <div className="grid md:grid-cols-2 gap-3">
+              {aiBrief.best_next_step && (
+                <div className="bg-card border border-border rounded-lg p-3">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">Best Next Step</p>
+                  <p className="text-sm">{aiBrief.best_next_step}</p>
+                </div>
+              )}
+              {aiBrief.outreach_draft && (
+                <div className="bg-card border border-border rounded-lg p-3">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">Outreach Draft</p>
+                  <p className="text-sm whitespace-pre-wrap">{aiBrief.outreach_draft}</p>
+                </div>
+              )}
+            </div>
+
+            {aiBrief.talking_points?.length > 0 && (
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Talking Points</p>
+                <ul className="space-y-2">
+                  {aiBrief.talking_points.map((point, index) => (
+                    <li key={index} className="flex items-start gap-2 text-sm text-foreground/80">
+                      <span className="w-1.5 h-1.5 rounded-full bg-accent mt-2 flex-shrink-0" />
+                      <span>{point}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {aiBrief.watchouts?.length > 0 && (
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Watchouts</p>
+                <ul className="space-y-2">
+                  {aiBrief.watchouts.map((watchout, index) => (
+                    <li key={index} className="flex items-start gap-2 text-sm text-foreground/80">
+                      <span className="w-1.5 h-1.5 rounded-full bg-destructive mt-2 flex-shrink-0" />
+                      <span>{watchout}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </>
+        ) : (
+          <p className="text-sm text-foreground/60">Generate a brief to get a next-step recommendation, outreach draft, and talking points.</p>
         )}
       </div>
 

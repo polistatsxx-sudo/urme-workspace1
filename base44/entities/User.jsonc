@@ -5,6 +5,7 @@
     "role": {
       "type": "string",
       "enum": [
+        "ceo",
         "admin",
         "user"
       ],
@@ -84,6 +85,21 @@
     "stripe_customer_id": {
       "type": "string",
       "description": "Optional Stripe customer ID for future webhook integration"
+    },
+    "failed_login_attempts": {
+      "type": "integer",
+      "default": 0,
+      "description": "Failed login counter for account lockout"
+    },
+    "account_locked": {
+      "type": "boolean",
+      "default": false,
+      "description": "When true, sign-in is blocked until an admin unlocks"
+    },
+    "mfa_enabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether TOTP MFA is enabled for this user"
     }
   }
 }

@@ -50,7 +50,7 @@ export default function Sidebar({ collapsed, setCollapsed }) {
 
       <nav className="flex-1 py-3 px-2 space-y-0.5 overflow-y-auto">
         {navItems.map((item) => {
-          if (item.adminOnly && user?.role !== 'admin') return null;
+          if (item.adminOnly && !['admin', 'ceo'].includes(user?.role)) return null;
           const isActive = location.pathname === item.path;
           if (item.isAction) {
             return (
@@ -103,7 +103,7 @@ export default function Sidebar({ collapsed, setCollapsed }) {
   return (
     <>
       {/* Mobile header bar */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border px-4 py-3 flex items-center justify-between">
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border px-3 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <img
             src="https://media.base44.com/images/public/6a2e6b5c552bd19313d69f46/b43319c91_1choice.png"
@@ -113,10 +113,10 @@ export default function Sidebar({ collapsed, setCollapsed }) {
           <span className="font-display font-bold text-sm">URME</span>
         </div>
         <div className="flex items-center gap-1">
-          <Button variant="ghost" size="icon" onClick={() => window.dispatchEvent(new CustomEvent('open-global-search'))} className="h-9 w-9">
+          <Button variant="ghost" size="icon" onClick={() => window.dispatchEvent(new CustomEvent('open-global-search'))} className="h-10 w-10">
             <Search className="w-5 h-5" />
           </Button>
-          <Button variant="ghost" size="icon" onClick={() => setMobileOpen(!mobileOpen)} className="h-9 w-9">
+          <Button variant="ghost" size="icon" onClick={() => setMobileOpen(!mobileOpen)} className="h-10 w-10">
             {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </Button>
         </div>
@@ -124,8 +124,8 @@ export default function Sidebar({ collapsed, setCollapsed }) {
 
       {/* Mobile overlay */}
       {mobileOpen && (
-        <div className="fixed top-14 left-0 w-56 bg-card border-r border-border overflow-y-auto z-50 pb-24" style={{ height: 'calc(100dvh - 3.5rem)' }} onClick={() => setMobileOpen(false)}>
-          <div className="w-64 h-full bg-background border-r border-border" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 z-40 bg-black/25 lg:hidden" onClick={() => setMobileOpen(false)}>
+          <div className="w-[min(85vw,18rem)] h-full bg-background border-r border-border shadow-xl overflow-y-auto" onClick={e => e.stopPropagation()}>
             <div className="pt-14">
               <NavContent />
             </div>

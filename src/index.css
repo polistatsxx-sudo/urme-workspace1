@@ -88,8 +88,35 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
   body {
-    @apply bg-background text-foreground font-body dark;
+    @apply bg-background text-foreground font-body;
+    min-height: 100dvh;
+    overflow-x: hidden;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  #root {
+    min-height: 100dvh;
+  }
+  button,
+  input,
+  select,
+  textarea {
+    touch-action: manipulation;
+  }
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 640px) {
+  body {
+    font-size: 15px;
   }
 }
 

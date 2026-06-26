@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Edit, Trash2, Plus, Phone, Mail, Globe, MapPin, Building2, Sparkles, Loader2, FileDown, MoreVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import PageHeader from '@/components/shared/PageHeader';
 import StageBadge from '@/components/shared/StageBadge';
 import HealthScoreBadge from '@/components/shared/HealthScoreBadge';
 import BusinessForm from '@/components/business/BusinessForm';
@@ -34,7 +33,7 @@ export default function BusinessDetail() {
   const [editOpen, setEditOpen] = useState(false);
   const [logOpen, setLogOpen] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
-  const [insight, setInsight] = useState('');
+  const [aiBrief, setAiBrief] = useState(null);
 
   const { data: businesses = [], isLoading: bizLoading } = useQuery({ queryKey: ['businesses'], queryFn: () => base44.entities.Business.list() });
   const { data: interactions = [] } = useQuery({ queryKey: ['interactions', bizId], queryFn: () => base44.entities.Interaction.filter({ business_id: bizId }, '-interaction_date') });
@@ -100,11 +99,45 @@ export default function BusinessDetail() {
   const getInsight = async () => {
     if (!biz) return;
     setAiLoading(true);
-    const res = await base44.integrations.Core.InvokeLLM({
-      prompt: `Give a brief strategic insight for this business in a B2B networking context. Business: ${biz.name}, Industry: ${biz.industry}, Needs: ${biz.needs}, Offers: ${biz.offers}. Give 3-4 actionable networking suggestions in 2-3 sentences each.`,
-    });
-    setInsight(res);
-    setAiLoading(false);
+    try {
+      const recentInteractionSummaries = interactions
+        .slice(0, 5)
+        .map(i => `- ${i.type} on ${i.interaction_date ? new Date(i.interaction_date).toLocaleDateString() : 'unknown date'}: ${i.notes || i.title || i.outcome || 'No details'}`)
+        .join('\n');
+
+      const res = await base44.integrations.Core.InvokeLLM({
+        prompt: `You are a senior account strategist for a B2B networking platform.
+
+Analyze this business and return a concise relationship brief that helps the user decide what to do next.
+
+Business: ${biz.name}
+Industry: ${biz.industry || 'Unknown'}
+Stage: ${biz.stage || 'Unknown'}
+Needs: ${biz.needs || 'Not specified'}
+Offers: ${biz.offers || 'Not specified'}
+Description: ${biz.description || 'Not specified'}
+Contact: ${biz.contact_name || 'Not specified'} (${biz.contact_email || 'No email'})
+Location: ${[biz.city, biz.state].filter(Boolean).join(', ') || 'Not specified'}
+Tags: ${biz.tags?.join(', ') || 'None'}
+Recent interactions:
+${recentInteractionSummaries || 'No interactions logged yet.'}
+
+Return only useful, actionable output.`,
+        response_json_schema: {
+          type: 'object',
+          properties: {
+            summary: { type: 'string' },
+            best_next_step: { type: 'string' },
+            outreach_draft: { type: 'string' },
+            talking_points: { type: 'array', items: { type: 'string' } },
+            risks: { type: 'array', items: { type: 'string' } },
+          },
+        },
+      });
+      setAiBrief(res);
+    } finally {
+      setAiLoading(false);
+    }
   };
 
   if (bizLoading) return <div className="text-center py-12 text-muted-foreground">Loading...</div>;
@@ -168,10 +201,63 @@ export default function BusinessDetail() {
         )}
       </div>
 
-      {insight && (
-        <div className="bg-accent/10 border border-accent/20 rounded-xl p-4 mb-4">
-          <h3 className="text-xs font-semibold text-accent mb-2">AI Insight</h3>
-          <p className="text-sm text-foreground/80 whitespace-pre-wrap">{insight}</p>
+      {aiBrief && (
+        <div className="bg-accent/10 border border-accent/20 rounded-xl p-4 mb-4 space-y-4">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <h3 className="text-xs font-semibold text-accent uppercase tracking-wider">AI Relationship Brief</h3>
+              <p className="text-sm text-foreground/80 mt-1">A focused read on what to do next with this account.</p>
+            </div>
+            <Button variant="outline" size="sm" onClick={getInsight} disabled={aiLoading} className="gap-1.5">
+              {aiLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+              Regenerate
+            </Button>
+          </div>
+
+          {aiBrief.summary && <p className="text-sm text-foreground/80 whitespace-pre-wrap">{aiBrief.summary}</p>}
+
+          <div className="grid md:grid-cols-2 gap-3">
+            {aiBrief.best_next_step && (
+              <div className="bg-card border border-border rounded-lg p-3">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">Best Next Step</p>
+                <p className="text-sm">{aiBrief.best_next_step}</p>
+              </div>
+            )}
+            {aiBrief.outreach_draft && (
+              <div className="bg-card border border-border rounded-lg p-3">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">Outreach Draft</p>
+                <p className="text-sm whitespace-pre-wrap">{aiBrief.outreach_draft}</p>
+              </div>
+            )}
+          </div>
+
+          {aiBrief.talking_points?.length > 0 && (
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Talking Points</p>
+              <ul className="space-y-2">
+                {aiBrief.talking_points.map((point, index) => (
+                  <li key={index} className="flex items-start gap-2 text-sm text-foreground/80">
+                    <span className="w-1.5 h-1.5 rounded-full bg-accent mt-2 flex-shrink-0" />
+                    <span>{point}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {aiBrief.risks?.length > 0 && (
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Watchouts</p>
+              <ul className="space-y-2">
+                {aiBrief.risks.map((risk, index) => (
+                  <li key={index} className="flex items-start gap-2 text-sm text-foreground/80">
+                    <span className="w-1.5 h-1.5 rounded-full bg-destructive mt-2 flex-shrink-0" />
+                    <span>{risk}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       )}
 

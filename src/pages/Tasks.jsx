@@ -88,9 +88,10 @@ export default function Tasks() {
         title="Accountability Engine"
         subtitle={`${done.length} completed • ${overdue.length} overdue`}
         actions={
-          <Dialog open={showAdd} onOpenChange={setShowAdd}>
-            <DialogTrigger asChild><Button size="sm"><Plus className="w-4 h-4 mr-1" /> New Task</Button></DialogTrigger>
-            <DialogContent className="max-w-md">
+          <div className="flex w-full sm:w-auto">
+            <Dialog open={showAdd} onOpenChange={setShowAdd}>
+              <DialogTrigger asChild><Button size="sm" className="w-full sm:w-auto justify-center"><Plus className="w-4 h-4 mr-1" /> New Task</Button></DialogTrigger>
+              <DialogContent className="w-[calc(100%-1rem)] max-w-md max-h-[90dvh] overflow-y-auto rounded-xl p-4 sm:p-6">
               <DialogHeader><DialogTitle>New Task</DialogTitle></DialogHeader>
               <form onSubmit={e => { e.preventDefault(); createMut.mutate(form); }} className="space-y-3">
                 <div><Label className="text-xs">Title *</Label><Input value={form.title} onChange={e => setForm(p => ({...p, title: e.target.value}))} required className="bg-secondary/50 mt-1" /></div>
@@ -122,7 +123,8 @@ export default function Tasks() {
                 )}
               </form>
             </DialogContent>
-          </Dialog>
+            </Dialog>
+          </div>
         }
       />
 
@@ -142,11 +144,11 @@ export default function Tasks() {
       </div>
 
       <Tabs value={tab} onValueChange={setTab} className="w-full">
-        <TabsList className="bg-card border border-border mb-4">
-          <TabsTrigger value="todo">To Do ({tasks.filter(t => t.status === 'todo').length})</TabsTrigger>
-          <TabsTrigger value="in_progress">In Progress ({tasks.filter(t => t.status === 'in_progress').length})</TabsTrigger>
-          <TabsTrigger value="done">Done ({done.length})</TabsTrigger>
-          {overdue.length > 0 && <TabsTrigger value="overdue" className="text-destructive">Overdue ({overdue.length})</TabsTrigger>}
+        <TabsList className="w-full justify-start overflow-x-auto bg-card border border-border mb-4 p-1">
+          <TabsTrigger value="todo" className="whitespace-nowrap">To Do ({tasks.filter(t => t.status === 'todo').length})</TabsTrigger>
+          <TabsTrigger value="in_progress" className="whitespace-nowrap">In Progress ({tasks.filter(t => t.status === 'in_progress').length})</TabsTrigger>
+          <TabsTrigger value="done" className="whitespace-nowrap">Done ({done.length})</TabsTrigger>
+          {overdue.length > 0 && <TabsTrigger value="overdue" className="whitespace-nowrap text-destructive">Overdue ({overdue.length})</TabsTrigger>}
         </TabsList>
 
         <div className="space-y-2">
