@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { supabase } from '@/lib/supabaseClient';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { User, Shield, Key, LogOut, Save, Trash2, Users, Camera, Activity, Building2, Calendar, ChevronRight, Edit, Bell, BellOff, Settings, Zap } from 'lucide-react';
+import { User, Shield, Key, LogOut, Save, Trash2, Users, Camera, Activity, Building2, Calendar, ChevronRight, Edit, Bell, BellOff, Settings, Zap, Copy, RefreshCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import InteractionTimeline from '@/components/business/InteractionTimeline';
 import StageBadge from '@/components/shared/StageBadge';
@@ -36,9 +36,45 @@ export default function Profile() {
   const [notifEnabled, setNotifEnabled] = useState(localStorage.getItem('urme_notifications_enabled') === 'true');
   const [autoTasksEnabled, setAutoTasksEnabled] = useState(localStorage.getItem('urme_auto_tasks') !== 'false');
   const [mfaFactorId, setMfaFactorId] = useState('');
-  const [mfaQrSvg, setMfaQrSvg] = useState('');
+  const [mfaQrCodeUri, setMfaQrCodeUri] = useState('');
+  const [mfaQrBlobUrl, setMfaQrBlobUrl] = useState('');
+  const [mfaSetupKey, setMfaSetupKey] = useState('');
   const [mfaCode, setMfaCode] = useState('');
   const [mfaBusy, setMfaBusy] = useState(false);
+
+  const normalizeQrCodeSrc = (totpPayload) => {
+    const raw = String(totpPayload?.qr_code || '').trim();
+    if (!raw) return '';
+
+    // Rebuild SVG payloads into a blob URL for consistent rendering across browsers/themes.
+    if (raw.startsWith('data:image/svg+xml')) {
+      const commaIdx = raw.indexOf(',');
+      if (commaIdx > -1) {
+        const header = raw.slice(0, commaIdx);
+        const dataPart = raw.slice(commaIdx + 1);
+        const svgString = header.includes(';base64')
+          ? atob(dataPart)
+          : decodeURIComponent(dataPart);
+        const blobUrl = URL.createObjectURL(new Blob([svgString], { type: 'image/svg+xml' }));
+        setMfaQrBlobUrl(blobUrl);
+        return blobUrl;
+      }
+    }
+
+    if (raw.startsWith('data:image/')) return raw;
+    if (raw.startsWith('<svg')) {
+      const blobUrl = URL.createObjectURL(new Blob([raw], { type: 'image/svg+xml' }));
+      setMfaQrBlobUrl(blobUrl);
+      return blobUrl;
+    }
+    return raw;
+  };
+
+  useEffect(() => {
+    return () => {
+      if (mfaQrBlobUrl) URL.revokeObjectURL(mfaQrBlobUrl);
+    };
+  }, [mfaQrBlobUrl]);
 
   const { data: allUsers = [] } = useQuery({ queryKey: ['users'], queryFn: () => base44.entities.User.list() });
   const { data: myInteractions = [] } = useQuery({
@@ -136,11 +172,35 @@ export default function Profile() {
   const handleStartMfaEnroll = async () => {
     setMfaBusy(true);
     try {
-      const enroll = await supabase.auth.mfa.enroll({ factorType: 'totp' });
+      if (mfaQrBlobUrl) {
+        URL.revokeObjectURL(mfaQrBlobUrl);
+        setMfaQrBlobUrl('');
+      }
+
+      let enroll = await supabase.auth.mfa.enroll({ factorType: 'totp' });
+
+      // Supabase can block re-enroll if an unverified TOTP factor already exists.
+      if (enroll.error) {
+        const factors = await supabase.auth.mfa.listFactors();
+        const unverifiedTotp = (factors?.data?.totp || []).filter((factor) => factor.status !== 'verified');
+        for (const factor of unverifiedTotp) {
+          await supabase.auth.mfa.unenroll({ factorId: factor.id });
+        }
+        if (unverifiedTotp.length > 0) {
+          enroll = await supabase.auth.mfa.enroll({ factorType: 'totp' });
+        }
+      }
+
       if (enroll.error) throw enroll.error;
+      const qrCodeSrc = normalizeQrCodeSrc(enroll.data?.totp);
+      if (!qrCodeSrc) {
+        throw new Error('Could not generate a QR code. Please try again.');
+      }
       setMfaFactorId(enroll.data.id);
-      setMfaQrSvg(enroll.data.totp.qr_code);
+      setMfaQrCodeUri(qrCodeSrc);
+      setMfaSetupKey(String(enroll.data?.totp?.secret || ''));
       setMfaCode('');
+      toast.success('Scan the QR code and enter the 6-digit code to finish enabling 2FA.');
     } catch (error) {
       toast.error(error.message || 'Failed to start 2FA enrollment');
     } finally {
@@ -165,7 +225,12 @@ export default function Profile() {
       await qc.invalidateQueries({ queryKey: ['users'] });
       await refreshProfile();
 
-      setMfaQrSvg('');
+      if (mfaQrBlobUrl) {
+        URL.revokeObjectURL(mfaQrBlobUrl);
+        setMfaQrBlobUrl('');
+      }
+      setMfaQrCodeUri('');
+      setMfaSetupKey('');
       setMfaFactorId('');
       setMfaCode('');
       toast.success('2FA enabled');
@@ -188,12 +253,54 @@ export default function Profile() {
       await base44.entities.User.update(user.id, { mfa_enabled: false });
       await qc.invalidateQueries({ queryKey: ['users'] });
       await refreshProfile();
-      setMfaQrSvg('');
+      if (mfaQrBlobUrl) {
+        URL.revokeObjectURL(mfaQrBlobUrl);
+        setMfaQrBlobUrl('');
+      }
+      setMfaQrCodeUri('');
+      setMfaSetupKey('');
       setMfaFactorId('');
       setMfaCode('');
       toast.success('2FA disabled');
     } catch (error) {
       toast.error(error.message || 'Failed to disable 2FA');
+    } finally {
+      setMfaBusy(false);
+    }
+  };
+
+  const handleCopySetupKey = async () => {
+    if (!mfaSetupKey) return;
+    try {
+      await navigator.clipboard.writeText(mfaSetupKey);
+      toast.success('Setup key copied');
+    } catch {
+      toast.error('Could not copy setup key. Please copy manually.');
+    }
+  };
+
+  const handleRestartMfaEnroll = async () => {
+    if (!mfaFactorId) {
+      await handleStartMfaEnroll();
+      return;
+    }
+    setMfaBusy(true);
+    try {
+      const unenrollResult = await supabase.auth.mfa.unenroll({ factorId: mfaFactorId });
+      if (unenrollResult.error) throw unenrollResult.error;
+
+      if (mfaQrBlobUrl) {
+        URL.revokeObjectURL(mfaQrBlobUrl);
+        setMfaQrBlobUrl('');
+      }
+      setMfaQrCodeUri('');
+      setMfaSetupKey('');
+      setMfaCode('');
+      setMfaFactorId('');
+
+      await handleStartMfaEnroll();
+    } catch (error) {
+      toast.error(error.message || 'Failed to restart 2FA setup');
     } finally {
       setMfaBusy(false);
     }
@@ -331,13 +438,27 @@ export default function Profile() {
                   )}
                 </div>
 
-                {mfaQrSvg && (
+                {mfaQrCodeUri && (
                   <div className="mt-3 space-y-3">
                     <img
-                      src={mfaQrSvg}
+                      src={mfaQrCodeUri}
                       alt="Scan this QR code with your authenticator app"
-                      className="w-48 h-48 mx-auto rounded-lg border border-border"
+                      className="w-48 h-48 mx-auto rounded-lg border border-border bg-white p-2"
                     />
+                    {mfaSetupKey && (
+                      <div className="space-y-1">
+                        <Label className="text-xs">Manual setup key (if scan fails)</Label>
+                        <Input readOnly value={mfaSetupKey} className="font-mono text-xs" />
+                        <div className="flex items-center gap-2">
+                          <Button type="button" variant="outline" size="sm" onClick={handleCopySetupKey}>
+                            <Copy className="w-3.5 h-3.5 mr-1" /> Copy setup key
+                          </Button>
+                          <Button type="button" variant="outline" size="sm" onClick={handleRestartMfaEnroll} disabled={mfaBusy}>
+                            <RefreshCw className="w-3.5 h-3.5 mr-1" /> Start over
+                          </Button>
+                        </div>
+                      </div>
+                    )}
                     <div className="flex justify-center">
                       <InputOTP maxLength={6} value={mfaCode} onChange={setMfaCode}>
                         <InputOTPGroup>

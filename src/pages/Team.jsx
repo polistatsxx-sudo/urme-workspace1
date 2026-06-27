@@ -6,7 +6,7 @@ import PageHeader from '@/components/shared/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { useAuth } from '@/lib/AuthContext';
 import TeamMemberEditDialog from '@/components/team/TeamMemberEditDialog';
@@ -95,61 +95,68 @@ export default function Team() {
         subtitle={subtitle}
         actions={
           canInvite ? (
-            <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
-              <DialogTrigger asChild>
-                <Button className="h-10">
-                  <Plus className="w-4 h-4 mr-2" /> Add Team Member
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-md">
-                <DialogHeader>
-                  <DialogTitle>Add Team Member</DialogTitle>
-                </DialogHeader>
-                <form onSubmit={handleInvite} className="space-y-3">
-                  <div>
-                    <Label className="text-xs">Full Name</Label>
-                    <Input
-                      required
-                      value={inviteForm.full_name}
-                      onChange={(e) => setInviteForm((p) => ({ ...p, full_name: e.target.value }))}
-                      className="mt-1"
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-xs">Email</Label>
-                    <Input
-                      required
-                      type="email"
-                      value={inviteForm.email}
-                      onChange={(e) => setInviteForm((p) => ({ ...p, email: e.target.value }))}
-                      className="mt-1"
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-xs">Temporary Password</Label>
-                    <Input
-                      required
-                      type="password"
-                      minLength={8}
-                      value={inviteForm.password}
-                      onChange={(e) => setInviteForm((p) => ({ ...p, password: e.target.value }))}
-                      className="mt-1"
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-xs">Role</Label>
-                    <Input value="user" disabled className="mt-1" />
-                    <p className="text-[10px] text-muted-foreground mt-1">Only standard team members can be created from this form.</p>
-                  </div>
-                  <Button type="submit" className="w-full" disabled={creating}>
-                    {creating ? 'Creating...' : 'Create Account'}
-                  </Button>
-                </form>
-              </DialogContent>
-            </Dialog>
+            <Button className="h-10 hidden sm:inline-flex" onClick={() => setInviteOpen(true)}>
+              <Plus className="w-4 h-4 mr-2" /> Add Team Member
+            </Button>
           ) : null
         }
       />
+
+      {canInvite && (
+        <div className="sm:hidden mb-3">
+          <Button className="w-full h-10" onClick={() => setInviteOpen(true)}>
+            <Plus className="w-4 h-4 mr-2" /> Add Team Member
+          </Button>
+        </div>
+      )}
+
+      <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add Team Member</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleInvite} className="space-y-3">
+            <div>
+              <Label className="text-xs">Full Name</Label>
+              <Input
+                required
+                value={inviteForm.full_name}
+                onChange={(e) => setInviteForm((p) => ({ ...p, full_name: e.target.value }))}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label className="text-xs">Email</Label>
+              <Input
+                required
+                type="email"
+                value={inviteForm.email}
+                onChange={(e) => setInviteForm((p) => ({ ...p, email: e.target.value }))}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label className="text-xs">Temporary Password</Label>
+              <Input
+                required
+                type="password"
+                minLength={8}
+                value={inviteForm.password}
+                onChange={(e) => setInviteForm((p) => ({ ...p, password: e.target.value }))}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label className="text-xs">Role</Label>
+              <Input value="user" disabled className="mt-1" />
+              <p className="text-[10px] text-muted-foreground mt-1">Only standard team members can be created from this form.</p>
+            </div>
+            <Button type="submit" className="w-full" disabled={creating}>
+              {creating ? 'Creating...' : 'Create Account'}
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       {isLoading ? (
         <div className="text-center py-12 text-muted-foreground">Loading team...</div>
