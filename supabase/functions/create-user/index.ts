@@ -83,7 +83,7 @@ Deno.serve(async (req) => {
 
     const { error: profileInsertError } = await adminClient
       .from('profiles')
-      .insert({
+      .upsert({
         id: createdAuth.user.id,
         full_name: fullName,
         email,
@@ -91,6 +91,8 @@ Deno.serve(async (req) => {
         failed_login_attempts: 0,
         account_locked: false,
         mfa_enabled: false,
+      }, {
+        onConflict: 'id',
       });
 
     if (profileInsertError) {
