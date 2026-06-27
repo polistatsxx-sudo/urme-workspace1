@@ -333,7 +333,11 @@ export default function Profile() {
 
                 {mfaQrSvg && (
                   <div className="mt-3 space-y-3">
-                    <div className="rounded-lg border border-border bg-background p-3 flex justify-center" dangerouslySetInnerHTML={{ __html: mfaQrSvg }} />
+                    <img
+                      src={mfaQrSvg}
+                      alt="Scan this QR code with your authenticator app"
+                      className="w-48 h-48 mx-auto rounded-lg border border-border"
+                    />
                     <div className="flex justify-center">
                       <InputOTP maxLength={6} value={mfaCode} onChange={setMfaCode}>
                         <InputOTPGroup>
