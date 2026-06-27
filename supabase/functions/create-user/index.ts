@@ -13,12 +13,13 @@ Deno.serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-    if (!supabaseUrl || !serviceRoleKey) {
+    const anonKey = Deno.env.get('SUPABASE_ANON_KEY');
+    if (!supabaseUrl || !serviceRoleKey || !anonKey) {
       throw new Error('Server is not configured for admin auth operations.');
     }
 
     const authHeader = req.headers.get('Authorization') ?? '';
-    const callerClient = createClient(supabaseUrl, Deno.env.get('SUPABASE_ANON_KEY') ?? '', {
+    const callerClient = createClient(supabaseUrl, anonKey, {
       global: { headers: { Authorization: authHeader } },
     });
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
@@ -74,7 +75,10 @@ Deno.serve(async (req) => {
     });
 
     if (createUserError || !createdAuth.user) {
-      throw createUserError || new Error('Failed to create auth user');
+      return new Response(JSON.stringify({ error: createUserError?.message || 'Failed to create auth user' }), {
+        status: createUserError?.status || 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     const { error: profileInsertError } = await adminClient
@@ -91,7 +95,10 @@ Deno.serve(async (req) => {
 
     if (profileInsertError) {
       await adminClient.auth.admin.deleteUser(createdAuth.user.id);
-      throw profileInsertError;
+      return new Response(JSON.stringify({ error: profileInsertError.message || 'Failed to create user profile' }), {
+        status: profileInsertError.code === '23505' ? 409 : 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     return new Response(JSON.stringify({ id: createdAuth.user.id, email }), {
@@ -99,8 +106,11 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
+    const status = typeof error?.status === 'number' && error.status >= 400 && error.status < 600
+      ? error.status
+      : 500;
     return new Response(JSON.stringify({ error: error.message || 'Unexpected error' }), {
-      status: 500,
+      status,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }

@@ -155,7 +155,23 @@ const functionsAdapter = {
     const { data, error } = await supabase.functions.invoke(functionName, {
       body: payload,
     });
-    if (error) throw error;
+    if (error) {
+      let detailedMessage = error.message;
+      const response = error.context;
+
+      if (response && typeof response.json === 'function') {
+        try {
+          const errorBody = await response.json();
+          if (errorBody?.error) {
+            detailedMessage = String(errorBody.error);
+          }
+        } catch {
+          // Ignore parse failures and fall back to the original message.
+        }
+      }
+
+      throw new Error(detailedMessage || `Failed to invoke function: ${functionName}`);
+    }
     return { data };
   },
 };
