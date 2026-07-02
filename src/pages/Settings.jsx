@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
-import { Settings as SettingsIcon, CreditCard, Save, Building2, Lock, ArrowLeft } from 'lucide-react';
+import { CreditCard, Save, Building2, Lock, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -74,7 +74,7 @@ export default function Settings() {
     }
   };
 
-  if (user?.role !== 'admin') {
+  if (!['admin', 'ceo'].includes(user?.role)) {
     return (
       <div className="animate-slide-up flex flex-col items-center justify-center py-20 gap-4">
         <div className="w-14 h-14 rounded-xl bg-destructive/10 flex items-center justify-center">

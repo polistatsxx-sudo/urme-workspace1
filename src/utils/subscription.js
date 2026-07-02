@@ -1,6 +1,6 @@
 export function hasActiveAccess(user) {
   if (!user) return false;
-  if (user.role === 'admin') return true;
+  if (user.role === 'admin' || user.role === 'ceo') return true;
   if (user.subscription_status === 'active') return true;
   if (user.paid_through_date) {
     const paidThrough = new Date(user.paid_through_date);
