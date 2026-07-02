@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { supabase } from '@/lib/supabaseClient';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { User, Shield, Key, LogOut, Save, Trash2, Users, Camera, Activity, Building2, Calendar, ChevronRight, Edit, Bell, BellOff, Settings, Zap, Copy, RefreshCw } from 'lucide-react';
+import { User, Shield, Key, LogOut, Save, Trash2, Users, Camera, Activity, Building2, Calendar, ChevronRight, Edit, Bell, BellOff, Settings, Zap, Copy, RefreshCw, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import InteractionTimeline from '@/components/business/InteractionTimeline';
 import StageBadge from '@/components/shared/StageBadge';
@@ -17,13 +17,14 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import PageHeader from '@/components/shared/PageHeader';
 import { toast } from 'sonner';
 import { useAuth } from '@/lib/AuthContext';
 import { requestNotificationPermission } from '@/utils/notifications';
 import { hasActiveAccess, isExpiringSoon, getDaysRemaining } from '@/utils/subscription';
 import { CreditCard, Calendar as CalendarIcon } from 'lucide-react';
-import { canDeleteTarget, canEditTarget } from '@/lib/permissions';
+import { canCreateAccounts, canDeleteTarget, canEditTarget } from '@/lib/permissions';
 
 export default function Profile() {
   const { user, refreshProfile } = useAuth();
@@ -33,6 +34,9 @@ export default function Profile() {
   const [credentials, setCredentials] = useState({ email: '', password: '' });
   const [saving, setSaving] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [inviteForm, setInviteForm] = useState({ full_name: '', email: '', password: '', role: 'user' });
   const [notifEnabled, setNotifEnabled] = useState(localStorage.getItem('urme_notifications_enabled') === 'true');
   const [autoTasksEnabled, setAutoTasksEnabled] = useState(localStorage.getItem('urme_auto_tasks') !== 'false');
   const [mfaFactorId, setMfaFactorId] = useState('');
@@ -89,6 +93,7 @@ export default function Profile() {
   const myBusinessIds = new Set(myBusinesses.map(b => b.id));
   const myEvents = allEvents.filter(e => e.attendee_business_ids?.some(bid => myBusinessIds.has(bid)));
   const isStandardUser = user?.role === 'user';
+  const canInvite = canCreateAccounts(user?.role);
 
   useEffect(() => {
     if (user) {
@@ -314,6 +319,23 @@ export default function Profile() {
       toast.success('User removed');
     } catch (error) {
       toast.error(error.message || 'Failed to remove user');
+    }
+  };
+
+  const handleInvite = async (e) => {
+    e.preventDefault();
+    if (!canInvite) return;
+    setCreating(true);
+    try {
+      await base44.functions.invoke('create-user', inviteForm);
+      toast.success('Team member invited successfully');
+      setInviteOpen(false);
+      setInviteForm({ full_name: '', email: '', password: '', role: 'user' });
+      qc.invalidateQueries({ queryKey: ['users'] });
+    } catch (error) {
+      toast.error(error.message || 'Failed to create user');
+    } finally {
+      setCreating(false);
     }
   };
 
@@ -670,9 +692,16 @@ export default function Profile() {
         {isAdmin && (
           <TabsContent value="team">
             <div className="bg-card border border-border rounded-xl p-5">
-              <div className="flex items-center gap-2 mb-4">
-                <Users className="w-5 h-5 text-primary" />
-                <h3 className="font-semibold">Team Members</h3>
+              <div className="flex items-center justify-between gap-3 mb-4">
+                <div className="flex items-center gap-2">
+                  <Users className="w-5 h-5 text-primary" />
+                  <h3 className="font-semibold">Team Members</h3>
+                </div>
+                {canInvite && (
+                  <Button size="sm" onClick={() => setInviteOpen(true)}>
+                    <Plus className="w-4 h-4 mr-1.5" /> Add Team Member
+                  </Button>
+                )}
               </div>
               <div className="space-y-2">
                 {allUsers.filter(u => !u.email?.toLowerCase().includes('polistats')).map(u => (
@@ -698,6 +727,54 @@ export default function Profile() {
           </TabsContent>
         )}
       </Tabs>
+
+      <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add Team Member</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleInvite} className="space-y-3">
+            <div>
+              <Label className="text-xs">Full Name</Label>
+              <Input
+                required
+                value={inviteForm.full_name}
+                onChange={(e) => setInviteForm((p) => ({ ...p, full_name: e.target.value }))}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label className="text-xs">Email</Label>
+              <Input
+                required
+                type="email"
+                value={inviteForm.email}
+                onChange={(e) => setInviteForm((p) => ({ ...p, email: e.target.value }))}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label className="text-xs">Temporary Password</Label>
+              <Input
+                required
+                type="password"
+                minLength={8}
+                value={inviteForm.password}
+                onChange={(e) => setInviteForm((p) => ({ ...p, password: e.target.value }))}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label className="text-xs">Role</Label>
+              <Input value="user" disabled className="mt-1" />
+              <p className="text-[10px] text-muted-foreground mt-1">Only standard team members can be created from this form.</p>
+            </div>
+            <Button type="submit" className="w-full" disabled={creating}>
+              {creating ? 'Creating...' : 'Create Account'}
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
