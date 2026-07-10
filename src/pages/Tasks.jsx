@@ -35,8 +35,12 @@ export default function Tasks() {
     setIsEnhancing(true);
     setShowAILink(false);
     try {
-      const res = await base44.functions.invoke('aiEnhanceTask', { title: form.title, description: form.description });
-      setForm(p => ({ ...p, title: res.data.improvedTitle, description: res.data.improvedDescription }));
+      const res = await base44.integrations.Core.InvokeLLM({
+        prompt: `You're a B2B task strategist. Improve this task for a business matchmaking CRM:\nTitle: "${form.title}"\nDescription: "${form.description || ''}"
+\nReturn an improved, clear, actionable title and description.`,
+        response_json_schema: { type: 'object', properties: { improvedTitle: { type: 'string' }, improvedDescription: { type: 'string' } } }
+      });
+      setForm(p => ({ ...p, title: res.improvedTitle || p.title, description: res.improvedDescription || p.description }));
       setShowAILink(true);
       toast.success('Task improved with AI!', { icon: '✨' });
     } catch (err) {
