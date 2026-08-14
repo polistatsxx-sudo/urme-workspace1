@@ -315,7 +315,7 @@ Return only useful, actionable output.`,
       <Dialog open={logOpen} onOpenChange={setLogOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader><DialogTitle>Log Interaction</DialogTitle></DialogHeader>
-          <LogInteractionForm users={users} bizId={bizId} bizName={biz?.name} onSubmit={data => logMut.mutate(data)} saving={logMut.isPending} />
+          <LogInteractionForm users={users} bizId={bizId} bizName={biz?.name} bizContactName={biz?.contact_name} bizContactTitle={biz?.contact_title} onSubmit={data => logMut.mutate(data)} saving={logMut.isPending} />
         </DialogContent>
       </Dialog>
     </div>
