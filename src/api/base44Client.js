@@ -106,9 +106,10 @@ const authAdapter = {
     return data;
   },
 
-  async logout() {
+  async logout(redirectTo) {
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
+    if (redirectTo) window.location.href = redirectTo;
   },
 
   async forgotPassword(email) {
