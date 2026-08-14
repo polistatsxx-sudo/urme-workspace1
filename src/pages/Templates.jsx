@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Pencil, Trash2, Mail, Eye } from 'lucide-react';
@@ -58,15 +58,29 @@ export default function Templates() {
     queryFn: () => base44.entities.EmailTemplate.list('-updated_date'),
   });
 
-  // Auto-create default templates on first load
+  // Auto-create default templates on first load. The creates are fire-and-forget
+  // from the query's point of view, so without this guard the effect could re-run
+  // against a still-empty cache and seed the defaults again.
+  const seedingRef = useRef(false);
   useEffect(() => {
-    if (!isLoading && templates.length === 0) {
-      defaultTemplates.forEach(t => {
-        base44.entities.EmailTemplate.create({ ...t, created_by_name: user?.full_name, use_count: 0 });
-      });
-      qc.invalidateQueries({ queryKey: ['emailTemplates'] });
-    }
-  }, [isLoading, templates.length]);
+    if (isLoading || templates.length > 0 || seedingRef.current) return;
+    seedingRef.current = true;
+
+    (async () => {
+      try {
+        const existing = await base44.entities.EmailTemplate.list();
+        if (existing.length > 0) return;
+        await Promise.all(
+          defaultTemplates.map(t =>
+            base44.entities.EmailTemplate.create({ ...t, created_by_name: user?.full_name, use_count: 0 })
+          )
+        );
+        qc.invalidateQueries({ queryKey: ['emailTemplates'] });
+      } catch {
+        seedingRef.current = false;
+      }
+    })();
+  }, [isLoading, templates.length, qc, user?.full_name]);
 
   const createMut = useMutation({
     mutationFn: (data) => base44.entities.EmailTemplate.create({ ...data, created_by_name: user?.full_name, use_count: 0 }),
