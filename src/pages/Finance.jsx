@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { DollarSign, TrendingUp, TrendingDown, Plus, Receipt, Calculator, Trash2, CheckCircle2, BarChart3, Calendar, Building2, AlertCircle, PieChart, Download, FileDown } from 'lucide-react';
+import { DollarSign, TrendingUp, TrendingDown, Plus, Receipt, Calculator, Trash2, CheckCircle2, BarChart3, Calendar, Building2, AlertCircle, Download, FileDown } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';

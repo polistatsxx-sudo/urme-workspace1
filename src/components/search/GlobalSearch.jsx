@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
-import { Search, X, ChevronRight, Building2, User, CheckSquare, Calendar, ArrowLeft, Clock } from 'lucide-react';
+import { Search, ChevronRight, Building2, User, CheckSquare, Calendar, ArrowLeft, Clock } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';

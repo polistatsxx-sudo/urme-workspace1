@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Calendar, MapPin, Users, Clock, Edit, Trash2, Sparkles, ExternalLink, Building2, User, ChevronDown, ChevronUp, Download } from 'lucide-react';
+import { Plus, Calendar, MapPin, Clock, Edit, Trash2, Sparkles, ExternalLink, Building2, User, ChevronDown, ChevronUp, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';

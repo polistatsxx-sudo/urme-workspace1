@@ -106,9 +106,10 @@ const authAdapter = {
     return data;
   },
 
-  async logout() {
+  async logout(redirectTo) {
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
+    if (redirectTo) window.location.href = redirectTo;
   },
 
   async forgotPassword(email) {
@@ -128,9 +129,12 @@ const authAdapter = {
 
 const integrationsAdapter = {
   Core: {
-    async InvokeLLM({ prompt, response_json_schema }) {
+    /**
+     * @param {{ prompt: string, response_json_schema?: any, model?: string, temperature?: number }} params
+     */
+    async InvokeLLM({ prompt, response_json_schema, model, temperature }) {
       const { data, error } = await supabase.functions.invoke('invoke-llm', {
-        body: { prompt, response_json_schema },
+        body: { prompt, response_json_schema, model, temperature },
       });
       if (error) throw error;
       return data;

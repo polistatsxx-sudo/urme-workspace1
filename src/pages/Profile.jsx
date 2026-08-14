@@ -15,7 +15,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
 import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import PageHeader from '@/components/shared/PageHeader';
@@ -30,7 +29,7 @@ export default function Profile() {
   const { user, refreshProfile } = useAuth();
   const qc = useQueryClient();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ full_name: '', bio: '', phone: '', job_title: '', ai_provider: 'none', ai_api_key: '', profile_photo: '' });
+  const [form, setForm] = useState({ full_name: '', bio: '', phone: '', job_title: '', profile_photo: '' });
   const [credentials, setCredentials] = useState({ email: '', password: '' });
   const [saving, setSaving] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -102,8 +101,6 @@ export default function Profile() {
         bio: user.bio || '',
         phone: user.phone || '',
         job_title: user.job_title || '',
-        ai_provider: user.ai_provider || 'none',
-        ai_api_key: user.ai_api_key || '',
         profile_photo: user.profile_photo || '',
       });
       setCredentials({ email: user.email || '', password: '' });
@@ -636,27 +633,11 @@ export default function Profile() {
               <Key className="w-5 h-5 text-primary" />
               <h3 className="font-semibold">AI Configuration</h3>
             </div>
-            <p className="text-xs text-muted-foreground mb-4">Connect your own API key to enable AI-powered features like business matching, idea improvement, and industry insights.</p>
-            <div className="space-y-3">
-              <div>
-                <Label className="text-xs">AI Provider</Label>
-                <Select value={form.ai_provider} onValueChange={v => setForm(p => ({...p, ai_provider: v}))}>
-                  <SelectTrigger className="bg-secondary/50 mt-1"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">None</SelectItem>
-                    <SelectItem value="grok">Grok</SelectItem>
-                    <SelectItem value="claude">Claude</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              {form.ai_provider !== 'none' && (
-                <div>
-                  <Label className="text-xs">API Key</Label>
-                  <Input type="password" value={form.ai_api_key} onChange={e => setForm(p => ({...p, ai_api_key: e.target.value}))} placeholder="sk-..." className="bg-secondary/50 mt-1" />
-                </div>
-              )}
-              <Button onClick={handleSave} disabled={saving}><Save className="w-4 h-4 mr-1" /> {saving ? 'Saving...' : 'Save Settings'}</Button>
-            </div>
+            <p className="text-xs text-muted-foreground">
+              AI features — business matching, idea improvement and industry insights — run through
+              URME's own server-side integration. There is nothing to configure here, and you never
+              need to hand over a personal API key.
+            </p>
           </div>
         </TabsContent>
 

@@ -45,6 +45,9 @@ const defaultTemplates = [
   },
 ];
 
+// Seeding is attempted at most once per page load, not once per mount.
+let seedAttempted = false;
+
 export default function Templates() {
   const qc = useQueryClient();
   const { user } = useAuth();
@@ -58,15 +61,29 @@ export default function Templates() {
     queryFn: () => base44.entities.EmailTemplate.list('-updated_date'),
   });
 
-  // Auto-create default templates on first load
+  // Auto-create default templates on first load. Remounting this page while the
+  // query cache still holds an empty list would otherwise seed the defaults again,
+  // so the attempt is tracked outside the component and confirmed against a fresh
+  // read before anything is written.
   useEffect(() => {
-    if (!isLoading && templates.length === 0) {
-      defaultTemplates.forEach(t => {
-        base44.entities.EmailTemplate.create({ ...t, created_by_name: user?.full_name, use_count: 0 });
-      });
-      qc.invalidateQueries({ queryKey: ['emailTemplates'] });
-    }
-  }, [isLoading, templates.length]);
+    if (isLoading || templates.length > 0 || seedAttempted) return;
+    seedAttempted = true;
+
+    (async () => {
+      try {
+        const existing = await base44.entities.EmailTemplate.list();
+        if (existing.length > 0) return;
+        await Promise.all(
+          defaultTemplates.map(t =>
+            base44.entities.EmailTemplate.create({ ...t, created_by_name: user?.full_name, use_count: 0 })
+          )
+        );
+        qc.invalidateQueries({ queryKey: ['emailTemplates'] });
+      } catch {
+        seedAttempted = false;
+      }
+    })();
+  }, [isLoading, templates.length, qc, user?.full_name]);
 
   const createMut = useMutation({
     mutationFn: (data) => base44.entities.EmailTemplate.create({ ...data, created_by_name: user?.full_name, use_count: 0 }),

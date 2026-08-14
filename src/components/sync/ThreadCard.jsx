@@ -2,7 +2,7 @@ import React from 'react';
 import { MessageSquare, Pin, Building2, Calendar, Lightbulb, Archive } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { format, formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow } from 'date-fns';
 
 const catColors = {
   general: 'bg-muted text-muted-foreground',
