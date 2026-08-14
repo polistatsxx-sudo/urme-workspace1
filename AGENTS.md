@@ -24,6 +24,11 @@ Single-page app, migrated off the Base44 low-code platform to Supabase.
   `logout(redirectTo?)`, `forgotPassword(email)`, `resetPassword(newPassword)`,
   `onAuthStateChange`. There is no `resetPasswordRequest`.
 - **Auth:** Supabase Auth. Roles live in `profiles.role`: `ceo > admin > user`.
+- **Auth context:** `src/lib/AuthContext.jsx` holds the signed-in user's `profiles` row and
+  loads it once at app start. Anything that writes to `profiles` must call the context's
+  `refreshProfile()` afterwards or the UI keeps rendering the pre-write row —
+  `qc.invalidateQueries(['users'])` only refreshes the TanStack Query cache, not the
+  context. `refreshProfile` is identity-stable, so it is safe as an effect dependency.
 - **AI:** `src/utils/ai.js` and `base44.integrations.Core.InvokeLLM({prompt, response_json_schema, model, temperature})`
   both call the `invoke-llm` Edge Function. `model` and `temperature` are optional and are
   forwarded to the function; only `prompt` is required.
@@ -44,6 +49,7 @@ npm run dev          # Vite on :5173
 npm run build        # emits dist/
 npm run lint
 npm run typecheck
+npm run test # vitest, jsdom
 ```
 Client config comes from environment variables (`VITE_SUPABASE_URL`,
 `VITE_SUPABASE_ANON_KEY`, optional `VITE_STRIPE_PAYMENT_LINK`). These are set as
@@ -51,7 +57,7 @@ Cursor environment secrets; `.env.local` is gitignored and must NOT be committed
 
 `npm run lint` is clean and must stay clean. `npm run typecheck` runs `tsc` over the
 whole `src` tree with `allowJs` + `checkJs` (see `jsconfig.json`) and still reports
-~150 errors, all of them TypeScript inference limits in untyped JS — required-vs-optional
+~145 errors, all of them TypeScript inference limits in untyped JS — required-vs-optional
 props on plain function components, `useMutation` variables inferred as `void`, and
 `useState({})` shapes. `src/types/react-forwardref.d.ts` widens `React.forwardRef`'s prop
 generic, which TypeScript otherwise infers as `{}` for the shadcn/ui JS components.
@@ -77,19 +83,25 @@ Set secrets with: `supabase secrets set NAME=value --project-ref rebjykbpmhhaxgp
   object, cross-checked against the reference entity schemas in `base44/entities/*.jsonc`,
   and is additive and idempotent (`ADD COLUMN IF NOT EXISTS` only). **It has not been
   applied** — a human needs to run it, then re-test each Add/Save form.
+  A full database sweep on 2026-08-14 confirmed every CHECK constraint and RLS policy is
+  correct, and dropped the stray `NOT NULL` on `events.title` and `email_templates.name`
+  (done directly via psql, so there is no migration file for it).
 - `base44/entities/*.jsonc` are the pre-migration Base44 entity definitions and are the
   closest thing the repo has to a schema of record: field names, types, defaults and the
   enum values behind each CHECK constraint. Treat them as the reference when reconciling.
+- **`supabase/migrations/20260814105153_discussions_archived.sql` must be applied before
+  the current `SyncHub.jsx` ships.** Archiving a thread now writes `{ archived: true }`
+  instead of overwriting `category` with a value that is not in the category enum. Until
+  the column exists, archiving fails with PGRST204 and previously archived threads are
+  still recognised by their legacy `category = 'archived'` value.
+- Empty strings are normalised to `null` centrally, in `base44Client`'s entity `create()`
+  and `update()`. Forms are free to keep sending `''` for an unset optional value; the
+  adapter converts every top-level `''` before it reaches PostgREST, so uuid, timestamptz
+  and integer columns no longer reject them (`22P02` / `22007`). Nested objects and arrays
+  (jsonb payloads such as `discussions.replies`) are left alone. Do not re-add per-form
+  `|| null` fixes, and keep new adapters going through the same normalisation.
 - Open schema decisions the reconciliation migration deliberately does not make (all
   detailed in the migration file's footer):
-  - `pages/SyncHub.jsx` archives a thread with `{ category: 'archived' }`, but `archived`
-    is not in the `discussions.category` enum, so a CHECK constraint rejects it. Preferred
-    fix is a separate `archived boolean` column plus the matching `SyncHub.jsx` change.
-  - Five forms send `''` for an unset optional value, which Postgres rejects on any
-    non-text column (`22P02` for uuid, `22007` for timestamptz): `linked_event_id` /
-    `linked_business_id` in `FinanceEntryForm.jsx` and `NewThreadDialog.jsx`, `contact_id`
-    in `LogInteractionForm.jsx`, `assigned_to` in `BusinessForm.jsx`, and
-    `paid_through_date` in `TeamMemberEditDialog.jsx`. The call sites need to send `null`.
   - Every table needs `created_date` because the adapter's `list()` falls back to
     `.order('created_date', { ascending: false })`; `updated_date` is additionally required
     on `email_templates`, `businesses` and `profiles`.
@@ -108,10 +120,13 @@ Set secrets with: `supabase secrets set NAME=value --project-ref rebjykbpmhhaxgp
   multi-provider routing).
 - `.env.local` is no longer tracked, but it remains in git history — rotating anything
   sensitive that was in it is a human decision.
-- Password reset: `ResetPassword` gates on a `?token=` query param. Supabase recovery links
-  do not use that shape by default, so confirm the auth email template and redirect URL
-  before treating the reset flow as working. The routes and the login-page entry point now
-  exist (`/forgot-password`, `/reset-password`), so the remaining work is Supabase-side.
+- Password reset: `ResetPassword` now gates on a recovery *session* rather than a `?token=`
+  query param — the token arrives in the URL hash and is consumed by the Supabase client
+  (`detectSessionInUrl`, pinned on in `src/lib/supabaseClient.js`), which then reports it
+  through `onAuthStateChange`. `auth.forgotPassword` asks for a
+  `${origin}/reset-password` redirect. Supabase-side confirmation still needed:
+  `/reset-password` must be in the project's Redirect URL allow-list, and the recovery
+  email template has to keep using the default `{{ .ConfirmationURL }}` link.
 - `Register.jsx` still has no route. Self-signup appears to be intentionally closed
   (accounts are created by admins through the `create-user` Edge Function), so it was left
   unrouted — confirm that is deliberate before wiring it up.
