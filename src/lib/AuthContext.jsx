@@ -1,6 +1,5 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabaseClient';
-import { base44 } from '@/api/base44Client';
 
 const AuthContext = createContext();
 
@@ -11,6 +10,55 @@ export const AuthProvider = ({ children }) => {
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
   const [isLoadingPublicSettings, setIsLoadingPublicSettings] = useState(false);
   const [authError, setAuthError] = useState(null);
+
+  const loadProfile = useCallback(async (userId) => {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .single();
+
+    const { data: { user: authUser } } = await supabase.auth.getUser();
+
+    setUser({
+      id: userId,
+      email: authUser?.email,
+      full_name: profile?.full_name || '',
+      ...profile,
+    });
+
+    const { data: assurance } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+    const needsAal2 = profile?.mfa_enabled === true;
+    const aal2Satisfied = assurance?.currentLevel === 'aal2';
+    setIsMfaVerified(!needsAal2 || aal2Satisfied);
+
+    setIsAuthenticated(true);
+  }, []);
+
+  // Re-reads the profile row for the signed-in user. Kept identity-stable and
+  // independent of the user state so callers can refresh straight after a write
+  // (profile saves go to the database directly, not through this context).
+  const refreshProfile = useCallback(async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) return;
+    await loadProfile(session.user.id);
+  }, [loadProfile]);
+
+  const checkUser = useCallback(async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        await loadProfile(session.user.id);
+      } else {
+        setIsAuthenticated(false);
+        setIsMfaVerified(true);
+      }
+    } catch {
+      setAuthError({ type: 'auth_required', message: 'Auth required' });
+    } finally {
+      setIsLoadingAuth(false);
+    }
+  }, [loadProfile]);
 
   useEffect(() => {
     // Check current session
@@ -30,47 +78,7 @@ export const AuthProvider = ({ children }) => {
     );
 
     return () => subscription.unsubscribe();
-  }, []);
-
-  const checkUser = async () => {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        await loadProfile(session.user.id);
-      } else {
-        setIsAuthenticated(false);
-        setIsMfaVerified(true);
-      }
-    } catch (err) {
-      setAuthError({ type: 'auth_required', message: 'Auth required' });
-    } finally {
-      setIsLoadingAuth(false);
-    }
-  };
-
-  const loadProfile = async (userId) => {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single();
-    
-    const { data: { user: authUser } } = await supabase.auth.getUser();
-    
-    setUser({
-      id: userId,
-      email: authUser?.email,
-      full_name: profile?.full_name || '',
-      ...profile,
-    });
-
-    const { data: assurance } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-    const needsAal2 = profile?.mfa_enabled === true;
-    const aal2Satisfied = assurance?.currentLevel === 'aal2';
-    setIsMfaVerified(!needsAal2 || aal2Satisfied);
-
-    setIsAuthenticated(true);
-  };
+  }, [checkUser, loadProfile]);
 
   const login = async (email, password) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -109,7 +117,7 @@ export const AuthProvider = ({ children }) => {
       register,
       logout,
       navigateToLogin,
-      refreshProfile: () => user?.id && loadProfile(user.id),
+      refreshProfile,
     }}>
       {children}
     </AuthContext.Provider>
