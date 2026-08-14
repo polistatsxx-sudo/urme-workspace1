@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { supabase } from '@/lib/supabaseClient';
 import { Button } from "@/components/ui/button";
@@ -195,6 +196,14 @@ export default function Login() {
               className="pl-10 h-12"
               required
             />
+          </div>
+          <div className="flex justify-end">
+            <Link
+              to="/forgot-password"
+              className="text-sm text-primary font-medium hover:underline"
+            >
+              Forgot password?
+            </Link>
           </div>
         </div>
         <Button type="submit" className="w-full h-12 font-medium" disabled={loading}>
