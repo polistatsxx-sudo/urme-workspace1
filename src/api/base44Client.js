@@ -128,9 +128,12 @@ const authAdapter = {
 
 const integrationsAdapter = {
   Core: {
-    async InvokeLLM({ prompt, response_json_schema }) {
+    /**
+     * @param {{ prompt: string, response_json_schema?: any, model?: string, temperature?: number }} params
+     */
+    async InvokeLLM({ prompt, response_json_schema, model, temperature }) {
       const { data, error } = await supabase.functions.invoke('invoke-llm', {
-        body: { prompt, response_json_schema },
+        body: { prompt, response_json_schema, model, temperature },
       });
       if (error) throw error;
       return data;
