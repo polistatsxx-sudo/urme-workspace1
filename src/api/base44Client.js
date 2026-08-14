@@ -15,6 +15,29 @@ const TABLE_MAP = {
   User: 'profiles',
 };
 
+/**
+ * Forms across the app send '' for an unset optional value. Postgres accepts
+ * that on a text column but rejects it on every other type -- 22P02 for uuid
+ * and integer, 22007 for timestamptz -- so an "Add Business" with no account
+ * manager, or an "Add Task" with no due date, fails at the database. Normalising
+ * here means every entity write is covered instead of each form individually.
+ *
+ * Only top-level values are touched: nested objects and arrays are jsonb
+ * payloads (discussions.replies, tasks.subtasks) where '' is a legitimate value.
+ *
+ * @template {Record<string, any>} T
+ * @param {T} record
+ * @returns {T}
+ */
+function nullifyEmptyStrings(record) {
+  if (!record || typeof record !== 'object' || Array.isArray(record)) return record;
+  return /** @type {T} */ (
+    Object.fromEntries(
+      Object.entries(record).map(([key, value]) => [key, value === '' ? null : value])
+    )
+  );
+}
+
 function createEntityAdapter(tableName) {
   return {
     async list(orderBy) {
@@ -34,7 +57,7 @@ function createEntityAdapter(tableName) {
     async create(record) {
       const { data, error } = await supabase
         .from(tableName)
-        .insert(record)
+        .insert(nullifyEmptyStrings(record))
         .select()
         .single();
       if (error) throw error;
@@ -44,7 +67,7 @@ function createEntityAdapter(tableName) {
     async update(id, updates) {
       const { data, error } = await supabase
         .from(tableName)
-        .update(updates)
+        .update(nullifyEmptyStrings(updates))
         .eq('id', id)
         .select()
         .single();

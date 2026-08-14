@@ -4,12 +4,26 @@ const invoke = vi.fn(() => Promise.resolve({ data: 'ok', error: null }));
 const signOut = vi.fn(() => Promise.resolve({ error: null }));
 const updateUser = vi.fn(() => Promise.resolve({ error: null }));
 const resetPasswordForEmail = vi.fn(() => Promise.resolve({ error: null }));
+const insert = vi.fn();
+const update = vi.fn();
+
+const returning = () => ({ single: () => Promise.resolve({ data: { id: 'row-1' }, error: null }) });
 
 vi.mock('@/lib/supabaseClient', () => ({
   supabase: {
     functions: { invoke },
     auth: { signOut, updateUser, resetPasswordForEmail },
-    from: () => ({ select: () => ({ order: () => Promise.resolve({ data: [], error: null }) }) }),
+    from: () => ({
+      select: () => ({ order: () => Promise.resolve({ data: [], error: null }) }),
+      insert: (payload) => {
+        insert(payload);
+        return { select: returning };
+      },
+      update: (payload) => {
+        update(payload);
+        return { eq: () => ({ select: returning }) };
+      },
+    }),
   },
 }));
 
@@ -43,6 +57,50 @@ describe('integrations.Core.InvokeLLM', () => {
     expect(options.body.prompt).toBe('hello');
     expect(options.body.model).toBeUndefined();
     expect(options.body.temperature).toBeUndefined();
+  });
+});
+
+describe('entity writes normalise empty strings', () => {
+  beforeEach(() => {
+    insert.mockClear();
+    update.mockClear();
+  });
+
+  it('sends null instead of the empty string a form leaves in an unset field', async () => {
+    await base44.entities.Business.create({
+      name: 'Acme',
+      stage: 'lead',
+      assigned_to: '',
+      website: '',
+    });
+
+    expect(insert).toHaveBeenCalledWith({
+      name: 'Acme',
+      stage: 'lead',
+      assigned_to: null,
+      website: null,
+    });
+  });
+
+  it('normalises updates the same way', async () => {
+    await base44.entities.Task.update('task-1', { title: 'Call back', due_date: '' });
+
+    expect(update).toHaveBeenCalledWith({ title: 'Call back', due_date: null });
+  });
+
+  it('leaves every other value alone, including falsy ones and nested payloads', async () => {
+    const record = {
+      title: 'Thread',
+      pinned: false,
+      attendee_count: 0,
+      author_name: null,
+      replies: [{ text: '', author: 'u1' }],
+      metadata: { note: '' },
+    };
+
+    await base44.entities.Discussion.create(record);
+
+    expect(insert).toHaveBeenCalledWith(record);
   });
 });
 
