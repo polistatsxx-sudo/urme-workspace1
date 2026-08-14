@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Pencil, Trash2, Mail, Eye } from 'lucide-react';
@@ -45,6 +45,9 @@ const defaultTemplates = [
   },
 ];
 
+// Seeding is attempted at most once per page load, not once per mount.
+let seedAttempted = false;
+
 export default function Templates() {
   const qc = useQueryClient();
   const { user } = useAuth();
@@ -58,13 +61,13 @@ export default function Templates() {
     queryFn: () => base44.entities.EmailTemplate.list('-updated_date'),
   });
 
-  // Auto-create default templates on first load. The creates are fire-and-forget
-  // from the query's point of view, so without this guard the effect could re-run
-  // against a still-empty cache and seed the defaults again.
-  const seedingRef = useRef(false);
+  // Auto-create default templates on first load. Remounting this page while the
+  // query cache still holds an empty list would otherwise seed the defaults again,
+  // so the attempt is tracked outside the component and confirmed against a fresh
+  // read before anything is written.
   useEffect(() => {
-    if (isLoading || templates.length > 0 || seedingRef.current) return;
-    seedingRef.current = true;
+    if (isLoading || templates.length > 0 || seedAttempted) return;
+    seedAttempted = true;
 
     (async () => {
       try {
@@ -77,7 +80,7 @@ export default function Templates() {
         );
         qc.invalidateQueries({ queryKey: ['emailTemplates'] });
       } catch {
-        seedingRef.current = false;
+        seedAttempted = false;
       }
     })();
   }, [isLoading, templates.length, qc, user?.full_name]);
