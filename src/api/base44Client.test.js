@@ -111,9 +111,11 @@ describe('auth adapter surface used by the auth pages', () => {
     resetPasswordForEmail.mockClear();
   });
 
-  it('exposes forgotPassword, which ForgotPassword calls', async () => {
+  it('points recovery emails at the route that can consume the token', async () => {
     await base44.auth.forgotPassword('someone@example.com');
-    expect(resetPasswordForEmail).toHaveBeenCalledWith('someone@example.com');
+    expect(resetPasswordForEmail).toHaveBeenCalledWith('someone@example.com', {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
   });
 
   it('sends the new password as a string, which ResetPassword now does', async () => {

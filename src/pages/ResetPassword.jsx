@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,14 +7,42 @@ import { Label } from "@/components/ui/label";
 import { Lock, Loader2, AlertTriangle } from "lucide-react";
 import AuthLayout from "@/components/AuthLayout";
 
+// Supabase reports a dead or already-used recovery link in the URL hash
+// (#error=access_denied&error_code=otp_expired&...) instead of returning a session.
+function readLinkError() {
+  const raw = window.location.hash.replace(/^#/, "");
+  if (!raw) return "";
+  const params = new URLSearchParams(raw);
+  if (!params.get("error") && !params.get("error_code")) return "";
+  return params.get("error_description") || "This password reset link is no longer valid.";
+}
+
 export default function ResetPassword() {
-  const [searchParams] = useSearchParams();
-  const resetToken = searchParams.get("token");
+  // Recovery links carry the token in the URL hash, which the Supabase client
+  // consumes asynchronously on load (detectSessionInUrl). So the gate is "do we
+  // have a session yet", not the shape of the URL.
+  const [linkError] = useState(readLinkError);
+  const [status, setStatus] = useState(linkError ? "invalid" : "checking");
 
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (linkError) return;
+
+    const { data } = base44.auth.onAuthStateChange((event, session) => {
+      if (session) {
+        setStatus("ready");
+      } else if (event === "INITIAL_SESSION") {
+        // The client has finished parsing the URL and found nothing usable.
+        setStatus("invalid");
+      }
+    });
+
+    return () => data.subscription.unsubscribe();
+  }, [linkError]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -34,12 +62,22 @@ export default function ResetPassword() {
     }
   };
 
-  if (!resetToken) {
+  if (status === "checking") {
+    return (
+      <AuthLayout icon={Lock} title="New password" subtitle="Checking your reset link">
+        <div className="flex justify-center py-4">
+          <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+        </div>
+      </AuthLayout>
+    );
+  }
+
+  if (status === "invalid") {
     return (
       <AuthLayout
         icon={AlertTriangle}
         title="Invalid reset link"
-        subtitle="This password reset link is missing or invalid"
+        subtitle="This password reset link is missing, expired or already used"
         footer={
           <Link to="/forgot-password" className="text-primary font-medium hover:underline">
             Request a new link
@@ -47,7 +85,7 @@ export default function ResetPassword() {
         }
       >
         <p className="text-sm text-foreground text-center">
-          The link you used appears to be incomplete. Please request a new password reset email.
+          {linkError || "Open the most recent reset email on this device, or request a new password reset email."}
         </p>
       </AuthLayout>
     );

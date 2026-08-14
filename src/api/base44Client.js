@@ -136,7 +136,10 @@ const authAdapter = {
   },
 
   async forgotPassword(email) {
-    const { error } = await supabase.auth.resetPasswordForEmail(email);
+    // Recovery links must land on the route that can consume the token.
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
     if (error) throw error;
   },
 
