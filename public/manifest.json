@@ -1,0 +1,19 @@
+{
+  "name": "URME",
+  "short_name": "URME",
+  "description": "B2B networking and matchmaking CRM",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f121a",
+  "theme_color": "#2ec2b3",
+  "icons": [
+    {
+      "src": "https://media.base44.com/images/public/6a2e6b5c552bd19313d69f46/b43319c91_1choice.png",
+      "sizes": "1024x791",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
