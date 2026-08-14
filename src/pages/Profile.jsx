@@ -94,6 +94,12 @@ export default function Profile() {
   const isStandardUser = user?.role === 'user';
   const canInvite = canCreateAccounts(user?.role);
 
+  // The context profile is loaded once at app start, so a profile edited from
+  // somewhere else (or in an earlier visit to this page) would otherwise render stale.
+  useEffect(() => {
+    refreshProfile();
+  }, [refreshProfile]);
+
   useEffect(() => {
     if (user) {
       setForm({
@@ -135,6 +141,7 @@ export default function Profile() {
     const { file_url } = await base44.integrations.Core.UploadFile({ file });
     setForm(p => ({ ...p, profile_photo: file_url }));
     await base44.entities.User.update(user.id, { profile_photo: file_url });
+    await refreshProfile();
     toast.success('Photo updated!');
   };
 
@@ -144,10 +151,16 @@ export default function Profile() {
       return;
     }
     setSaving(true);
-    await base44.entities.User.update(user.id, form);
-    qc.invalidateQueries({ queryKey: ['users'] });
-    toast.success('Profile updated!');
-    setSaving(false);
+    try {
+      await base44.entities.User.update(user.id, form);
+      qc.invalidateQueries({ queryKey: ['users'] });
+      await refreshProfile();
+      toast.success('Profile updated!');
+    } catch (error) {
+      toast.error(error.message || 'Failed to update profile');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleSaveCredentials = async () => {
@@ -504,7 +517,10 @@ export default function Profile() {
             open={editDialogOpen}
             onOpenChange={setEditDialogOpen}
             canEdit={canEditTarget(user, user)}
-            onSaved={() => qc.invalidateQueries({ queryKey: ['users'] })}
+            onSaved={() => {
+              qc.invalidateQueries({ queryKey: ['users'] });
+              refreshProfile();
+            }}
           />
         </TabsContent>
 

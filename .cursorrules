@@ -32,7 +32,7 @@ Keep repo and deployed versions in sync — the repo copy has drifted before.
 
 ## Before finishing
 Run `npm run build`, `npm run lint` and `npm run typecheck` and report deltas.
-`lint` is at zero errors — keep it there. `typecheck` has a known backlog of ~150
+`lint` is at zero errors — keep it there. `typecheck` has a known backlog of ~145
 JS-inference errors (see AGENTS.md); do not paper over it by turning off `checkJs`,
 and do not let the count grow.
 
