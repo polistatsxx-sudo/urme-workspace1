@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { Building2, CheckSquare, Calendar, Handshake, AlertTriangle, TrendingUp, ArrowRight, Clock, CreditCard, PenLine, ChevronRight } from 'lucide-react';
+import { Building2, CheckSquare, Calendar, Handshake, AlertTriangle, TrendingUp, ArrowRight, CreditCard, PenLine, ChevronRight } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import PageHeader from '@/components/shared/PageHeader';
 import StatCard from '@/components/shared/StatCard';

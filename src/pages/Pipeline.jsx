@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { Link } from 'react-router-dom';
 import { Building2, User, FileDown } from 'lucide-react';
 import PageHeader from '@/components/shared/PageHeader';
-import StageBadge from '@/components/shared/StageBadge';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { computeHealthScore, getHealthDotColor } from '@/utils/healthScore';
