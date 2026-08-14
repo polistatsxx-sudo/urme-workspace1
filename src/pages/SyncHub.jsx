@@ -63,7 +63,7 @@ export default function SyncHub() {
   });
 
   const archiveMut = useMutation({
-    mutationFn: (disc) => base44.entities.Discussion.update(disc.id, { category: 'archived' }),
+    mutationFn: (disc) => base44.entities.Discussion.update(disc.id, { archived: true }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['discussions'] });
       setActiveThread(null);
@@ -75,13 +75,16 @@ export default function SyncHub() {
 
   const categories = ['all', 'general', 'business', 'event', 'idea', 'announcement'];
 
+  // Threads archived before the archived column existed still carry category = 'archived'.
+  const isArchived = (d) => d.archived === true || d.category === 'archived';
+
   const filtered = discussions
-    .filter(d => d.category !== 'archived')
+    .filter(d => !isArchived(d))
     .filter(d => categoryFilter === 'all' || d.category === categoryFilter)
     .filter(d => !search || d.title.toLowerCase().includes(search.toLowerCase()) || d.content?.toLowerCase().includes(search.toLowerCase()))
     .sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
 
-  const archived = discussions.filter(d => d.category === 'archived');
+  const archived = discussions.filter(isArchived);
 
   // Sync activeThread with fresh data from server
   const liveThread = activeThread ? discussions.find(d => d.id === activeThread.id) || activeThread : null;
