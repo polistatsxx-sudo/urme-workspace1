@@ -32,8 +32,6 @@ class Query implements PromiseLike<Result> {
   private wantsSingle = false;
 
   select(_columns?: string) {
-    if (this.op === 'select-noop') return this;
-    if (this.op === 'select') this.op = 'select';
     return this;
   }
 

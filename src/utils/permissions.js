@@ -35,13 +35,6 @@ export const MANAGER_ROLES = ['ceo', 'admin'];
 export const ROLES = ['user', 'admin', 'ceo'];
 
 /**
- * @param {string | undefined} userId
- */
-export function isProtectedAccount(userId) {
-  return userId === MICHAEL_ID || userId === AJ_ID;
-}
-
-/**
  * @param {Account | null | undefined} caller
  * @param {Account | null | undefined} target
  */

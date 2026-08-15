@@ -60,10 +60,6 @@ export const PROFILE_FIELDS = [
 /** Profile columns that require management rights over the target, not just edit rights. */
 export const MANAGEMENT_FIELDS = ['subscription_status', 'paid_through_date', 'role'];
 
-export function isProtectedAccount(userId?: string | null): boolean {
-  return userId === MICHAEL_ID || userId === AJ_ID;
-}
-
 export function isSelf(caller?: Account | null, target?: Account | null): boolean {
   return !!caller?.id && !!target?.id && caller.id === target.id;
 }
