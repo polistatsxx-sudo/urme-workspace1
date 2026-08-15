@@ -10,12 +10,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Lock, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/lib/AuthContext';
+import { canEditProfile, canManage } from '@/utils/permissions';
 
 const statusConfig = {
   active: { label: 'Active', color: 'bg-emerald-500/15 text-emerald-400' },
   inactive: { label: 'Inactive', color: 'bg-muted text-muted-foreground' },
   on_leave: { label: 'On Leave', color: 'bg-yellow-500/15 text-yellow-400' },
 };
+
+const MANAGEMENT_FIELDS = ['subscription_status', 'paid_through_date'];
 
 export default function TeamMemberEditDialog({ member, open, onOpenChange, canEdit, onSaved }) {
   const [form, setForm] = useState({});
@@ -49,6 +52,7 @@ export default function TeamMemberEditDialog({ member, open, onOpenChange, canEd
   const setCredentialsField = (k, v) => setCredentials((p) => ({ ...p, [k]: v }));
   const isSelfEdit = currentUser?.id === member?.id;
   const isUserSelfEdit = isSelfEdit && currentUser?.role === 'user';
+  const canManageMember = canManage(currentUser, member);
 
   const addSkill = () => {
     const s = skillInput.trim();
@@ -60,14 +64,28 @@ export default function TeamMemberEditDialog({ member, open, onOpenChange, canEd
 
   const handleSave = async () => {
     if (isUserSelfEdit) return;
+    if (!canEditProfile(currentUser, member)) {
+      toast.error('You do not have permission to edit this profile.');
+      return;
+    }
+    const updates = canManageMember
+      ? form
+      : Object.fromEntries(Object.entries(form).filter(([field]) => !MANAGEMENT_FIELDS.includes(field)));
+
     setSaving(true);
     try {
-      await base44.entities.User.update(member.id, form);
+      if (isSelfEdit) {
+        await base44.entities.User.update(member.id, updates);
+      } else {
+        // Another member's profile is only writable through the Edge Function, which
+        // re-checks the same rule with the service role. PostgREST refuses it directly.
+        await base44.functions.invoke('update-user', { targetUserId: member.id, updates });
+      }
       toast.success('Profile updated!');
       onSaved?.();
       onOpenChange(false);
-    } catch {
-      toast.error('Failed to update profile');
+    } catch (error) {
+      toast.error(error.message || 'Failed to update profile');
     } finally {
       setSaving(false);
     }
@@ -233,7 +251,7 @@ export default function TeamMemberEditDialog({ member, open, onOpenChange, canEd
                 </SelectContent>
               </Select>
             </div>
-            {['admin', 'ceo'].includes(currentUser?.role) && member?.role === 'user' && (
+            {canManageMember && member?.role === 'user' && (
               <div className="border-t border-border/50 pt-4 space-y-3">
                 <div className="flex items-center gap-2">
                   <Lock className="w-4 h-4 text-primary" />

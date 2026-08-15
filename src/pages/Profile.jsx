@@ -23,7 +23,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { requestNotificationPermission } from '@/utils/notifications';
 import { hasActiveAccess, isExpiringSoon, getDaysRemaining } from '@/utils/subscription';
 import { CreditCard, Calendar as CalendarIcon } from 'lucide-react';
-import { canCreateAccounts, canDeleteTarget, canEditTarget } from '@/lib/permissions';
+import { canCreateAccounts, canDeleteAccount, canEditProfile } from '@/utils/permissions';
 
 export default function Profile() {
   const { user, refreshProfile } = useAuth();
@@ -321,10 +321,11 @@ export default function Profile() {
     }
   };
 
-  const handleDeleteUser = async (userId) => {
+  const handleDeleteUser = async (member) => {
+    if (!canDeleteAccount(user, member)) return;
     if (!confirm('Delete this user? This cannot be undone.')) return;
     try {
-      await base44.functions.invoke('delete-user', { targetUserId: userId });
+      await base44.functions.invoke('delete-user', { targetUserId: member.id });
       qc.invalidateQueries({ queryKey: ['users'] });
       toast.success('User removed');
     } catch (error) {
@@ -516,7 +517,7 @@ export default function Profile() {
             member={user}
             open={editDialogOpen}
             onOpenChange={setEditDialogOpen}
-            canEdit={canEditTarget(user, user)}
+            canEdit={canEditProfile(user, user)}
             onSaved={() => {
               qc.invalidateQueries({ queryKey: ['users'] });
               refreshProfile();
@@ -712,8 +713,8 @@ export default function Profile() {
                         <p className="text-[10px] text-muted-foreground">{u.email} • {u.role} {u.job_title ? `• ${u.job_title}` : ''}</p>
                       </div>
                     </div>
-                    {canDeleteTarget(user, u) && (
-                      <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => handleDeleteUser(u.id)}>
+                    {canDeleteAccount(user, u) && (
+                      <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => handleDeleteUser(u)}>
                         <Trash2 className="w-3.5 h-3.5" />
                       </Button>
                     )}
