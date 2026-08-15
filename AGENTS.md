@@ -31,6 +31,24 @@ Single-page app, migrated off the Base44 low-code platform to Supabase.
   `'primary'` sentinel, and writes `interactions.contact_name` with no `contact_id`.
   De-dupe by name (case-insensitive) so a business that has both does not list it twice.
 - **Auth:** Supabase Auth. Roles live in `profiles.role`: `ceo > admin > user`.
+- **Account management (`canManage`).** Who may administer whose account is one rule, kept
+  in `src/utils/permissions.js` for the UI and mirrored in
+  `supabase/functions/_shared/permissions.ts` for the Edge Functions (Deno cannot import
+  from `src/`). `src/utils/permissions.test.js` runs both copies over the whole
+  caller/target matrix and fails if they disagree, so change them together.
+  - Michael (`MICHAEL_ID`) manages anyone. AJ (`AJ_ID`) and any future admin/CEO manage
+    regular members but neither Michael nor AJ. Standard members manage nobody.
+  - Both protected accounts are gated **on user id**, never on email or name. The
+    expected email is documentation plus a drift check
+    (`warnOnProtectedIdentityDrift`) that shouts if a rebuilt database repoints an id at
+    a different person; it never grants or denies by itself.
+  - Editing your own profile is not management and is always allowed. Add/invite has no
+    target, so it falls back to the role gate (`canCreateAccounts`).
+  - Lockout guards: nobody changes their own role or deletes their own account, deletion
+    is limited to `role = 'user'` targets (demote first), and a demotion/deletion that
+    would leave no admin or CEO at all is refused.
+  - Client checks are UX only. Every one of them is re-run server-side in the Edge
+    Functions with the service role — see below.
 - **Auth context:** `src/lib/AuthContext.jsx` holds the signed-in user's `profiles` row and
   loads it once at app start. Anything that writes to `profiles` must call the context's
   `refreshProfile()` afterwards or the UI keeps rendering the pre-write row —
@@ -46,8 +64,18 @@ Single-page app, migrated off the Base44 low-code platform to Supabase.
   Reads the Authorization header to identify the user and logs `user_id` with token counts.
   Deploy with `--no-verify-jwt`.
 - `auth-login-guard` — pre-login lockout precheck / failed / success (advisory, see Known Issues)
-- `create-user`, `delete-user`, `unlock-account` — admin/ceo-only user management
-  (these correctly authenticate the caller — use them as the auth pattern to follow)
+- `create-user`, `update-user`, `delete-user`, `unlock-account` — account management.
+  Each authenticates the caller, then applies the shared `canManage` rule through the
+  `authorize*` helpers in `_shared/permissions.ts` before touching anything with the
+  service role. Use them as the auth pattern to follow.
+  - `update-user` is how one member's profile edit of *another* member reaches the
+    database; the direct `base44.entities.User.update()` path is for editing yourself.
+    It takes `{ targetUserId, updates }`, accepts only whitelisted profile columns,
+    requires management rights for `role` / `subscription_status` / `paid_through_date`,
+    and normalises `''` to `null` the way `base44Client` does.
+- `supabase/functions/_tests/permission-matrix.ts` drives all four handlers through the
+  permission matrix with a stubbed supabase-js. It needs Deno, so `npm run test` does not
+  run it: `cd supabase/functions/_tests && deno run --allow-env --allow-read permission-matrix.ts`.
 
 ## Local development
 ```bash
@@ -117,6 +145,20 @@ Set secrets with: `supabase secrets set NAME=value --project-ref rebjykbpmhhaxgp
     `discussions.content`); do not "align" them or you will split data.
 - `profiles.ai_api_key` / `profiles.ai_provider` are dead columns — the UI that wrote them
   has been removed. Drop the columns and purge any stored values (needs DB access).
+- **`supabase/migrations/20260815012500_profiles_update_hardening.sql` is not applied.**
+  Until it is, `profiles` RLS is whatever the hand-rebuilt database ended up with, so an
+  admin (or possibly anyone) can still bypass `update-user` by writing another member's
+  row straight through PostgREST, and anyone can set their own `role` /
+  `subscription_status` / `account_locked`. The migration narrows UPDATE to
+  `auth.uid() = id` and adds a trigger that blocks privileged columns for the
+  `authenticated`/`anon` roles; the Edge Functions use the service role and are exempt.
+  Apply it after the schema reconciliation migration (it names columns that one adds),
+  then re-test self-save, admin-edits-member and standard-member-edits-someone-else.
+- New/changed Edge Functions still need a human deploy:
+  `npx supabase functions deploy update-user --no-verify-jwt --project-ref rebjykbpmhhaxgpclzsg`
+  (same for `create-user`, `delete-user`, `unlock-account`, which now import
+  `_shared/permissions.ts`). Until `update-user` is deployed, saving another member's
+  profile from the Team page fails.
 - 3-strike lockout is advisory/bypassable; `auth-login-guard` is unauthenticated. Needs redesign.
   Direct `signInWithPassword` and Google OAuth skip it entirely, and any unauthenticated
   caller can lock an arbitrary account by posting `{action: 'failed', email}`.
