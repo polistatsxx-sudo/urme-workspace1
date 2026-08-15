@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Lock, Mail, Phone, Plus, ShieldAlert, Trash2 } from 'lucide-react';
@@ -11,7 +11,13 @@ import { toast } from 'sonner';
 import { useAuth } from '@/lib/AuthContext';
 import TeamMemberEditDialog from '@/components/team/TeamMemberEditDialog';
 import { format } from 'date-fns';
-import { canCreateAccounts, canDeleteTarget, canEditTarget, canUnlockTarget } from '@/lib/permissions';
+import {
+  canCreateAccounts,
+  canDeleteAccount,
+  canEditProfile,
+  canUnlockAccount,
+  warnOnProtectedIdentityDrift,
+} from '@/utils/permissions';
 
 const statusConfig = {
   active: { label: 'Active', color: 'bg-emerald-500/15 text-emerald-400', dot: 'bg-emerald-400' },
@@ -38,13 +44,18 @@ export default function Team() {
 
   const canInvite = canCreateAccounts(user?.role);
 
+  // The protected-account ids are hardcoded, so a database rebuild that reissued them
+  // would silently protect the wrong people. Surface that rather than let it pass.
+  useEffect(() => {
+    if (allUsers.length > 0) warnOnProtectedIdentityDrift(allUsers);
+  }, [allUsers]);
+
   const subtitle = useMemo(() => {
     const lockedCount = allUsers.filter((u) => u.account_locked).length;
     return `${allUsers.length} members${lockedCount ? ` • ${lockedCount} locked` : ''}`;
   }, [allUsers]);
 
   const handleCardClick = (member) => {
-    const canEdit = canEditTarget(user, member);
     setEditingMember(member);
     setEditOpen(true);
   };
@@ -67,7 +78,7 @@ export default function Team() {
   };
 
   const handleUnlock = async (member) => {
-    if (!canUnlockTarget(user, member)) return;
+    if (!canUnlockAccount(user, member)) return;
     try {
       await base44.functions.invoke('unlock-account', { targetUserId: member.id });
       toast.success('Account unlocked');
@@ -77,10 +88,11 @@ export default function Team() {
     }
   };
 
-  const handleDeleteUser = async (userId) => {
+  const handleDeleteUser = async (member) => {
+    if (!canDeleteAccount(user, member)) return;
     if (!confirm('Delete this user? This cannot be undone.')) return;
     try {
-      await base44.functions.invoke('delete-user', { targetUserId: userId });
+      await base44.functions.invoke('delete-user', { targetUserId: member.id });
       qc.invalidateQueries({ queryKey: ['users'] });
       toast.success('User removed');
     } catch (error) {
@@ -163,9 +175,9 @@ export default function Team() {
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {allUsers.map(member => {
-            const canEdit = canEditTarget(user, member);
-            const canDelete = canDeleteTarget(user, member);
-            const canUnlock = member.account_locked && canUnlockTarget(user, member);
+            const canEdit = canEditProfile(user, member);
+            const canDelete = canDeleteAccount(user, member);
+            const canUnlock = member.account_locked && canUnlockAccount(user, member);
             const status = statusConfig[member.status || 'active'] || statusConfig.active;
             return (
               <div
@@ -236,7 +248,7 @@ export default function Team() {
                     </Button>
                   )}
                   {canDelete && (
-                    <Button variant="outline" size="sm" className="h-8 text-xs text-destructive" onClick={() => handleDeleteUser(member.id)}>
+                    <Button variant="outline" size="sm" className="h-8 text-xs text-destructive" onClick={() => handleDeleteUser(member)}>
                       <Trash2 className="w-3.5 h-3.5 mr-1" /> Delete
                     </Button>
                   )}
@@ -251,7 +263,7 @@ export default function Team() {
         member={editingMember}
         open={editOpen}
         onOpenChange={setEditOpen}
-        canEdit={canEditTarget(user, editingMember)}
+        canEdit={canEditProfile(user, editingMember)}
         onSaved={() => qc.invalidateQueries({ queryKey: ['users'] })}
       />
     </div>

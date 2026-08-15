@@ -1,6 +1,6 @@
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 import {
-  authorizeAccountUnlock,
+  authorizeProfileUpdate,
   warnOnProtectedIdentityDrift,
 } from '../_shared/permissions.ts';
 
@@ -8,6 +8,23 @@ const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+const json = (body: unknown, status: number) =>
+  new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+  });
+
+/**
+ * Forms send '' for an unset optional value; Postgres rejects that on date and uuid
+ * columns. `src/api/base44Client.js` normalises the same way for direct PostgREST
+ * writes, and profile saves that route through this function need the same treatment.
+ */
+function nullifyEmptyStrings(record: Record<string, unknown>) {
+  return Object.fromEntries(
+    Object.entries(record).map(([key, value]) => [key, value === '' ? null : value]),
+  );
+}
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -19,7 +36,7 @@ Deno.serve(async (req) => {
     const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     const anonKey = Deno.env.get('SUPABASE_ANON_KEY');
     if (!supabaseUrl || !serviceRoleKey || !anonKey) {
-      throw new Error('Server is not configured for account unlock operations.');
+      throw new Error('Server is not configured for profile update operations.');
     }
 
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
@@ -30,18 +47,12 @@ Deno.serve(async (req) => {
 
     const { data: authUser, error: authError } = await callerClient.auth.getUser();
     if (authError || !authUser.user) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      return json({ error: 'Unauthorized' }, 401);
     }
 
-    const { targetUserId } = await req.json();
+    const { targetUserId, updates } = await req.json();
     if (!targetUserId) {
-      return new Response(JSON.stringify({ error: 'targetUserId is required.' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      return json({ error: 'targetUserId is required.' }, 400);
     }
 
     const { data: profiles, error: profilesError } = await adminClient
@@ -55,35 +66,27 @@ Deno.serve(async (req) => {
     const targetProfile = (profiles ?? []).find((p) => p.id === targetUserId);
 
     if (!callerProfile) {
-      return new Response(JSON.stringify({ error: 'Forbidden' }), {
-        status: 403,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      return json({ error: 'Forbidden' }, 403);
     }
 
-    const decision = authorizeAccountUnlock(callerProfile, targetProfile);
+    const decision = authorizeProfileUpdate(callerProfile, targetProfile, updates ?? {}, profiles ?? []);
     if (!decision.ok) {
-      return new Response(JSON.stringify({ error: decision.error }), {
-        status: decision.status,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      return json({ error: decision.error }, decision.status);
     }
 
-    const { error: updateError } = await adminClient
+    const { data: updated, error: updateError } = await adminClient
       .from('profiles')
-      .update({ account_locked: false, failed_login_attempts: 0 })
-      .eq('id', targetUserId);
+      .update(nullifyEmptyStrings(updates))
+      .eq('id', targetUserId)
+      .select()
+      .single();
 
-    if (updateError) throw updateError;
+    if (updateError) {
+      return json({ error: updateError.message || 'Failed to update profile' }, 400);
+    }
 
-    return new Response(JSON.stringify({ ok: true }), {
-      status: 200,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    return json(updated, 200);
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message || 'Unexpected error' }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    return json({ error: error instanceof Error ? error.message : 'Unexpected error' }, 500);
   }
 });
