@@ -23,6 +23,13 @@ Single-page app, migrated off the Base44 low-code platform to Supabase.
   Auth exposes `me`, `login({email, password})`, `register({email, password, full_name})`,
   `logout(redirectTo?)`, `forgotPassword(email)`, `resetPassword(newPassword)`,
   `onAuthStateChange`. There is no `resetPasswordRequest`.
+- **Two kinds of contact.** A business has a *primary contact* stored on its own row
+  (`businesses.contact_name` / `contact_title` / `contact_email` / `contact_phone`) and,
+  separately, any number of `contacts` rows linked by `business_id`. The primary contact is
+  not a Contact entity and has no id, so anything that offers a contact picker has to
+  surface it explicitly — `components/business/LogInteractionForm.jsx` does, keyed on a
+  `'primary'` sentinel, and writes `interactions.contact_name` with no `contact_id`.
+  De-dupe by name (case-insensitive) so a business that has both does not list it twice.
 - **Auth:** Supabase Auth. Roles live in `profiles.role`: `ceo > admin > user`.
 - **Auth context:** `src/lib/AuthContext.jsx` holds the signed-in user's `profiles` row and
   loads it once at app start. Anything that writes to `profiles` must call the context's

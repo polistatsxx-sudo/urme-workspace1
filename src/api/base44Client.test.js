@@ -82,6 +82,24 @@ describe('entity writes normalise empty strings', () => {
     });
   });
 
+  it('never lets an interaction reach PostgREST with contact_id: ""', async () => {
+    // What Log Interaction sends when the business's primary contact is picked:
+    // it is not a Contact row, so there is no id to send.
+    await base44.entities.Interaction.create({
+      business_id: 'biz-1',
+      contact_id: '',
+      contact_name: 'Michael',
+      type: 'meeting',
+    });
+
+    expect(insert).toHaveBeenCalledWith({
+      business_id: 'biz-1',
+      contact_id: null,
+      contact_name: 'Michael',
+      type: 'meeting',
+    });
+  });
+
   it('normalises updates the same way', async () => {
     await base44.entities.Task.update('task-1', { title: 'Call back', due_date: '' });
 

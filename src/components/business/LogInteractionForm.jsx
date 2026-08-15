@@ -11,7 +11,11 @@ import { findPotentialDuplicates } from '@/utils/duplicateDetection';
 import RichTextEditor from '@/components/shared/RichTextEditor';
 import { fillMergeFields } from '@/utils/mergeFields';
 
-export default function LogInteractionForm({ onSubmit, saving, users = [], bizId, bizName }) {
+// Sentinels for the two picker options that are not a Contact row.
+const NO_CONTACT = 'none';
+const PRIMARY_CONTACT = 'primary';
+
+export default function LogInteractionForm({ onSubmit, saving, users = [], bizId, bizName, bizContactName, bizContactTitle }) {
   const qc = useQueryClient();
   const [form, setForm] = useState({
     type: 'meeting', title: '', notes: '', outcome: '', team_member: '',
@@ -19,6 +23,9 @@ export default function LogInteractionForm({ onSubmit, saving, users = [], bizId
     attachment_url: '', attachment_name: '',
     interaction_date: new Date().toISOString().slice(0, 16),
   });
+  // The picker cannot be driven by form.contact_id alone: the business's own
+  // primary contact is not a Contact row, so it has no id to select on.
+  const [contactChoice, setContactChoice] = useState('');
   const [uploading, setUploading] = useState(false);
   const [showNewContact, setShowNewContact] = useState(false);
   const [newContact, setNewContact] = useState({ full_name: '', title: '', email: '', phone: '' });
@@ -51,6 +58,32 @@ export default function LogInteractionForm({ onSubmit, saving, users = [], bizId
 
   const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
 
+  // businesses.contact_name / contact_title hold the primary contact directly on
+  // the business record. It is the contact the user sees on the page, so it has
+  // to be selectable here even when the contacts table has no row for it.
+  const primaryContactName = (bizContactName || '').trim();
+  const primaryContactHasRecord = contacts.some(
+    c => (c.full_name || '').trim().toLowerCase() === primaryContactName.toLowerCase()
+  );
+  const showPrimaryContact = !!primaryContactName && !primaryContactHasRecord;
+
+  const handleContactChange = (value) => {
+    setContactChoice(value);
+    if (value === PRIMARY_CONTACT) {
+      // No contact_id: the primary contact has no Contact row, and inventing a
+      // uuid would point at nothing. The adapter turns '' into null on write.
+      setForm(p => ({ ...p, contact_id: '', contact_name: primaryContactName }));
+      return;
+    }
+    const contact = contacts.find(c => c.id === value);
+    setForm(p => ({ ...p, contact_id: contact?.id || '', contact_name: contact?.full_name || '' }));
+  };
+
+  const selectContact = (contact) => {
+    setContactChoice(contact.id);
+    setForm(p => ({ ...p, contact_id: contact.id, contact_name: contact.full_name }));
+  };
+
   const handleUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -73,8 +106,7 @@ export default function LogInteractionForm({ onSubmit, saving, users = [], bizId
         business_name: bizName,
       });
       qc.invalidateQueries({ queryKey: ['contacts', bizId] });
-      set('contact_id', created.id);
-      set('contact_name', created.full_name);
+      selectContact(created);
       setShowNewContact(false);
       setNewContact({ full_name: '', title: '', email: '', phone: '' });
       toast.success('Contact created & linked');
@@ -119,17 +151,15 @@ export default function LogInteractionForm({ onSubmit, saving, users = [], bizId
             <UserPlus className="w-3 h-3" /> Add new contact
           </button>
         </div>
-        <Select
-          value={form.contact_id}
-          onValueChange={v => {
-            const c = contacts.find(c => c.id === v);
-            set('contact_id', v);
-            set('contact_name', c?.full_name || '');
-          }}
-        >
+        <Select value={contactChoice} onValueChange={handleContactChange}>
           <SelectTrigger className="bg-secondary/50"><SelectValue placeholder="Select a contact…" /></SelectTrigger>
           <SelectContent>
-            <SelectItem value={null}>No contact</SelectItem>
+            <SelectItem value={NO_CONTACT}>No contact</SelectItem>
+            {showPrimaryContact && (
+              <SelectItem value={PRIMARY_CONTACT}>
+                {primaryContactName}{bizContactTitle ? ` · ${bizContactTitle}` : ''} (primary contact)
+              </SelectItem>
+            )}
             {contacts.map(c => (
               <SelectItem key={c.id} value={c.id}>
                 {c.full_name}{c.title ? ` · ${c.title}` : ''}
@@ -149,7 +179,7 @@ export default function LogInteractionForm({ onSubmit, saving, users = [], bizId
                   <p className="text-[10px] text-amber-400 font-semibold">Possible duplicate contact</p>
                 </div>
                 {contactDuplicates.map((dup, i) => (
-                  <button key={i} type="button" onClick={() => { set('contact_id', dup.entry.id); set('contact_name', dup.entry.full_name); setShowNewContact(false); setNewContact({ full_name: '', title: '', email: '', phone: '' }); setContactDuplicates([]); }}
+                  <button key={i} type="button" onClick={() => { selectContact(dup.entry); setShowNewContact(false); setNewContact({ full_name: '', title: '', email: '', phone: '' }); setContactDuplicates([]); }}
                     className="w-full text-left text-xs bg-amber-500/5 rounded px-2 py-1.5 hover:bg-amber-500/10 transition-colors">
                     <span className="font-medium">{dup.entry.full_name}</span>
                     <span className="text-[10px] text-muted-foreground ml-1">({dup.matchReason}) — Tap to use existing</span>
