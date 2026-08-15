@@ -1,4 +1,8 @@
 import { createClient } from 'jsr:@supabase/supabase-js@2';
+import {
+  authorizeAccountDeletion,
+  warnOnProtectedIdentityDrift,
+} from '../_shared/permissions.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -32,19 +36,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { data: callerProfile } = await adminClient
-      .from('profiles')
-      .select('id, role')
-      .eq('id', authUser.user.id)
-      .single();
-
-    if (!callerProfile || !['ceo', 'admin'].includes(callerProfile.role)) {
-      return new Response(JSON.stringify({ error: 'Forbidden' }), {
-        status: 403,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
     const { targetUserId } = await req.json();
     if (!targetUserId) {
       return new Response(JSON.stringify({ error: 'targetUserId is required.' }), {
@@ -53,15 +44,27 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { data: targetProfile } = await adminClient
+    const { data: profiles, error: profilesError } = await adminClient
       .from('profiles')
-      .select('id, role')
-      .eq('id', targetUserId)
-      .single();
+      .select('id, role, email');
+    if (profilesError) throw profilesError;
 
-    if (!targetProfile || targetProfile.role !== 'user') {
-      return new Response(JSON.stringify({ error: 'Only user accounts can be deleted.' }), {
+    warnOnProtectedIdentityDrift(profiles ?? [], { requirePresence: true });
+
+    const callerProfile = (profiles ?? []).find((p) => p.id === authUser.user.id);
+    const targetProfile = (profiles ?? []).find((p) => p.id === targetUserId);
+
+    if (!callerProfile) {
+      return new Response(JSON.stringify({ error: 'Forbidden' }), {
         status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const decision = authorizeAccountDeletion(callerProfile, targetProfile, profiles ?? []);
+    if (!decision.ok) {
+      return new Response(JSON.stringify({ error: decision.error }), {
+        status: decision.status,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }

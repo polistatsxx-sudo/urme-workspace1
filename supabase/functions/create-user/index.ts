@@ -1,4 +1,8 @@
 import { createClient } from 'jsr:@supabase/supabase-js@2';
+import {
+  authorizeAccountCreation,
+  warnOnProtectedIdentityDrift,
+} from '../_shared/permissions.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -32,15 +36,18 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { data: callerProfile, error: callerProfileError } = await adminClient
+    const { data: profiles, error: profilesError } = await adminClient
       .from('profiles')
-      .select('id, role')
-      .eq('id', authUser.user.id)
-      .single();
+      .select('id, role, email');
+    if (profilesError) throw profilesError;
 
-    if (callerProfileError || !callerProfile || !['ceo', 'admin'].includes(callerProfile.role)) {
-      return new Response(JSON.stringify({ error: 'Forbidden' }), {
-        status: 403,
+    warnOnProtectedIdentityDrift(profiles ?? [], { requirePresence: true });
+
+    const callerProfile = (profiles ?? []).find((p) => p.id === authUser.user.id);
+    const creationDecision = authorizeAccountCreation(callerProfile);
+    if (!creationDecision.ok) {
+      return new Response(JSON.stringify({ error: creationDecision.error }), {
+        status: creationDecision.status,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
