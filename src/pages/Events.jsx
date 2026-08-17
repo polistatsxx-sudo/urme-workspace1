@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -30,9 +31,18 @@ export default function Events() {
   const { user } = useAuth();
   const [showAdd, setShowAdd] = useState(false);
   const [editEvent, setEditEvent] = useState(null);
-  const [form, setForm] = useState({ name: '', description: '', date: '', time: '', location: '', status: 'planning', event_type: 'mixer', objectives: '', target_industries: [] });
+  const [form, setForm] = useState({ name: '', description: '', date: '', time: '', location: '', status: 'planning', event_type: 'mixer', objectives: '', target_industries: [], attendee_business_ids: [] });
   const [isEnhancing, setIsEnhancing] = useState(false);
   const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
+
+  // attendee_count is what the CSV export calls "Attendees" and what linking a business
+  // from its own page increments, so it follows the attendee list rather than drifting
+  // from it.
+  const toggleAttendee = (bizId) => setForm(p => {
+    const current = p.attendee_business_ids || [];
+    const next = current.includes(bizId) ? current.filter(id => id !== bizId) : [...current, bizId];
+    return { ...p, attendee_business_ids: next, attendee_count: next.length };
+  });
 
   const handleEnhance = async () => {
     if (!form.name.trim() && !form.description.trim()) { toast.error('Add a name or description first'); return; }
@@ -52,11 +62,13 @@ export default function Events() {
   const { data: businesses = [] } = useQuery({ queryKey: ['businesses'], queryFn: () => base44.entities.Business.list() });
   const { data: users = [] } = useQuery({ queryKey: ['users'], queryFn: () => base44.entities.User.list() });
 
+  const attendeeOptions = [...businesses].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+
   const upcoming = events.filter(e => e.date && !isPast(new Date(e.date))).sort((a, b) => new Date(a.date) - new Date(b.date));
   const past = events.filter(e => e.date && isPast(new Date(e.date)));
 
   const createMut = useMutation({
-    mutationFn: (d) => base44.entities.Event.create({ ...d, organizer_name: user?.full_name, attendee_business_ids: [] }),
+    mutationFn: (d) => base44.entities.Event.create({ ...d, organizer_name: user?.full_name, attendee_business_ids: d.attendee_business_ids || [] }),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['events'] }); setShowAdd(false); resetForm(); toast.success('Event created!'); },
   });
 
@@ -70,10 +82,10 @@ export default function Events() {
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['events'] }); toast.success('Deleted'); },
   });
 
-  const resetForm = () => setForm({ name: '', description: '', date: '', time: '', location: '', status: 'planning', event_type: 'mixer', objectives: '', target_industries: [] });
+  const resetForm = () => setForm({ name: '', description: '', date: '', time: '', location: '', status: 'planning', event_type: 'mixer', objectives: '', target_industries: [], attendee_business_ids: [] });
 
   const openEdit = (ev) => {
-    setForm({ ...ev, target_industries: ev.target_industries || [] });
+    setForm({ ...ev, target_industries: ev.target_industries || [], attendee_business_ids: ev.attendee_business_ids || [] });
     setEditEvent(ev);
   };
 
@@ -110,6 +122,29 @@ export default function Events() {
         </div>
       </div>
       <div><Label className="text-xs">Objectives</Label><Textarea value={form.objectives} onChange={e => set('objectives', e.target.value)} className="bg-secondary/50 mt-1 h-16 resize-none" /></div>
+      <div>
+        <div className="flex items-center justify-between">
+          <Label className="text-xs">Attending Businesses</Label>
+          <span className="text-[10px] text-muted-foreground">{(form.attendee_business_ids || []).length} selected</span>
+        </div>
+        {businesses.length === 0 ? (
+          <p className="text-xs text-muted-foreground mt-1">No businesses in your network yet.</p>
+        ) : (
+          <div className="mt-1 max-h-36 overflow-y-auto rounded-md border border-border bg-secondary/50 divide-y divide-border/50">
+            {attendeeOptions.map(b => (
+              <label key={b.id} className="flex items-center gap-2 px-2.5 py-1.5 cursor-pointer hover:bg-secondary">
+                <Checkbox
+                  checked={(form.attendee_business_ids || []).includes(b.id)}
+                  onCheckedChange={() => toggleAttendee(b.id)}
+                  aria-label={b.name}
+                />
+                <span className="text-xs truncate">{b.name}</span>
+              </label>
+            ))}
+          </div>
+        )}
+        <p className="text-[10px] text-muted-foreground mt-1">Optional. A business can also be linked from its own page.</p>
+      </div>
       {isEdit && (
         <div><Label className="text-xs">Post-Event Notes</Label><Textarea value={form.post_event_notes || ''} onChange={e => set('post_event_notes', e.target.value)} className="bg-secondary/50 mt-1 h-16 resize-none" /></div>
       )}
@@ -145,8 +180,8 @@ export default function Events() {
             </div>
           </div>
           <div className="flex gap-1 flex-shrink-0">
-            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(ev)}><Edit className="w-3.5 h-3.5" /></Button>
-            <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => { if (confirm('Delete?')) deleteMut.mutate(ev.id); }}><Trash2 className="w-3.5 h-3.5" /></Button>
+            <Button variant="ghost" size="icon" className="h-7 w-7" aria-label={`Edit ${ev.name}`} onClick={() => openEdit(ev)}><Edit className="w-3.5 h-3.5" /></Button>
+            <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" aria-label={`Delete ${ev.name}`} onClick={() => { if (confirm('Delete?')) deleteMut.mutate(ev.id); }}><Trash2 className="w-3.5 h-3.5" /></Button>
           </div>
         </div>
         {ev.objectives && <p className="text-xs text-muted-foreground mt-2 border-t border-border/50 pt-2"><span className="font-semibold text-foreground/70">Objectives:</span> {ev.objectives}</p>}
