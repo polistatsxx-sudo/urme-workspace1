@@ -93,7 +93,8 @@ export default function HelpYourself() {
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search help — try “password”, “CSV”, “matches”…"
             aria-label="Search help topics"
-            className="pl-9 pr-9 h-11 bg-card"
+            // The clear button below is ours; hide the one WebKit adds to type="search".
+            className="pl-9 pr-9 h-11 bg-card [&::-webkit-search-cancel-button]:appearance-none"
           />
           {query && (
             <button
