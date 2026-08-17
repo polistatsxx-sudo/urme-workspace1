@@ -83,3 +83,14 @@ describe('Profile keeps the auth context in step with the database', () => {
     await waitFor(() => expect(refreshProfile).toHaveBeenCalledTimes(1));
   });
 });
+
+describe('Profile offers the help entry point', () => {
+  afterEach(cleanup);
+
+  it('renders a "HELP Yourself" link pointing at the help page', async () => {
+    renderProfile();
+
+    const link = await screen.findByRole('link', { name: /help yourself/i });
+    expect(link.getAttribute('href')).toBe('/help');
+  });
+});

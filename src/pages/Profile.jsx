@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { supabase } from '@/lib/supabaseClient';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { User, Shield, Key, LogOut, Save, Trash2, Users, Camera, Activity, Building2, Calendar, ChevronRight, Edit, Bell, BellOff, Settings, Zap, Copy, RefreshCw, Plus } from 'lucide-react';
+import { User, Shield, Key, LogOut, Save, Trash2, Users, Camera, Activity, Building2, Calendar, ChevronRight, Edit, Bell, BellOff, Settings, Zap, Copy, RefreshCw, Plus, HelpCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import InteractionTimeline from '@/components/business/InteractionTimeline';
 import StageBadge from '@/components/shared/StageBadge';
@@ -725,6 +725,18 @@ export default function Profile() {
           </TabsContent>
         )}
       </Tabs>
+
+      {/* Help entry point — every role sees this. */}
+      <div className="mt-8 pt-6 border-t border-border/50 flex flex-col items-center gap-1.5">
+        <Button variant="outline" asChild className="h-10">
+          <Link to="/help">
+            <HelpCircle className="w-4 h-4" /> HELP Yourself
+          </Link>
+        </Button>
+        <p className="text-[11px] text-muted-foreground">
+          Step-by-step answers for every part of URME
+        </p>
+      </div>
 
       <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
         <DialogContent className="max-w-md">
