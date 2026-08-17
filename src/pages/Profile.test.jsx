@@ -3,14 +3,16 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { MICHAEL_ID } from '@/utils/permissions';
 
 const updateUser = vi.fn(() => Promise.resolve({ id: 'user-1' }));
+const userList = vi.fn(() => Promise.resolve([]));
 const refreshProfile = vi.fn(() => Promise.resolve());
 
 vi.mock('@/api/base44Client', () => ({
   base44: {
     entities: {
-      User: { list: vi.fn(() => Promise.resolve([])), update: updateUser },
+      User: { list: (...args) => userList(...args), update: updateUser },
       Interaction: { filter: vi.fn(() => Promise.resolve([])) },
       Business: { list: vi.fn(() => Promise.resolve([])) },
       Event: { list: vi.fn(() => Promise.resolve([])) },
@@ -81,6 +83,41 @@ describe('Profile keeps the auth context in step with the database', () => {
 
     await waitFor(() => expect(updateUser).toHaveBeenCalledWith('user-1', expect.objectContaining({ full_name: 'New Name' })));
     await waitFor(() => expect(refreshProfile).toHaveBeenCalledTimes(1));
+  });
+});
+
+describe('Profile team roster', () => {
+  afterEach(cleanup);
+
+  beforeEach(() => {
+    userList.mockResolvedValue([
+      { id: MICHAEL_ID, full_name: 'Michael Alexander', email: 'polistatsxx@gmail.com', role: 'admin' },
+      { id: 'user-2', full_name: 'Member Two', email: 'member2@urmeinc.com', role: 'user' },
+    ]);
+  });
+
+  afterEach(() => userList.mockResolvedValue([]));
+
+  it('lists the super-admin alongside everyone else', async () => {
+    renderProfile();
+
+    // Radix Tabs switch on mousedown, not click.
+    fireEvent.mouseDown(screen.getByRole('tab', { name: 'Team' }));
+
+    expect(await screen.findByText('Michael Alexander')).toBeTruthy();
+    expect(screen.getByText('Member Two')).toBeTruthy();
+  });
+
+  it('still gates the controls per row, so showing the super-admin grants nothing', async () => {
+    renderProfile();
+
+    fireEvent.mouseDown(screen.getByRole('tab', { name: 'Team' }));
+    await screen.findByText('Michael Alexander');
+
+    const row = (name) => screen.getByText(name).closest('div.flex.items-center.justify-between');
+    // The signed-in CEO may delete a standard member, but never the super-admin.
+    expect(row('Michael Alexander').querySelector('button')).toBeNull();
+    expect(row('Member Two').querySelector('button')).not.toBeNull();
   });
 });
 
