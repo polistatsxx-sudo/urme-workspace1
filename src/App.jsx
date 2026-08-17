@@ -30,6 +30,7 @@ import Reports from '@/pages/Reports';
 import Team from '@/pages/Team';
 import Templates from '@/pages/Templates';
 import Settings from '@/pages/Settings';
+import HelpYourself from '@/pages/HelpYourself';
 import Subscribe from '@/pages/Subscribe';
 import SubscriptionGate from '@/components/SubscriptionGate';
 
@@ -83,6 +84,8 @@ const AuthenticatedApp = () => {
           <Route path="/task-ai-chat" element={<TaskAIChat />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/profile" element={<Profile />} />
+          {/* Help is for every signed-in member — no role gate. */}
+          <Route path="/help" element={<HelpYourself />} />
         </Route>
       </Route>
 

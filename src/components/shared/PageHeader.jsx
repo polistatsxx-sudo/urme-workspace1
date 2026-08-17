@@ -1,5 +1,11 @@
 import React from 'react';
 
+/**
+ * `subtitle` and `actions` are genuinely optional — most pages pass one or neither. Without
+ * this annotation TypeScript infers all three props as required and flags every such call.
+ *
+ * @param {{ title: React.ReactNode, subtitle?: React.ReactNode, actions?: React.ReactNode }} props
+ */
 export default function PageHeader({ title, subtitle, actions }) {
   return (
     <div className="flex flex-col gap-3 mb-6 sm:mb-8">
