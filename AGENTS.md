@@ -30,6 +30,15 @@ Single-page app, migrated off the Base44 low-code platform to Supabase.
   surface it explicitly — `components/business/LogInteractionForm.jsx` does, keyed on a
   `'primary'` sentinel, and writes `interactions.contact_name` with no `contact_id`.
   De-dupe by name (case-insensitive) so a business that has both does not list it twice.
+- **Event attendees have two writers.** `events.attendee_business_ids` is set from the
+ attendee tick-list in the Event form (`pages/Events.jsx`) and from Link/Unlink Event on a
+ business page (`components/business/EventEngagements.jsx`). `attendee_count` tracks the
+ length of that array — the form sets it to the list length, the business page steps it by
+ one — so keep both writers in step or the CSV export's "Attendees" column drifts.
+- **Google Calendar links** come from `src/utils/calendar.js`, which reads the day out of
+ `events.date` textually (a `new Date()` shifts it west of UTC) and parses the free-text
+ `events.time`. Times are handed to Google without a `Z` so they land in the viewer's own
+ calendar timezone; an unreadable time falls back to an all-day event.
 - **Auth:** Supabase Auth. Roles live in `profiles.role`: `ceo > admin > user`.
 - **Account management (`canManage`).** Who may administer whose account is one rule, kept
   in `src/utils/permissions.js` for the UI and mirrored in
@@ -125,10 +134,12 @@ Set secrets with: `supabase secrets set NAME=value --project-ref rebjykbpmhhaxgp
   closest thing the repo has to a schema of record: field names, types, defaults and the
   enum values behind each CHECK constraint. Treat them as the reference when reconciling.
 - **`supabase/migrations/20260814105153_discussions_archived.sql` must be applied before
-  the current `SyncHub.jsx` ships.** Archiving a thread now writes `{ archived: true }`
-  instead of overwriting `category` with a value that is not in the category enum. Until
-  the column exists, archiving fails with PGRST204 and previously archived threads are
-  still recognised by their legacy `category = 'archived'` value.
+ the current `SyncHub.jsx` ships.** Archiving a thread now writes `{ archived: true }`
+ instead of overwriting `category` with a value that is not in the category enum. Until
+ the column exists, archiving fails with PGRST204 and previously archived threads are
+ still recognised by their legacy `category = 'archived'` value. Unarchiving needs the
+ same column: it writes `{ archived: false }`, plus `category: 'general'` for a legacy
+ thread whose own category was overwritten.
 - Empty strings are normalised to `null` centrally, in `base44Client`'s entity `create()`
   and `update()`. Forms are free to keep sending `''` for an unset optional value; the
   adapter converts every top-level `''` before it reaches PostgREST, so uuid, timestamptz
@@ -157,8 +168,9 @@ Set secrets with: `supabase secrets set NAME=value --project-ref rebjykbpmhhaxgp
 - New/changed Edge Functions still need a human deploy:
   `npx supabase functions deploy update-user --no-verify-jwt --project-ref rebjykbpmhhaxgpclzsg`
   (same for `create-user`, `delete-user`, `unlock-account`, which now import
-  `_shared/permissions.ts`). Until `update-user` is deployed, saving another member's
-  profile from the Team page fails.
+ `_shared/permissions.ts`). Until `update-user` is deployed, saving another member's
+ profile from the Team page fails — including the role selector in
+ `TeamMemberEditDialog`, which is the only way a role reaches the database.
 - 3-strike lockout is advisory/bypassable; `auth-login-guard` is unauthenticated. Needs redesign.
   Direct `signInWithPassword` and Google OAuth skip it entirely, and any unauthenticated
   caller can lock an arbitrary account by posting `{action: 'failed', email}`.
@@ -179,9 +191,15 @@ Set secrets with: `supabase secrets set NAME=value --project-ref rebjykbpmhhaxgp
 - `Register.jsx` still has no route. Self-signup appears to be intentionally closed
   (accounts are created by admins through the `create-user` Edge Function), so it was left
   unrouted — confirm that is deliberate before wiring it up.
-- Push notifications are not wired up: `public/sw.js` has a `push` handler but nothing calls
-  `registration.pushManager.subscribe()`, and both `sw.js` and `src/utils/notifications.js`
-  reference `/favicon.ico`, which does not exist in `public/`.
+- **Background push is a future feature, not a bug.** `src/utils/notifications.js` uses the
+ `Notification` constructor, which by definition only fires while a tab is open; reminders
+ that arrive with the app closed need a service-worker push subscription
+ (`registration.pushManager.subscribe()`) plus a push-sender backend and VAPID keys.
+ `public/sw.js` has a `push` handler but nothing subscribes, and both `sw.js` and
+ `notifications.js` reference `/favicon.ico`, which does not exist in `public/`. The in-app
+ help (`src/data/helpContent.js`, `notifications` section) and `docs/USER_GUIDE.md` §21.1
+ both state the tab-open limitation, so the wording is accurate as it stands — keep it that
+ way until push actually ships.
 - `public/manifest.json` exists but its only icon is the remote Base44 logo (1024x791).
   Self-hosted square 192x192 / 512x512 PNGs (plus a maskable variant) are still needed for
   installability.

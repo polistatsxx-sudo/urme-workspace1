@@ -1,6 +1,6 @@
 import React from 'react';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AJ_ID, MICHAEL_ID } from '@/utils/permissions';
 
 const updateUser = vi.fn(() => Promise.resolve({ id: 'user-1' }));
@@ -23,6 +23,18 @@ let currentUser = { id: MICHAEL_ID, role: 'admin', email: 'polistatsxx@gmail.com
 vi.mock('@/lib/AuthContext', () => ({
   useAuth: () => ({ user: currentUser }),
 }));
+
+beforeAll(() => {
+  // Radix's select popper leans on a few APIs jsdom does not implement.
+  global.ResizeObserver = class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  };
+  Element.prototype.scrollIntoView = () => {};
+  Element.prototype.hasPointerCapture = () => false;
+  Element.prototype.releasePointerCapture = () => {};
+});
 
 const { default: TeamMemberEditDialog } = await import('@/components/team/TeamMemberEditDialog');
 
@@ -77,6 +89,49 @@ describe('TeamMemberEditDialog routes writes through the authorized path', () =>
     currentUser = { id: 'admin-2', role: 'admin', email: 'admin2@urmeinc.com' };
     renderDialog({ ...member, id: AJ_ID, role: 'user' });
     expect(screen.queryByText('Subscription Management')).toBeNull();
+  });
+
+  it('offers the role selector only to a caller who may change that account\'s role', () => {
+    renderDialog(member);
+    expect(screen.getByText('Account Type')).toBeTruthy();
+    cleanup();
+
+    // Nobody changes their own role, however privileged they are.
+    currentUser = { ...member, role: 'ceo' };
+    renderDialog({ ...member, role: 'ceo' });
+    expect(screen.queryByText('Account Type')).toBeNull();
+    cleanup();
+
+    // AJ is protected from every caller but Michael.
+    currentUser = { id: 'admin-2', role: 'admin', email: 'admin2@urmeinc.com' };
+    renderDialog(aj);
+    expect(screen.queryByText('Account Type')).toBeNull();
+  });
+
+  it('sends a role change through update-user, where the server guards are re-run', async () => {
+    renderDialog(member);
+
+    const roleTrigger = screen.getAllByRole('combobox').find(el => el.textContent.includes('Standard member'));
+    fireEvent.keyDown(roleTrigger, { key: 'ArrowDown' });
+    fireEvent.click(await screen.findByRole('option', { name: 'Admin' }));
+    fireEvent.click(screen.getByRole('button', { name: /save changes/i }));
+
+    await waitFor(() => expect(invoke).toHaveBeenCalledWith('update-user', {
+      targetUserId: 'user-1',
+      updates: expect.objectContaining({ role: 'admin' }),
+    }));
+    expect(updateUser).not.toHaveBeenCalled();
+  });
+
+  it('keeps role out of a self-edit, which writes straight to PostgREST', async () => {
+    currentUser = { ...member, role: 'ceo' };
+    renderDialog({ ...member, role: 'ceo' });
+
+    fireEvent.click(screen.getByRole('button', { name: /save changes/i }));
+
+    await waitFor(() => expect(updateUser).toHaveBeenCalled());
+    const [, updates] = updateUser.mock.calls[0];
+    expect(updates).not.toHaveProperty('role');
   });
 
   it('refuses to save a profile the caller may not edit, even if the dialog is forced open', async () => {

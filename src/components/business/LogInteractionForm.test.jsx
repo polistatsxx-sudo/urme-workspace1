@@ -1,15 +1,17 @@
 import React from 'react';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const contactFilter = vi.fn(() => Promise.resolve([]));
+const templateList = vi.fn(() => Promise.resolve([]));
+const templateUpdate = vi.fn(() => Promise.resolve({}));
 
 vi.mock('@/api/base44Client', () => ({
   base44: {
     entities: {
       Contact: { filter: (...args) => contactFilter(...args), create: vi.fn() },
-      EmailTemplate: { list: vi.fn(() => Promise.resolve([])) },
+      EmailTemplate: { list: (...args) => templateList(...args), update: (...args) => templateUpdate(...args) },
     },
     integrations: { Core: { UploadFile: vi.fn() } },
   },
@@ -29,8 +31,9 @@ beforeAll(() => {
   Element.prototype.releasePointerCapture = () => {};
 });
 
-async function renderForm({ contacts = [], bizContactName, bizContactTitle } = {}) {
+async function renderForm({ contacts = [], templates = [], bizContactName, bizContactTitle, initialData } = {}) {
   contactFilter.mockResolvedValue(contacts);
+  templateList.mockResolvedValue(templates);
   const onSubmit = vi.fn();
   const { default: LogInteractionForm } = await import('@/components/business/LogInteractionForm');
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -44,6 +47,7 @@ async function renderForm({ contacts = [], bizContactName, bizContactTitle } = {
         bizName="Acme"
         bizContactName={bizContactName}
         bizContactTitle={bizContactTitle}
+        initialData={initialData}
       />
     </QueryClientProvider>
   );
@@ -65,6 +69,8 @@ describe('Log Interaction contact picker', () => {
   beforeEach(() => {
     vi.resetModules();
     contactFilter.mockClear();
+    templateList.mockClear();
+    templateUpdate.mockClear();
   });
 
   afterEach(cleanup);
@@ -122,5 +128,86 @@ describe('Log Interaction contact picker', () => {
 
     expect(await option('michael')).toBeTruthy();
     expect(screen.queryByRole('option', { name: /primary contact/ })).toBeNull();
+  });
+});
+
+describe('Log Interaction form as an editor', () => {
+  beforeEach(() => {
+    vi.resetModules();
+    contactFilter.mockClear();
+    templateList.mockClear();
+  });
+
+  afterEach(cleanup);
+
+  it('seeds itself from the interaction being edited and submits the corrections', async () => {
+    const { onSubmit } = await renderForm({
+      contacts: [{ id: 'c-1', full_name: 'Dana Reed' }],
+      initialData: {
+        id: 'ix-1',
+        type: 'call',
+        title: 'Intro call',
+        outcome: 'Send deck',
+        contact_id: 'c-1',
+        contact_name: 'Dana Reed',
+        interaction_date: '2026-08-17T14:45:00+00:00',
+      },
+    });
+
+    // The stored wall-clock time is read back as typed, not shifted by the browser offset.
+    expect(screen.getByDisplayValue('2026-08-17T14:45')).toBeTruthy();
+
+    fireEvent.change(screen.getByDisplayValue('Intro call'), { target: { value: 'Intro call (rescheduled)' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save Changes' }));
+
+    const [payload] = onSubmit.mock.calls[0];
+    expect(payload.title).toBe('Intro call (rescheduled)');
+    expect(payload.type).toBe('call');
+    expect(payload.outcome).toBe('Send deck');
+    expect(payload.contact_id).toBe('c-1');
+    expect(payload.interaction_date).toBe('2026-08-17T14:45');
+  });
+
+  it('still says "Log Interaction" when there is nothing to edit', async () => {
+    await renderForm({});
+    expect(screen.getByRole('button', { name: 'Log Interaction' })).toBeTruthy();
+  });
+});
+
+describe('Log Interaction template use count', () => {
+  beforeEach(() => {
+    vi.resetModules();
+    contactFilter.mockClear();
+    templateList.mockClear();
+    templateUpdate.mockClear();
+  });
+
+  afterEach(cleanup);
+
+  it('counts a template as used when it is applied to the notes', async () => {
+    await renderForm({ templates: [{ id: 't-1', title: 'Follow Up', body: 'Hi {{contact_name}}', use_count: 4 }] });
+
+    fireEvent.click(screen.getByRole('button', { name: /use template/i }));
+    fireEvent.click(await screen.findByRole('button', { name: /follow up/i }));
+
+    await waitFor(() => expect(templateUpdate).toHaveBeenCalledWith('t-1', { use_count: 5 }));
+  });
+
+  it('starts a template that has never been used at one', async () => {
+    await renderForm({ templates: [{ id: 't-2', title: 'Intro', body: 'Hello' }] });
+
+    fireEvent.click(screen.getByRole('button', { name: /use template/i }));
+    fireEvent.click(await screen.findByRole('button', { name: /intro/i }));
+
+    await waitFor(() => expect(templateUpdate).toHaveBeenCalledWith('t-2', { use_count: 1 }));
+  });
+
+  it('does not count merely opening the template list', async () => {
+    await renderForm({ templates: [{ id: 't-1', title: 'Follow Up', body: 'Hi' }] });
+
+    fireEvent.click(screen.getByRole('button', { name: /use template/i }));
+    await screen.findByRole('button', { name: /follow up/i });
+
+    expect(templateUpdate).not.toHaveBeenCalled();
   });
 });

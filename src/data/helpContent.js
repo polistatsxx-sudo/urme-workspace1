@@ -407,7 +407,10 @@ export const HELP_SECTIONS = [
       'Press "Log Interaction" at the bottom.',
     ],
     tip: 'Two shortcuts sit above the boxes. "Add new contact" saves a new person without leaving this form. "Use Template" drops a pre-written message in for you. You can also attach a file at the bottom — press "Attach a file" and pick it.',
-    ifStuck: 'Read it over before you save. Once written up, a conversation cannot be edited or deleted by anyone.',
+    afterSteps: [
+      'Each entry in the list has a pencil and a bin on its right-hand edge. The pencil reopens the form as you wrote it, and the bin removes the entry once you confirm. Either way the company\'s score, last-spoken date and conversation count are put back in step.',
+    ],
+    ifStuck: 'Anybody who can see the company can correct or remove its conversations — they are the team\'s notes, not personal ones. Deleting one is permanent, so read the confirmation.',
   },
   {
     id: 'bulk-log-interaction',
@@ -509,8 +512,8 @@ export const HELP_SECTIONS = [
       'Press "Preview" to see it filled in with pretend details, so you can check it reads properly.',
       'Press "Create".',
     ],
-    tip: 'To use one: open a company, start writing up a conversation, and press "Use Template" above the notes box. The company and person\'s names fill themselves in.',
-    ifStuck: 'URME cannot send email. It only writes the words — copy them into Gmail, Outlook or whatever you use. Also, the "Used 0x" count on each card never goes up, so ignore it.',
+    tip: 'To use one: open a company, start writing up a conversation, and press "Use Template" above the notes box. The company and person\'s names fill themselves in, and the "Used Nx" count on the template\'s card goes up by one. Opening the list or pressing "Preview" does not count.',
+    ifStuck: 'URME cannot send email. It only writes the words — copy them into Gmail, Outlook or whatever you use.',
   },
 
   {
@@ -549,10 +552,11 @@ export const HELP_SECTIONS = [
       'Fill in the name, description, date, time and place.',
       'Pick a "Type" (mixer, workshop, dinner and so on) and a "Status" (start with "Planning").',
       'Write what you want out of it in "Objectives".',
+      'Tick anybody you already know is coming under "Attending Businesses". This is optional and you can change it later.',
       'Press "Create Event".',
     ],
-    tip: 'To say a company is coming, you do it from their side, not here. Open that company and press "Link Event" on the "Events & Engagements" card. Then this event will show a line saying how many companies are taking part — tap it to see them.',
-    ifStuck: 'The "Add to Google Calendar" link fills in the name and place, but always guesses a one-hour morning slot instead of the time you typed. Fix the time in Google Calendar before you save it. Also, linking a company to an event cannot be undone here.',
+    tip: 'There are two ways to say a company is coming: tick it under "Attending Businesses" on the event form, or open that company and press "Link Event" on the "Events & Engagements" card. Either way the event shows a line saying how many companies are taking part — tap it to see them. To take one back off, untick it, or press the broken-link symbol next to the event on the company\'s card.',
+    ifStuck: 'The "Add to Google Calendar" link uses the date and time you typed, and reads "6:00 PM", "18:00" and "6 - 8pm" alike. Leave "Time" empty, or type something that is not a time, and Google gets an all-day event on the right date instead of a slot.',
   },
   {
     id: 'event-fees',
@@ -586,7 +590,7 @@ export const HELP_SECTIONS = [
       'To reply to any thread, tap it, type in the box at the bottom, and press the arrow button.',
     ],
     tip: 'Instead of pressing the arrow, you can hold Ctrl and press Enter to send. On a Mac, hold Cmd and press Enter.',
-    roleNote: 'Admins and the CEO can also pin a thread to the top of the list, or archive it to get it out of the way. If you do not see those buttons, you are a standard member — you can still read and reply to everything.',
+    roleNote: 'Admins and the CEO can also pin a thread to the top of the list, or archive it to get it out of the way. Archived threads gather under a line at the bottom of the list; expand it and press the restore button, or open the thread and choose "Unarchive Thread", to bring one back. If you do not see those buttons, you are a standard member — you can still read and reply to everything.',
   },
 
   {
@@ -715,8 +719,8 @@ export const HELP_SECTIONS = [
       'A small padlock on somebody\'s card on the "Team" screen means that account is not yours to change. Standard members see a padlock on everybody but themselves.',
       'You can always change your own details, whoever you are.',
     ],
-    tip: 'Nobody can change anybody\'s account type inside URME, not even the CEO. That has to be done outside the app, so ask whoever runs your system.',
-    roleNote: 'As a standard member you will not see: the "Add Team Member" button, "Unlock" buttons, "Delete" buttons, the subscription boxes, the "Settings" menu word, or the pin and archive buttons in Sync Hub. Nothing is broken — they are just not yours to press.',
+    tip: 'Account types are changed on somebody\'s card, under "Account Type". You can never change your own, and URME refuses a change that would leave nobody in charge.',
+    roleNote: 'As a standard member you will not see: the "Add Team Member" button, "Unlock" buttons, "Delete" buttons, the "Account Type" and subscription boxes, the "Settings" menu word, or the pin, archive and restore buttons in Sync Hub. Nothing is broken — they are just not yours to press.',
   },
   {
     id: 'manage-team-members',
@@ -734,11 +738,12 @@ export const HELP_SECTIONS = [
     afterSteps: [
       'To help somebody who is locked out, find their card — it has a red "Locked" label — and press "Unlock". They can log in again straight away.',
       'To switch someone\'s access back on after they pay, tap their card, then set "Subscription Status" to "Active" or put a future date in "Paid Through Date".',
-      'To remove somebody for good, press "Delete" on their card and confirm.',
+      'To make somebody an admin or the CEO — or to put them back to a standard member — tap their card, pick a "Role" under "Account Type", and press "Save Changes".',
+      'To remove somebody for good, press "Delete" on their card and confirm. Only standard members can be deleted, so change the role first.',
     ],
-    tip: 'New accounts are always standard members. That cannot be changed on this form.',
+    tip: 'New accounts are always standard members. That cannot be changed on the invite form, but you can change it on their card afterwards.',
     roleNote: 'This is all admin and CEO work. Standard members will not see any of these buttons. You also cannot delete an admin, the CEO, or your own account.',
-    ifStuck: 'No "Delete" button on someone\'s card? That happens when they are an admin or the CEO, when the card is your own, or when you are not allowed to manage them.',
+    ifStuck: 'No "Delete" button on someone\'s card? That happens when they are an admin or the CEO, when the card is your own, or when you are not allowed to manage them. A role change can also be refused if it would leave the workspace with no admin or CEO at all.',
   },
   {
     id: 'admin-settings',
@@ -803,7 +808,7 @@ export const HELP_SECTIONS = [
     afterSteps: [
       'After that, URME checks for late tasks and companies you have not contacted in two weeks, and pops up to three little reminders on your screen.',
     ],
-    tip: 'These only appear while URME is actually open in a tab. Close the app and the reminders stop, so do not rely on them like a phone alarm.',
+    tip: 'These only appear while URME is actually open in a tab. Close the app and the reminders stop, so do not rely on them like a phone alarm. Reminders that reach you with URME closed are a separate feature that is not built yet.',
     ifStuck: 'If the switch flicks back and says notifications are blocked, you said No to your browser at some point. Go into your browser\'s site settings, allow notifications for URME, then try the switch again. You also have to do this separately on each device.',
   },
   {
@@ -814,10 +819,9 @@ export const HELP_SECTIONS = [
     keywords: ['undo', 'edit', 'delete', 'mistake', 'permanent', 'cannot', 'limitations', 'missing', 'oops', 'recover', 'bin'],
     body: [
       'URME has no bin and no undo button. These ones are worth knowing before you press anything.',
-      'A written-up conversation cannot be changed or removed at all, by anyone. Read it before saving.',
       'Tasks and money entries cannot be edited. You have to delete them and write them again.',
-      'Deleting a company, person, event, idea, template or colleague is permanent.',
-      'Archiving a team thread, and linking a company to an event, are both one-way.',
+      'Deleting a company, person, event, idea, template, colleague or written-up conversation is permanent.',
+      'Some things can be taken back: a written-up conversation can be corrected with its pencil, an archived team thread restored, and a company unlinked from an event.',
     ],
     tip: 'To get a company out of your way without deleting it, edit it and set its stage to "Archived". It leaves your board but keeps all its history.',
   },

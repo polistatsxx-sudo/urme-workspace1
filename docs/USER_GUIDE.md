@@ -551,8 +551,13 @@ you should chase them next.
 leaving the page. **"Use Template"** drops a pre-written message into the notes.
 **"Attach a file"** at the bottom adds a document or photo.
 
-**If it doesn't work:** read it over before you save. Once written up, a conversation cannot be
-edited or deleted by anybody.
+**Changing or removing one.** Each entry in the **"Activity"** list has a **pencil** and a
+**bin** on its right-hand edge. The pencil reopens the same form with everything as you wrote it —
+press **"Save Changes"** when you are done. The bin asks you to confirm, then removes the entry
+for good. Both also put the company's score, last-spoken date and conversation count back in step.
+
+Anybody who can see the company can correct or remove its conversations. They are the team's
+notes, not personal ones.
 
 **Seeing the history.** When a company has several conversations, a drop-down appears above the
 list so you can show only meetings, only calls, and so on.
@@ -586,8 +591,11 @@ The **"Events & Engagements"** card lists every event this company is taking par
 3. Add a **"Note"** and a **"Link"** if you want. Both are optional.
 4. Press **"Link Event"**.
 
-**If it doesn't work:** events the company is already going to are not offered in the list. And
-linking cannot be undone in the app, so check before you press.
+To undo it, press the **broken-link** symbol next to that event in the list.
+
+**If it doesn't work:** events the company is already going to are not offered in the list. Any
+note or link you added is kept in the event's **"Post-Event Notes"**, so unlinking does not tidy
+that up for you.
 
 ### 7.6 Acting on a suggested match
 
@@ -776,10 +784,12 @@ To change a template later, press its **pencil**. To remove one, press its **bin
 3. Tap the template you want. The wording appears in the notes, with the company and person's
    names already filled in.
 
+Each time you drop a template into a conversation, the *"Used Nx"* count on its card goes up by
+one. Opening the list or pressing **"Preview"** does not count.
+
 **If it doesn't work:** URME cannot send email. It only writes the words — copy them into Gmail,
 Outlook or whatever you use. Also check the message over: only the company name and person's
-name get filled in, so any other blanks come out empty. And ignore the *"Used 0x"* count on each
-card — it never goes up.
+name get filled in, so any other blanks come out empty.
 
 ---
 
@@ -833,7 +843,9 @@ Press **"Events"** in the menu. There are two tabs: **"Upcoming"** for future da
    **"Virtual"**, **"Showcase"** or **"Other"**.
 7. Pick a **"Status"**. Start with **"Planning"**.
 8. Write what you want out of it in **"Objectives"**.
-9. Press **"Create Event"**.
+9. Under **"Attending Businesses"**, tick anybody you already know is coming. This is optional and
+   you can change it later.
+10. Press **"Create Event"**.
 
 **Tip:** **"Improve with AI"** will smarten up the name, description and objectives for you.
 
@@ -846,25 +858,28 @@ Press the **bin** and confirm to delete it. There is no undo.
 
 ### 13.3 Saying which companies are coming
 
-You do this from the company's side, not from the Events screen.
+There are two ways in, and they end up in the same place.
 
-1. Open the company.
-2. Press **"Link Event"** on the **"Events & Engagements"** card.
-3. Pick the event and press **"Link Event"**.
+- **From the event:** press the **pencil** on the event card and tick companies under
+  **"Attending Businesses"**, then press **"Update Event"**.
+- **From the company:** open it, press **"Link Event"** on the **"Events & Engagements"** card,
+  pick the event and press **"Link Event"**.
 
 The event card then shows a line saying how many companies are taking part. Tap it to see who,
 along with whose job it is to look after each one. Tap any of them to open that company.
 
-**If it doesn't work:** there is no attendee list on the Events screen itself, and linking cannot
-be undone. Check you have the right event before pressing.
+To take a company back off an event, untick it in the event form, or press the **broken-link**
+symbol next to the event on the company's **"Events & Engagements"** card.
 
 ### 13.4 Adding an event to your calendar
 
 Press **"Add to Google Calendar"** at the bottom of the card. Google Calendar opens with the
-name, description and place already filled in.
+name, description, place and the event's own date and time already filled in. It reads times like
+`6:00 PM`, `18:00` and `6 - 8pm`; without an end time it books an hour.
 
-**If it doesn't work:** the time always comes through as a one-hour morning slot, whatever you
-typed in URME. Fix the time in Google Calendar before you save it.
+**If it doesn't work:** if you left **"Time"** empty, or typed something that is not a time,
+Google gets an all-day event on the right date instead of a slot. Type a time in URME and press
+the link again.
 
 ### 13.5 Taking a fee
 
@@ -926,12 +941,13 @@ these buttons — you can still read and reply to everything.
 - **In the list**, hover over a thread card and use the small **pin** and **archive** buttons on
   its right-hand edge.
 - **Inside a thread**, press the **three-dots** button at the top and choose **"Pin Thread"**,
-  **"Unpin Thread"** or **"Archive Thread"**.
+  **"Unpin Thread"**, **"Archive Thread"** or **"Unarchive Thread"**.
 
 Pinned threads go to the top of the list for everybody. Archived threads disappear from the main
 list and gather under a line at the bottom saying how many there are — tap it to expand.
 
-**If it doesn't work:** archiving cannot be undone in the app, so be sure before you press it.
+To bring one back, expand that line and press the **restore** button on the thread's right-hand
+edge, or open the thread and choose **"Unarchive Thread"**. It returns to the main list.
 
 ---
 
@@ -1073,8 +1089,8 @@ You can always change your own details, whoever you are.
 | The CEO, or an admin | Standard members only |
 | A standard member | Nobody but yourself |
 
-**Tip:** nobody can change anybody's account type inside URME, not even the CEO. That has to be
-done outside the app — ask whoever runs your system.
+**Tip:** account types are changed on somebody's card — see [17.4](#174-changing-somebodys-details).
+You can never change your own, and the last admin or CEO cannot be demoted.
 
 ### 17.3 Adding somebody
 
@@ -1086,7 +1102,8 @@ done outside the app — ask whoever runs your system.
 3. Press **"Create Account"**.
 4. Tell them the starter password and ask them to change it on their Profile page.
 
-New accounts are always standard members. That cannot be changed on this form.
+New accounts are always standard members. That cannot be changed on this form — make them an
+admin afterwards from their card if you need to, see [17.4](#174-changing-somebodys-details).
 
 ### 17.4 Changing somebody's details
 
@@ -1099,6 +1116,11 @@ Tap anywhere on their card. What you see depends on who you are:
 - **Otherwise** you get the full form: photo, **"Display Name"**, **"Job Title"**, **"Phone"**,
   **"Bio"**, **"LinkedIn URL"**, **"Department"**, **"Location"**, **"Skills"** and
   **"Status"**. Press **"Save Changes"**.
+
+**"Account Type"** — where you make somebody an admin, the CEO, or a standard member again — only
+appears on cards that are not your own and are yours to look after. Pick a **"Role"** and press
+**"Save Changes"**. URME refuses the change if it would leave nobody in charge, and nobody can
+promote or demote themselves.
 
 **"Subscription Management"** — where you switch somebody's access on — only appears when the
 account is yours to look after and they are a standard member.
@@ -1136,7 +1158,7 @@ Nothing below is broken or missing — these buttons simply are not yours to pre
 - **"Delete"** buttons
 - the **"Subscription Management"** boxes
 - the **"Settings"** word in the menu
-- the **pin** and **archive** buttons in Sync Hub
+- the **pin**, **archive** and **restore** buttons in Sync Hub
 
 On your own card you get email and password, and nothing else. Ask an admin to change your name
 or job title.
@@ -1273,7 +1295,8 @@ After that, URME checks for late jobs and companies you have not contacted in tw
 pops up to three little reminders.
 
 **Tip:** these only appear while URME is actually open in a browser tab. Close the app and they
-stop, so do not rely on them like a phone alarm.
+stop, so do not rely on them like a phone alarm. Reminders that reach you with URME closed are a
+separate feature that is not built yet.
 
 **If it doesn't work:** if the switch flicks back and says notifications are blocked, you said No
 to your browser at some point. Go into your browser's site settings, allow notifications for
@@ -1341,7 +1364,8 @@ shortcut.
 | Change your own name, job title, phone, bio | No — ask an admin | Yes |
 | Change your own email, password and 6-digit code | Yes | Yes |
 | Need an up-to-date subscription | Yes | No |
-| Change anybody's account type | Not possible in the app | Not possible in the app |
+| Change somebody else's account type | No | Yes, except the two protected accounts |
+| Change your own account type | No | No |
 
 Neither an admin nor the CEO can change the two protected accounts. Nobody can delete their own
 account.
@@ -1393,7 +1417,8 @@ company — "Improve with AI" can help — and try again. The scanner also only 
 20 companies each time you run it.
 
 **I made a mistake writing up a meeting.**
-Conversations cannot be edited or deleted by anybody, sorry. Write a second, correcting one.
+Open the company's **"Activity"** tab and use the **pencil** on that entry to fix it, or the
+**bin** to remove it. Anybody who can see the company can do this.
 
 **I made a mistake on a task or a money entry.**
 Neither can be edited, but both can be deleted and written again.
@@ -1402,7 +1427,8 @@ Neither can be edited, but both can be deleted and written again.
 No. Templates write the words; you copy them into your own email app.
 
 **Can I un-archive a thread, or un-link a company from an event?**
-Not in the app. Both are one-way.
+Yes to both. Expand the archived line in Sync Hub and press **restore**, or press the
+**broken-link** symbol next to the event on the company's **"Events & Engagements"** card.
 
 **Do I need to refresh the Dashboard?**
 No. Everything on it works itself out from your companies, jobs, events and matches as you go.
@@ -1413,16 +1439,12 @@ No. Everything on it works itself out from your companies, jobs, events and matc
 
 Listed here so you do not go hunting for a button that is not there.
 
-- **Conversations cannot be edited or deleted** at all, by anybody.
 - **Tasks and money entries cannot be edited.** Delete and re-create instead.
-- **Account types cannot be changed** anywhere in the app. New accounts are always standard
-  members.
-- **Some things are one-way:** archiving a Sync Hub thread, and linking a company to an event.
-- **The Events screen has no attendee list.** Companies are linked from their own page.
-- **"Add to Google Calendar" gets the time wrong** — it always uses a one-hour morning slot.
-  Fix it in Google Calendar.
-- **Template use counts always say "Used 0x"**, even for templates you use constantly.
+- **New accounts are always standard members.** Change the account type afterwards from their card.
+- **An event with no time** goes into Google Calendar as an all-day event rather than a slot.
 - **Screen reminders only work while the app is open**, and are set up separately on each device.
+  Reminders that reach you with URME closed need proper push notifications, which are not built
+  yet.
 - **The money target on the Charts screen** lives in your browser only. It is not shared, and it
   disappears if you clear your browser history.
 - **The team score on Tasks** is one number for everybody. There is no personal score.

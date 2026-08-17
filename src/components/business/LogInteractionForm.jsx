@@ -15,17 +15,41 @@ import { fillMergeFields } from '@/utils/mergeFields';
 const NO_CONTACT = 'none';
 const PRIMARY_CONTACT = 'primary';
 
-export default function LogInteractionForm({ onSubmit, saving, users = [], bizId, bizName, bizContactName, bizContactTitle }) {
+/**
+ * interaction_date is stored as the wall-clock string the datetime picker produced, so it
+ * is read back textually. `new Date()` would shift it by the browser's offset and an
+ * untouched edit would silently move the interaction.
+ */
+function toDateTimeLocal(value) {
+  const match = String(value || '').match(/^(\d{4}-\d{2}-\d{2})[T ](\d{2}:\d{2})/);
+  return match ? `${match[1]}T${match[2]}` : '';
+}
+
+function buildForm(initialData) {
+  return {
+    type: initialData?.type || 'meeting',
+    title: initialData?.title || '',
+    notes: initialData?.notes || '',
+    outcome: initialData?.outcome || '',
+    team_member: initialData?.team_member || '',
+    contact_id: initialData?.contact_id || '',
+    contact_name: initialData?.contact_name || '',
+    attachment_url: initialData?.attachment_url || '',
+    attachment_name: initialData?.attachment_name || '',
+    interaction_date: toDateTimeLocal(initialData?.interaction_date) || new Date().toISOString().slice(0, 16),
+  };
+}
+
+export default function LogInteractionForm({ onSubmit, saving, users = [], bizId, bizName, bizContactName, bizContactTitle, initialData = null }) {
   const qc = useQueryClient();
-  const [form, setForm] = useState({
-    type: 'meeting', title: '', notes: '', outcome: '', team_member: '',
-    contact_id: '', contact_name: '',
-    attachment_url: '', attachment_name: '',
-    interaction_date: new Date().toISOString().slice(0, 16),
-  });
+  const isEdit = !!initialData;
+  const [form, setForm] = useState(() => buildForm(initialData));
   // The picker cannot be driven by form.contact_id alone: the business's own
-  // primary contact is not a Contact row, so it has no id to select on.
-  const [contactChoice, setContactChoice] = useState('');
+  // primary contact is not a Contact row, so it has no id to select on. An interaction
+  // logged against the primary contact has a name but no id, which is that same case.
+  const [contactChoice, setContactChoice] = useState(
+    () => initialData?.contact_id || (initialData?.contact_name ? PRIMARY_CONTACT : '')
+  );
   const [uploading, setUploading] = useState(false);
   const [showNewContact, setShowNewContact] = useState(false);
   const [newContact, setNewContact] = useState({ full_name: '', title: '', email: '', phone: '' });
@@ -116,6 +140,23 @@ export default function LogInteractionForm({ onSubmit, saving, users = [], bizId
   const handleSubmit = (e) => {
     e.preventDefault();
     onSubmit(form);
+  };
+
+  // Applying a template to the notes is the only place a template is actually used, so
+  // it is the only place the "Used Nx" count on the Templates page may grow. Opening the
+  // list or previewing does not count. The count is a nicety: if the write fails the
+  // applied template still stands.
+  const applyTemplate = async (template) => {
+    const filled = fillMergeFields(template.body || '', { business_name: bizName, contact_name: form.contact_name });
+    set('notes', filled);
+    setShowTemplateSheet(false);
+    toast.success('Template applied');
+    try {
+      await base44.entities.EmailTemplate.update(template.id, { use_count: (template.use_count || 0) + 1 });
+      qc.invalidateQueries({ queryKey: ['emailTemplates'] });
+    } catch {
+      // Leave the count alone rather than interrupt the interaction being logged.
+    }
   };
 
   return (
@@ -226,13 +267,7 @@ export default function LogInteractionForm({ onSubmit, saving, users = [], bizId
                 <button
                   key={t.id}
                   type="button"
-                  onClick={() => {
-                    const data = { business_name: bizName, contact_name: form.contact_name };
-                    const filled = fillMergeFields(t.body || '', data);
-                    set('notes', filled);
-                    setShowTemplateSheet(false);
-                    toast.success('Template applied');
-                  }}
+                  onClick={() => applyTemplate(t)}
                   className="w-full text-left text-xs bg-card border border-border rounded-md px-2 py-1.5 hover:border-primary/30 active:scale-95 transition-all"
                 >
                   <span className="font-medium">{t.title}</span>
@@ -270,7 +305,9 @@ export default function LogInteractionForm({ onSubmit, saving, users = [], bizId
           </label>
         )}
       </div>
-      <Button type="submit" disabled={saving || uploading} className="w-full">{saving ? 'Saving...' : 'Log Interaction'}</Button>
+      <Button type="submit" disabled={saving || uploading} className="w-full">
+        {saving ? 'Saving...' : isEdit ? 'Save Changes' : 'Log Interaction'}
+      </Button>
     </form>
   );
 }

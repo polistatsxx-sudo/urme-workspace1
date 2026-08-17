@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Calendar, MapPin, Plus, Link2, Loader2 } from 'lucide-react';
+import { Calendar, MapPin, Plus, Link2, Link2Off, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -42,6 +42,18 @@ export default function EventEngagements({ bizId }) {
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['events'] }); setOpen(false); setEventId(''); setNote(''); setLink(''); toast.success('Linked to event'); },
   });
 
+  // The mirror image of linking. Any note or link that was appended to the event's
+  // post-event notes stays there: it is free text somebody may have edited since.
+  const unlinkMut = useMutation({
+    /** @param {any} ev */
+    mutationFn: (ev) => base44.entities.Event.update(ev.id, {
+      attendee_business_ids: (ev.attendee_business_ids || []).filter(id => id !== bizId),
+      attendee_count: Math.max(0, (ev.attendee_count || 0) - 1),
+    }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['events'] }); toast.success('Unlinked from event'); },
+    onError: (error) => toast.error(error?.message || 'Failed to unlink from event'),
+  });
+
   return (
     <div className="bg-card border border-border rounded-xl p-5">
       <div className="flex items-center justify-between mb-4">
@@ -61,7 +73,19 @@ export default function EventEngagements({ bizId }) {
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between gap-2">
                   <p className="text-sm font-medium truncate">{ev.name}</p>
-                  <span className={`text-[10px] capitalize ${statusColors[ev.status] || ''}`}>{ev.status?.replace(/_/g, ' ')}</span>
+                  <div className="flex items-center gap-1.5 flex-shrink-0">
+                    <span className={`text-[10px] capitalize ${statusColors[ev.status] || ''}`}>{ev.status?.replace(/_/g, ' ')}</span>
+                    <button
+                      type="button"
+                      aria-label={`Unlink from ${ev.name}`}
+                      title="Unlink"
+                      onClick={() => unlinkMut.mutate(ev)}
+                      disabled={unlinkMut.isPending}
+                      className="p-1 text-muted-foreground hover:text-destructive"
+                    >
+                      <Link2Off className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
                 <div className="flex items-center gap-3 mt-1 text-[10px] text-muted-foreground flex-wrap">
                   {ev.date && <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> {format(new Date(ev.date), 'MMM d, yyyy')}</span>}

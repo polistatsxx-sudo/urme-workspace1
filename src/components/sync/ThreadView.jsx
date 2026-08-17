@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ArrowLeft, Pin, Building2, Calendar, Send, Archive, MoreVertical } from 'lucide-react';
+import { ArrowLeft, Pin, Building2, Calendar, Send, Archive, ArchiveRestore, MoreVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
@@ -23,7 +23,7 @@ function Avatar({ name, size = 'md' }) {
   return <div className={`${sz} ${color} rounded-full flex items-center justify-center font-bold flex-shrink-0`}>{initials}</div>;
 }
 
-export default function ThreadView({ disc, user, onBack, onAddReply, onPin, onArchive, isAdmin, saving }) {
+export default function ThreadView({ disc, user, onBack, onAddReply, onPin, onArchive, onUnarchive = null, isAdmin, archived = false, saving }) {
   const [replyText, setReplyText] = useState('');
   const bottomRef = useRef(null);
 
@@ -86,9 +86,15 @@ export default function ThreadView({ disc, user, onBack, onAddReply, onPin, onAr
               <DropdownMenuItem onClick={() => onPin(disc)}>
                 <Pin className="w-3.5 h-3.5 mr-2" /> {disc.pinned ? 'Unpin Thread' : 'Pin Thread'}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onArchive(disc)} className="text-destructive">
-                <Archive className="w-3.5 h-3.5 mr-2" /> Archive Thread
-              </DropdownMenuItem>
+              {archived ? (
+                <DropdownMenuItem onClick={() => onUnarchive(disc)}>
+                  <ArchiveRestore className="w-3.5 h-3.5 mr-2" /> Unarchive Thread
+                </DropdownMenuItem>
+              ) : (
+                <DropdownMenuItem onClick={() => onArchive(disc)} className="text-destructive">
+                  <Archive className="w-3.5 h-3.5 mr-2" /> Archive Thread
+                </DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         )}

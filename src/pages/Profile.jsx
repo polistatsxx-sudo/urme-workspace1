@@ -702,7 +702,14 @@ export default function Profile() {
                 )}
               </div>
               <div className="space-y-2">
-                {allUsers.filter(u => !u.email?.toLowerCase().includes('polistats')).map(u => (
+                {/*
+                  Everybody is listed, super-admin included. Who may act on a row is
+                  decided per row by the shared rule below, so showing the row grants
+                  nothing; hiding one only made the team roster disagree with the Team
+                  page and keyed off an email substring, which the protection rule
+                  deliberately never does.
+                */}
+                {allUsers.map(u => (
                   <div key={u.id} className="flex items-center justify-between bg-secondary/50 rounded-lg p-3">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">

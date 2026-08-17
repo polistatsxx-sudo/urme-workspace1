@@ -23,7 +23,6 @@ import { computeHealthScore, computeNextFollowUp } from '@/utils/healthScore';
 import { exportBusinessPDF } from '@/utils/pdfExport';
 import RichTextDisplay from '@/components/shared/RichTextDisplay';
 import { runStageChangeAutomations } from '@/utils/automations';
-import { format } from 'date-fns';
 
 export default function BusinessDetail() {
   const bizId = window.location.pathname.split('/businesses/')[1]?.split('/')[0];
@@ -32,6 +31,7 @@ export default function BusinessDetail() {
   const { user } = useAuth();
   const [editOpen, setEditOpen] = useState(false);
   const [logOpen, setLogOpen] = useState(false);
+  const [editingInteraction, setEditingInteraction] = useState(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiBrief, setAiBrief] = useState(null);
 
@@ -72,29 +72,68 @@ export default function BusinessDetail() {
     onSuccess: () => { navigate('/businesses'); toast.success('Deleted'); },
   });
 
+  // The business row carries a denormalised interaction count, last-contact date and
+  // health score. Every change to its activity — logging, editing a date, deleting —
+  // recomputes them from what is actually there rather than nudging them one way.
+  const syncActivityMetrics = async () => {
+    try {
+      const allInteractions = await base44.entities.Interaction.filter({ business_id: bizId });
+      const count = allInteractions.length;
+      const latest = allInteractions
+        .map(ix => ix.interaction_date || ix.created_date)
+        .filter(Boolean)
+        .sort()
+        .pop();
+      const lastDate = latest ? String(latest).slice(0, 10) : null;
+      await base44.entities.Business.update(bizId, {
+        health_score: computeHealthScore(biz, count, lastDate),
+        last_interaction_date: lastDate,
+        interaction_count: count,
+        next_follow_up: computeNextFollowUp(biz.stage),
+      });
+      qc.invalidateQueries({ queryKey: ['businesses'] });
+    } catch {}
+  };
+
   const logMut = useMutation({
     mutationFn: (data) => base44.entities.Interaction.create({ ...data, business_id: bizId, business_name: biz?.name, logged_by_id: user?.id, logged_by_name: user?.full_name }),
     onSuccess: async () => {
       qc.invalidateQueries({ queryKey: ['interactions', bizId] });
       setLogOpen(false);
       toast.success('Interaction logged');
-      // Update business health score
-      try {
-        const allInteractions = await base44.entities.Interaction.filter({ business_id: bizId });
-        const count = allInteractions.length;
-        const lastDate = format(new Date(), 'yyyy-MM-dd');
-        const newScore = computeHealthScore(biz, count, lastDate);
-        const nextFU = computeNextFollowUp(biz.stage);
-        await base44.entities.Business.update(bizId, {
-          health_score: newScore,
-          last_interaction_date: lastDate,
-          interaction_count: count,
-          next_follow_up: nextFU,
-        });
-        qc.invalidateQueries({ queryKey: ['businesses'] });
-      } catch {}
+      await syncActivityMetrics();
     },
   });
+
+  // Anyone who can see this business can correct or remove its history: the entries are
+  // shared team notes, not personal ones, and RLS on `interactions` is the real boundary.
+  const updateInteractionMut = useMutation({
+    /** @param {{ id: string, data: any }} variables */
+    mutationFn: ({ id, data }) => base44.entities.Interaction.update(id, data),
+    onSuccess: async () => {
+      qc.invalidateQueries({ queryKey: ['interactions', bizId] });
+      setEditingInteraction(null);
+      toast.success('Interaction updated');
+      await syncActivityMetrics();
+    },
+    onError: (error) => toast.error(error?.message || 'Failed to update interaction'),
+  });
+
+  const deleteInteractionMut = useMutation({
+    /** @param {string} id */
+    mutationFn: (id) => base44.entities.Interaction.delete(id),
+    onSuccess: async () => {
+      qc.invalidateQueries({ queryKey: ['interactions', bizId] });
+      toast.success('Interaction deleted');
+      await syncActivityMetrics();
+    },
+    onError: (error) => toast.error(error?.message || 'Failed to delete interaction'),
+  });
+
+  const handleDeleteInteraction = (ix) => {
+    if (!confirm('Delete this interaction? This cannot be undone.')) return;
+    deleteInteractionMut.mutate(ix.id);
+  };
 
   const getInsight = async () => {
     if (!biz) return;
@@ -295,7 +334,11 @@ Return only useful, actionable output.`,
           <div className="mb-3">
             <Button size="sm" onClick={() => setLogOpen(true)}><Plus className="w-4 h-4 mr-1" /> Log Interaction</Button>
           </div>
-          <InteractionTimeline interactions={interactions} />
+          <InteractionTimeline
+            interactions={interactions}
+            onEdit={setEditingInteraction}
+            onDelete={handleDeleteInteraction}
+          />
         </TabsContent>
         <TabsContent value="contacts">
           <ContactsCard bizId={bizId} bizName={biz?.name} />
@@ -316,6 +359,26 @@ Return only useful, actionable output.`,
         <DialogContent className="max-w-md">
           <DialogHeader><DialogTitle>Log Interaction</DialogTitle></DialogHeader>
           <LogInteractionForm users={users} bizId={bizId} bizName={biz?.name} bizContactName={biz?.contact_name} bizContactTitle={biz?.contact_title} onSubmit={data => logMut.mutate(data)} saving={logMut.isPending} />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!editingInteraction} onOpenChange={open => { if (!open) setEditingInteraction(null); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>Edit Interaction</DialogTitle></DialogHeader>
+          {editingInteraction && (
+            <LogInteractionForm
+              // Remount on a different entry so the form state starts from that one.
+              key={editingInteraction.id}
+              users={users}
+              bizId={bizId}
+              bizName={biz?.name}
+              bizContactName={biz?.contact_name}
+              bizContactTitle={biz?.contact_title}
+              initialData={editingInteraction}
+              onSubmit={data => updateInteractionMut.mutate({ id: editingInteraction.id, data })}
+              saving={updateInteractionMut.isPending}
+            />
+          )}
         </DialogContent>
       </Dialog>
     </div>

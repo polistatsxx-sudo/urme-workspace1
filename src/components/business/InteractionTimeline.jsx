@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Phone, Mail, Users, ArrowRightLeft, Clock, FileText, Calendar, UserPlus, Paperclip, User } from 'lucide-react';
+import { Phone, Mail, Users, ArrowRightLeft, Clock, FileText, Calendar, UserPlus, Paperclip, Pencil, Trash2, User } from 'lucide-react';
 import { format } from 'date-fns';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import RichTextDisplay from '@/components/shared/RichTextDisplay';
@@ -19,7 +19,12 @@ const typeLabels = {
   intro_made: 'Introduction', follow_up: 'Follow-up', note: 'Other', event: 'Event',
 };
 
-export default function InteractionTimeline({ interactions }) {
+/**
+ * `onEdit` and `onDelete` are optional: the timeline also renders read-only on the
+ * Profile and Contact pages, which show interactions from businesses other than the one
+ * being viewed. Only the business's own Activity tab passes them.
+ */
+export default function InteractionTimeline({ interactions, onEdit = null, onDelete = null }) {
   const [filter, setFilter] = useState('all');
 
   const filtered = filter === 'all' ? interactions : interactions.filter(ix => ix.type === filter);
@@ -54,9 +59,31 @@ export default function InteractionTimeline({ interactions }) {
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between gap-2">
                     <p className="text-sm font-medium">{ix.title || typeLabels[ix.type] || ix.type.replace(/_/g, ' ')}</p>
-                    <span className="text-[10px] text-muted-foreground flex-shrink-0">
-                      {ix.interaction_date ? format(new Date(ix.interaction_date), 'MMM d, yyyy · h:mm a') : format(new Date(ix.created_date), 'MMM d, yyyy')}
-                    </span>
+                    <div className="flex items-center gap-1.5 flex-shrink-0">
+                      <span className="text-[10px] text-muted-foreground">
+                        {ix.interaction_date ? format(new Date(ix.interaction_date), 'MMM d, yyyy · h:mm a') : format(new Date(ix.created_date), 'MMM d, yyyy')}
+                      </span>
+                      {onEdit && (
+                        <button
+                          type="button"
+                          aria-label="Edit interaction"
+                          onClick={() => onEdit(ix)}
+                          className="p-1 text-muted-foreground hover:text-foreground"
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                      {onDelete && (
+                        <button
+                          type="button"
+                          aria-label="Delete interaction"
+                          onClick={() => onDelete(ix)}
+                          className="p-1 text-muted-foreground hover:text-destructive"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
                   </div>
                   {ix.notes && <RichTextDisplay content={ix.notes} className="mt-1" />}
                   {ix.outcome && <p className="text-xs text-primary mt-1">Next: {ix.outcome}</p>}

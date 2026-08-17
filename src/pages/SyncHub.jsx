@@ -71,6 +71,23 @@ export default function SyncHub() {
     },
   });
 
+  const unarchiveMut = useMutation({
+    /** @param {any} disc */
+    mutationFn: (disc) => {
+      const stored = discussions.find(d => d.id === disc.id) || disc;
+      const updates = { archived: false };
+      // A thread archived before the archived column existed had its category overwritten
+      // with 'archived', which is not one of the real categories. Restoring it has to hand
+      // back a real one or the thread still reads as archived.
+      if (stored.category === 'archived') updates.category = 'general';
+      return base44.entities.Discussion.update(disc.id, updates);
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['discussions'] });
+      toast.success('Thread unarchived');
+    },
+  });
+
   const isAdmin = ['admin', 'ceo'].includes(user?.role);
 
   const categories = ['all', 'general', 'business', 'event', 'idea', 'announcement'];
@@ -101,7 +118,9 @@ export default function SyncHub() {
             onAddReply={(discId, text) => replyMut.mutate({ discId, text })}
             onPin={pinMut.mutate}
             onArchive={(disc) => { archiveMut.mutate(disc); }}
+            onUnarchive={unarchiveMut.mutate}
             isAdmin={isAdmin}
+            archived={isArchived(liveThread)}
             saving={replyMut.isPending}
           />
         </div>
@@ -176,7 +195,16 @@ export default function SyncHub() {
               </summary>
               <div className="space-y-2 mt-2 opacity-60">
                 {archived.map(disc => (
-                  <ThreadCard key={disc.id} disc={{ ...disc, category: 'general' }} onOpen={setActiveThread} onPin={pinMut.mutate} onArchive={archiveMut.mutate} isAdmin={isAdmin} />
+                  <ThreadCard
+                    key={disc.id}
+                    disc={{ ...disc, category: 'general' }}
+                    onOpen={setActiveThread}
+                    onPin={pinMut.mutate}
+                    onArchive={archiveMut.mutate}
+                    onUnarchive={unarchiveMut.mutate}
+                    isAdmin={isAdmin}
+                    archived
+                  />
                 ))}
               </div>
             </details>

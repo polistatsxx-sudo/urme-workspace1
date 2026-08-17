@@ -1,5 +1,5 @@
 import React from 'react';
-import { MessageSquare, Pin, Building2, Calendar, Lightbulb, Archive } from 'lucide-react';
+import { MessageSquare, Pin, Building2, Calendar, Lightbulb, Archive, ArchiveRestore } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { formatDistanceToNow } from 'date-fns';
@@ -14,7 +14,7 @@ const catColors = {
 
 const contextIcon = { business: Building2, event: Calendar, idea: Lightbulb };
 
-export default function ThreadCard({ disc, onOpen, onPin, onArchive, isAdmin }) {
+export default function ThreadCard({ disc, onOpen, onPin, onArchive, onUnarchive = null, isAdmin, archived = false }) {
   const lastReply = disc.replies?.length ? disc.replies[disc.replies.length - 1] : null;
   const lastActivity = lastReply ? new Date(lastReply.date) : new Date(disc.created_date);
   const preview = lastReply ? lastReply.text : disc.content;
@@ -74,9 +74,15 @@ export default function ThreadCard({ disc, onOpen, onPin, onArchive, isAdmin }) 
             <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-primary" title={disc.pinned ? 'Unpin' : 'Pin'} onClick={() => onPin(disc)}>
               <Pin className="w-3 h-3" />
             </Button>
-            <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-destructive" title="Archive" onClick={() => onArchive(disc)}>
-              <Archive className="w-3 h-3" />
-            </Button>
+            {archived ? (
+              <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-primary" title="Unarchive" onClick={() => onUnarchive(disc)}>
+                <ArchiveRestore className="w-3 h-3" />
+              </Button>
+            ) : (
+              <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-destructive" title="Archive" onClick={() => onArchive(disc)}>
+                <Archive className="w-3 h-3" />
+              </Button>
+            )}
           </div>
         )}
       </div>
