@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Lock, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/lib/AuthContext';
-import { canEditProfile, canManage } from '@/utils/permissions';
+import { ROLES, canChangeRole, canEditProfile, canManage } from '@/utils/permissions';
 
 const statusConfig = {
   active: { label: 'Active', color: 'bg-emerald-500/15 text-emerald-400' },
@@ -18,7 +18,9 @@ const statusConfig = {
   on_leave: { label: 'On Leave', color: 'bg-yellow-500/15 text-yellow-400' },
 };
 
-const MANAGEMENT_FIELDS = ['subscription_status', 'paid_through_date'];
+const MANAGEMENT_FIELDS = ['subscription_status', 'paid_through_date', 'role'];
+
+const roleLabels = { user: 'Standard member', admin: 'Admin', ceo: 'CEO' };
 
 export default function TeamMemberEditDialog({ member, open, onOpenChange, canEdit, onSaved }) {
   const [form, setForm] = useState({});
@@ -42,6 +44,7 @@ export default function TeamMemberEditDialog({ member, open, onOpenChange, canEd
         profile_photo: member.profile_photo || '',
         subscription_status: member.subscription_status || 'none',
         paid_through_date: member.paid_through_date || '',
+        role: member.role || 'user',
       });
       setCredentials({ email: member.email || '', password: '' });
       setSkillInput('');
@@ -53,6 +56,7 @@ export default function TeamMemberEditDialog({ member, open, onOpenChange, canEd
   const isSelfEdit = currentUser?.id === member?.id;
   const isUserSelfEdit = isSelfEdit && currentUser?.role === 'user';
   const canManageMember = canManage(currentUser, member);
+  const canChangeMemberRole = canChangeRole(currentUser, member);
 
   const addSkill = () => {
     const s = skillInput.trim();
@@ -68,9 +72,12 @@ export default function TeamMemberEditDialog({ member, open, onOpenChange, canEd
       toast.error('You do not have permission to edit this profile.');
       return;
     }
-    const updates = canManageMember
-      ? form
-      : Object.fromEntries(Object.entries(form).filter(([field]) => !MANAGEMENT_FIELDS.includes(field)));
+    // A role change has a rule of its own on top of management rights — never your own
+    // account — so it is dropped separately from the other management fields. The
+    // Edge Function re-checks all of this, including the last-admin backstop.
+    const withheld = new Set(canManageMember ? [] : MANAGEMENT_FIELDS);
+    if (!canChangeMemberRole) withheld.add('role');
+    const updates = Object.fromEntries(Object.entries(form).filter(([field]) => !withheld.has(field)));
 
     setSaving(true);
     try {
@@ -251,6 +258,29 @@ export default function TeamMemberEditDialog({ member, open, onOpenChange, canEd
                 </SelectContent>
               </Select>
             </div>
+            {canChangeMemberRole && (
+              <div className="border-t border-border/50 pt-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <Lock className="w-4 h-4 text-primary" />
+                  <p className="text-xs font-semibold">Account Type</p>
+                </div>
+                <div>
+                  <Label className="text-xs">Role</Label>
+                  <Select value={form.role} onValueChange={v => set('role', v)}>
+                    <SelectTrigger className="bg-secondary/50 mt-1"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {ROLES.map(role => (
+                        <SelectItem key={role} value={role}>{roleLabels[role] || role}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-[10px] text-muted-foreground mt-1">
+                    Admins and the CEO can manage other accounts. A member has to be a standard member
+                    before their account can be deleted, and the last admin or CEO cannot be demoted.
+                  </p>
+                </div>
+              </div>
+            )}
             {canManageMember && member?.role === 'user' && (
               <div className="border-t border-border/50 pt-4 space-y-3">
                 <div className="flex items-center gap-2">
