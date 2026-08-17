@@ -51,6 +51,14 @@ function SectionBody({ section }) {
         </ol>
       )}
 
+      {section.afterSteps?.length > 0 && (
+        <div className="space-y-2">
+          {section.afterSteps.map((paragraph, i) => (
+            <p key={i} className="text-sm text-muted-foreground leading-relaxed">{paragraph}</p>
+          ))}
+        </div>
+      )}
+
       {section.tip && (
         <Callout icon={Lightbulb} label="Tip:" tone="tip">{section.tip}</Callout>
       )}

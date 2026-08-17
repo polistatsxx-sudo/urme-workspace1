@@ -14,8 +14,10 @@
  * @property {string} whatFor      One line: what this is for. Shown before the steps.
  * @property {string[]} keywords   Extra search terms, including words that do not appear
  *                                 in the text (synonyms, what people actually type).
+ * @property {string[]} [body]     Context that has to be read before the steps make sense —
+ *                                 what a thing is, why it exists.
  * @property {string[]} [steps]    Numbered instructions, one action each.
- * @property {string[]} [body]     Plain paragraphs of explanation.
+ * @property {string[]} [afterSteps] Notes that only make sense once the steps are done.
  * @property {string} [tip]        A short, friendly extra.
  * @property {string} [ifStuck]    What to do when it does not work.
  * @property {string} [roleNote]   Who is allowed to do this, and who will not see it.
@@ -61,7 +63,7 @@ export const HELP_SECTIONS = [
       'Type your password in the field marked "Password".',
       'Press the wide button that says "Log in".',
     ],
-    body: [
+    afterSteps: [
       'You land on the Dashboard. That is the home screen.',
       'There is a second way in. Press the button at the very top that says "Continue with Google", then pick your account in the window Google opens. Use the same email address your URME account was made with, or it will not work.',
       'You cannot sign yourself up. Someone at your company sets your account up and gives you your first password.',
@@ -150,7 +152,7 @@ export const HELP_SECTIONS = [
       'Results appear straight away, sorted into four headings: Businesses, Contacts, Tasks and Events.',
       'Tap the result you want and the app takes you there.',
     ],
-    body: [
+    afterSteps: [
       'If a heading has lots of matches you only see the first five. Press "Show all N results" underneath to see the rest.',
       'Before you type anything, you get shortcut buttons for the four headings, so you can browse one kind of thing at a time. Your last eight searches sit under the word "Recent" — tap one to run it again.',
     ],
@@ -192,7 +194,7 @@ export const HELP_SECTIONS = [
       'Under "Account Manager", choose whose job it is to look after this company.',
       'Press "Add Business" at the bottom.',
     ],
-    body: [
+    afterSteps: [
       '"Tags" are your own labels — type a word, press Enter, and it sticks to the company. Tap a tag to peel it off again. Use them for anything the app does not already have a box for.',
       'The "Notes" box is for private notes your team can see. You can make text bold, add bullet points and paste links in there.',
     ],
@@ -282,7 +284,7 @@ export const HELP_SECTIONS = [
       'Tap a dot to see that company\'s name, industry and stage. Tap its name to open it properly.',
       'Tap the other small button, the one shaped like a list, to go back to the normal view.',
     ],
-    body: [
+    afterSteps: [
       'The dot colours are the health score: green is a healthy relationship, red means it has gone cold.',
     ],
     ifStuck: 'A yellow message saying some companies "need geocoding" means the app does not know where they are yet. Press "Geocode All" and it works them out from each city and state. It takes about a second per company, so give it a minute. A company with no city and no state cannot go on the map at all.',
@@ -319,7 +321,7 @@ export const HELP_SECTIONS = [
       'Press "Propose Intro" once you have offered to introduce them, or "Dismiss" if it is a bad idea.',
       'After you have actually put the two in touch, press "Mark Introduced".',
     ],
-    body: [
+    afterSteps: [
       'This is just bookkeeping — the app does not email anyone. Pressing the buttons only records where you are up to, so you and your team can see it later.',
     ],
     tip: 'Dismissed suggestions do not disappear. They stay on the list, just no longer counted as something to do.',
@@ -420,7 +422,7 @@ export const HELP_SECTIONS = [
       'Fill in the type, date, title, notes and outcome once.',
       'Press the button at the bottom — it says "Log for" and the number of companies you ticked.',
     ],
-    body: [
+    afterSteps: [
       'The same note is copied onto every company you ticked, and each of their health scores updates.',
     ],
     tip: 'This is perfect after a networking night. Ten companies written up in one go, instead of opening ten pages.',
@@ -674,7 +676,7 @@ export const HELP_SECTIONS = [
       'Press "Save Profile".',
       'To sign out of URME, press "Logout" under those boxes.',
     ],
-    body: [
+    afterSteps: [
       'Pressing "Edit" opens a bigger form with a few more boxes, including your LinkedIn address, your department and your skills.',
       'The other tabs on this page show how long your access lasts, the companies you look after, every conversation you have written up, and your own settings.',
     ],
@@ -729,7 +731,7 @@ export const HELP_SECTIONS = [
       'Press "Create Account".',
       'Tell them the starter password, and ask them to change it on their Profile page.',
     ],
-    body: [
+    afterSteps: [
       'To help somebody who is locked out, find their card — it has a red "Locked" label — and press "Unlock". They can log in again straight away.',
       'To switch someone\'s access back on after they pay, tap their card, then set "Subscription Status" to "Active" or put a future date in "Paid Through Date".',
       'To remove somebody for good, press "Delete" on their card and confirm.',
@@ -753,7 +755,7 @@ export const HELP_SECTIONS = [
       'Add your company name under "Business Branding".',
       'Press "Save Settings".',
     ],
-    body: [
+    afterSteps: [
       'Until this is filled in, the payment buttons everywhere else in the app stay grey and do nothing.',
     ],
     roleNote: 'Only admins and the CEO can open this screen. Everyone else gets a page saying "Access Denied", which is normal and not a fault.',
@@ -798,7 +800,7 @@ export const HELP_SECTIONS = [
       'Switch on "Push Notifications".',
       'Your browser asks for permission. Press Allow.',
     ],
-    body: [
+    afterSteps: [
       'After that, URME checks for late tasks and companies you have not contacted in two weeks, and pops up to three little reminders on your screen.',
     ],
     tip: 'These only appear while URME is actually open in a tab. Close the app and the reminders stop, so do not rely on them like a phone alarm.',
@@ -849,6 +851,7 @@ function haystack(section) {
     ...(section.keywords || []),
     ...(section.body || []),
     ...(section.steps || []),
+    ...(section.afterSteps || []),
     section.tip || '',
     section.ifStuck || '',
     section.roleNote || '',
@@ -860,8 +863,8 @@ function haystack(section) {
 
 /**
  * Filter help sections by a free-text query. Every whitespace-separated term has to
- * appear somewhere in the section — title, category, what it is for, keywords, body,
- * steps, tip, "if it doesn't work" or role note — so "csv import" narrows rather than widens.
+ * appear somewhere in the section — title, category, what it is for, keywords, any of the
+ * prose, tip, "if it doesn't work" or role note — so "csv import" narrows, not widens.
  *
  * An empty query returns everything, which is what the page shows before anyone types.
  *

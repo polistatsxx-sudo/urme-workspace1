@@ -26,9 +26,13 @@ describe('help content data', () => {
       expect(section.whatFor, `section ${section.id} needs a whatFor line`).toBeTruthy();
       expect(section.keywords?.length, `section ${section.id} needs keywords`).toBeGreaterThan(0);
       expect(
-        (section.steps?.length || 0) + (section.body?.length || 0),
+        (section.steps?.length || 0) + (section.body?.length || 0) + (section.afterSteps?.length || 0),
         `section ${section.id} needs steps or body copy`
       ).toBeGreaterThan(0);
+      // afterSteps only makes sense underneath a list of steps.
+      if (section.afterSteps?.length) {
+        expect(section.steps?.length, `${section.id} has afterSteps but no steps`).toBeGreaterThan(0);
+      }
     }
 
     // groupHelpSections keeps unknown categories, so compare counts to catch a typo
@@ -38,6 +42,15 @@ describe('help content data', () => {
     expect(grouped.map((group) => group.category)).toEqual(
       expect.arrayContaining(['Getting started', 'Your businesses and people'])
     );
+  });
+
+  it('gives every section at least one friendly extra — a tip, a fix, or a note on who can do it', () => {
+    for (const section of HELP_SECTIONS) {
+      expect(
+        Boolean(section.tip || section.ifStuck || section.roleNote),
+        `section ${section.id} should offer a tip, an "if it doesn't work", or a role note`
+      ).toBe(true);
+    }
   });
 
   it('keeps the plain-language house style: short "what this is for" lines, no insider terms', () => {
@@ -52,7 +65,7 @@ describe('help content data', () => {
     // fine — these are the ones no part of the interface actually says.
     const jargon = ['entity', 'entities', 'postgrest', 'supabase', 'rls', 'jsonb', 'endpoint', 'invokellm', 'edge function'];
     for (const section of HELP_SECTIONS) {
-      const prose = [section.whatFor, ...(section.body || []), ...(section.steps || []), section.tip || '', section.ifStuck || '', section.roleNote || '']
+      const prose = [section.whatFor, ...(section.body || []), ...(section.steps || []), ...(section.afterSteps || []), section.tip || '', section.ifStuck || '', section.roleNote || '']
         .join(' ')
         .toLowerCase();
       for (const term of jargon) {
@@ -136,6 +149,18 @@ describe('How-To Guide page', () => {
     expect(screen.getByText(/press and hold the card/i)).toBeTruthy();
   });
 
+  it('puts the numbered steps before the notes that only apply afterwards', () => {
+    render(<HelpYourself />);
+
+    search('welcome back');
+
+    const firstStep = screen.getByText('Open URME in your web browser.');
+    const afterNote = screen.getByText('You land on the Dashboard. That is the home screen.');
+
+    // Node.DOCUMENT_POSITION_FOLLOWING === 4: afterNote comes later in the document.
+    expect(firstStep.compareDocumentPosition(afterNote) & 4).toBeTruthy();
+  });
+
   it('renders the tip and "if it doesn\'t work" helpers inside an open topic', () => {
     render(<HelpYourself />);
 
@@ -143,6 +168,17 @@ describe('How-To Guide page', () => {
 
     expect(screen.getByText('Tip:')).toBeTruthy();
     expect(screen.getByText('If it doesn’t work:')).toBeTruthy();
+  });
+
+  it('shows a tip as a labelled callout, not as loose text in the paragraphs', () => {
+    render(<HelpYourself />);
+
+    search('what is urme');
+
+    // The tip belongs to the intro topic. It has to sit inside the callout that carries
+    // the "Tip:" label, not trail off the end of the body copy.
+    const tipText = screen.getByText(/"tap" means click/);
+    expect(tipText.textContent).toContain('Tip:');
   });
 
   it('shows the empty state when nothing matches, and recovers from it', () => {
