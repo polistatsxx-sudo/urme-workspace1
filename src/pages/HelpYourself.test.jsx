@@ -5,24 +5,25 @@ import { afterEach, describe, expect, it } from 'vitest';
 import HelpYourself from '@/pages/HelpYourself';
 import { HELP_SECTIONS, groupHelpSections, searchHelpSections } from '@/data/helpContent';
 
-// The section titles below are the ones the assertions key on. Accordion triggers are
-// always rendered (only their content is collapsed), so a title in the document means the
-// section survived the filter.
-const PASSWORD_TOPIC = 'Reset a forgotten password';
-const FINANCE_TOPIC = 'Log revenue and expenses';
-const CSV_TOPIC = 'Import and export CSV files';
+// The section titles below are what the assertions key on. Accordion triggers are always
+// rendered (only their content is collapsed), so a title in the document means the section
+// survived the filter.
+const PASSWORD_TOPIC = 'Forgot your password?';
+const FINANCE_TOPIC = 'Write down money coming in or going out';
+const CSV_TOPIC = 'Bring in a spreadsheet, or save one out';
 
 function search(value) {
   fireEvent.change(screen.getByLabelText('Search help topics'), { target: { value } });
 }
 
 describe('help content data', () => {
-  it('gives every section a unique id, a title and a known category', () => {
+  it('gives every section a unique id, a title, keywords and a "what this is for" line', () => {
     const ids = HELP_SECTIONS.map((section) => section.id);
     expect(new Set(ids).size).toBe(ids.length);
 
     for (const section of HELP_SECTIONS) {
       expect(section.title, `section ${section.id} needs a title`).toBeTruthy();
+      expect(section.whatFor, `section ${section.id} needs a whatFor line`).toBeTruthy();
       expect(section.keywords?.length, `section ${section.id} needs keywords`).toBeGreaterThan(0);
       expect(
         (section.steps?.length || 0) + (section.body?.length || 0),
@@ -35,8 +36,29 @@ describe('help content data', () => {
     const grouped = groupHelpSections(HELP_SECTIONS);
     expect(grouped.flatMap((group) => group.sections)).toHaveLength(HELP_SECTIONS.length);
     expect(grouped.map((group) => group.category)).toEqual(
-      expect.arrayContaining(['Getting started', 'Your network'])
+      expect.arrayContaining(['Getting started', 'Your businesses and people'])
     );
+  });
+
+  it('keeps the plain-language house style: short "what this is for" lines, no insider terms', () => {
+    for (const section of HELP_SECTIONS) {
+      expect(
+        section.whatFor.length,
+        `whatFor for ${section.id} should stay to one short line`
+      ).toBeLessThan(120);
+    }
+
+    // Words that would send a first-time reader to a search engine. Button labels are
+    // fine — these are the ones no part of the interface actually says.
+    const jargon = ['entity', 'entities', 'postgrest', 'supabase', 'rls', 'jsonb', 'endpoint', 'invokellm', 'edge function'];
+    for (const section of HELP_SECTIONS) {
+      const prose = [section.whatFor, ...(section.body || []), ...(section.steps || []), section.tip || '', section.ifStuck || '', section.roleNote || '']
+        .join(' ')
+        .toLowerCase();
+      for (const term of jargon) {
+        expect(prose.includes(term), `${section.id} should not use "${term}"`).toBe(false);
+      }
+    }
   });
 
   it('returns every section for an empty query', () => {
@@ -49,6 +71,14 @@ describe('help content data', () => {
     expect(searchHelpSections('receivables').map((s) => s.id)).toContain('receivables');
     // "kanban" only exists as a keyword on the pipeline section.
     expect(searchHelpSections('kanban').map((s) => s.id)).toEqual(['pipeline-stages']);
+  });
+
+  it('finds topics from the words a confused beginner would actually type', () => {
+    // None of these phrases are section titles; they come from the keyword lists.
+    expect(searchHelpSections('locked out').length).toBeGreaterThan(0);
+    expect(searchHelpSections('missing button').map((s) => s.id)).toContain('team-and-roles');
+    expect(searchHelpSections('oops').map((s) => s.id)).toContain('what-you-cannot-undo');
+    expect(searchHelpSections('spreadsheet').map((s) => s.id)).toContain('csv-import-export');
   });
 
   it('narrows rather than widens when a query has several terms', () => {
@@ -79,6 +109,13 @@ describe('How-To Guide page', () => {
     expect(screen.queryByText(/no results/i)).toBeNull();
   });
 
+  it('shows what each topic is for without needing to open it', () => {
+    render(<HelpYourself />);
+
+    // The one-liner for the password topic, visible while the section is still collapsed.
+    expect(screen.getByText('Getting back in when you cannot remember your password.')).toBeTruthy();
+  });
+
   it('filters the list down to matching sections as the user types', () => {
     render(<HelpYourself />);
 
@@ -96,7 +133,16 @@ describe('How-To Guide page', () => {
 
     expect(screen.getByRole('status').textContent).toContain('1 topic');
     // The single match is expanded, so its step copy is on screen without another click.
-    expect(screen.getByText(/press and hold a card/i)).toBeTruthy();
+    expect(screen.getByText(/press and hold the card/i)).toBeTruthy();
+  });
+
+  it('renders the tip and "if it doesn\'t work" helpers inside an open topic', () => {
+    render(<HelpYourself />);
+
+    search('kanban');
+
+    expect(screen.getByText('Tip:')).toBeTruthy();
+    expect(screen.getByText('If it doesn’t work:')).toBeTruthy();
   });
 
   it('shows the empty state when nothing matches, and recovers from it', () => {
@@ -130,7 +176,7 @@ describe('How-To Guide page', () => {
   it('browses by topic chip, and combines the chip with the search box', () => {
     render(<HelpYourself />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Money & reporting' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Money and reports' }));
 
     expect(screen.getByText(FINANCE_TOPIC)).toBeTruthy();
     expect(screen.queryByText(PASSWORD_TOPIC)).toBeNull();

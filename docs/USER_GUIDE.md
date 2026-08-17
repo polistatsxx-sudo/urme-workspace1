@@ -1,1360 +1,1435 @@
-# URME User Guide
+# URME — How-To Guide
 
-URME is a mobile-first CRM for business networking and matchmaking. You keep every company
-you meet in one place, track the relationship as it moves from a first introduction to a real
-partnership, log every conversation, and let the built-in AI suggest who should be introduced
-to whom.
+Welcome to URME. This guide explains the whole app, one screen at a time, in plain English.
 
-This guide walks through every screen in the app and every action you can take on it. It is
-written for the people who use URME day to day, not for developers. Where a button only
-appears for certain roles, that is called out.
+You do not need to have used anything like this before. Every section starts by saying what
+the thing is for, then walks you through it step by step. Buttons are written exactly as they
+appear on screen, inside quote marks, so you can match them up.
 
----
+A few notes before you start:
 
-## Table of contents
+- This guide says **tap**. If you are on a computer, tap means click.
+- The word **business** just means a company you have added to the app.
+- Where a button only shows up for certain people, the guide says so. If you cannot see it,
+  nothing is broken.
 
-1. [Signing in and account access](#1-signing-in-and-account-access)
-2. [Finding your way around](#2-finding-your-way-around)
-3. [Dashboard](#3-dashboard)
-4. [Pipeline](#4-pipeline)
-5. [Businesses (your network)](#5-businesses-your-network)
-6. [A single business profile](#6-a-single-business-profile)
-7. [AI Acquisition Strategy](#7-ai-acquisition-strategy)
-8. [Contacts](#8-contacts)
-9. [Tasks](#9-tasks)
-10. [Templates](#10-templates)
-11. [Ideas](#11-ideas)
-12. [Events](#12-events)
-13. [Sync Hub](#13-sync-hub)
-14. [Finance](#14-finance)
-15. [Reports](#15-reports)
-16. [Team, roles and account management](#16-team-roles-and-account-management)
-17. [Profile](#17-profile)
-18. [Settings (admins and the CEO only)](#18-settings-admins-and-the-ceo-only)
-19. [Where AI shows up](#19-where-ai-shows-up)
-20. [Notifications and automations](#20-notifications-and-automations)
-21. [Roles at a glance](#21-roles-at-a-glance)
-22. [Tips and FAQ](#22-tips-and-faq)
-23. [Things that are limited or missing today](#23-things-that-are-limited-or-missing-today)
+There is a shorter version of this guide inside the app. Go to **Profile** and press
+**HELP Yourself** at the bottom.
 
 ---
 
-## 1. Signing in and account access
+## Contents
 
-### 1.1 Log in with email and password
-
-1. Go to the app address. If you are not signed in you land on the **Welcome back** screen.
-2. Type your email in the **Email** field and your password in the **Password** field.
-3. Press **Log in**.
-4. You are taken to the Dashboard.
-
-If the email or password is wrong you get a red message above the form. Repeated failed
-attempts are counted, and an account can end up locked — see [1.5](#15-if-your-account-is-locked).
-
-### 1.2 Continue with Google
-
-1. On the login screen, press **Continue with Google** at the top.
-2. Pick your Google account in the window Google opens.
-3. You are returned to URME already signed in.
-
-Use the same Google account as the email your URME account was created with. Google sign-in does
-not show the two-factor code prompt described below, so if your account has two-factor switched on,
-sign in with email and password instead — otherwise you may be sent straight back to the login screen.
-
-### 1.3 Two-factor authentication at login
-
-If two-factor authentication (2FA) is switched on for your account:
-
-1. Enter your email and password and press **Log in** as usual.
-2. A **Two-factor authentication** screen appears with six empty boxes.
-3. Open your authenticator app (Google Authenticator, Authy, 1Password, or similar) and read
-   the current 6-digit code for URME.
-4. Type the code. The **Verify and continue** button becomes active once all six digits are in.
-5. Press **Verify and continue**.
-
-If the code is rejected, wait for your authenticator app to roll over to a fresh code and try
-again — codes expire every 30 seconds.
-
-To turn 2FA on or off for yourself, see [17.2](#172-account-security-email-password-and-2fa).
-
-### 1.4 Forgot password / reset password
-
-1. On the login screen, press **Forgot password?** underneath the password field.
-2. Enter your email address and press **Send reset link**.
-3. The screen confirms that if an account exists for that address, a reset link is on its way.
-   You always see this message, whether or not the address is registered.
-4. Open the email and click the reset link **on the same device and browser** you want to reset from.
-5. The **New password** screen appears. Type the new password twice — once in **New Password**
-   and once in **Confirm Password** — then press **Reset password**.
-6. You are sent back to the login screen. Sign in with the new password.
-
-If the two passwords do not match you get a "Passwords do not match" message and nothing is saved.
-
-If you see **Invalid reset link**, the link was expired, already used, or opened somewhere that
-could not read it. Press **Request a new link** and start again from step 1.
-
-### 1.5 If your account is locked
-
-If your account has been locked, the login screen shows *"Account locked. Contact your admin."*
-You cannot unlock yourself. Ask an admin or the CEO to unlock you from the Team page
-(see [16.5](#165-unlocking-a-locked-account)).
-
-### 1.6 Access and subscription
-
-Admins and the CEO always have access. Standard members need an active subscription, which
-means either their subscription status is set to *Active* or their paid-through date is still
-in the future.
-
-- **Access expiring soon.** In the last 14 days before your paid-through date, an amber bar
-  appears across the top of every page: *"Your access expires in N days."* Press **Subscribe now**
-  in that bar to open the payment page.
-- **Access expired.** You are redirected to a single screen, *"Your URME Access Has Expired"*.
-  Press **Subscribe — $25/month** to open the payment page in a new tab, then contact your admin
-  so they can reactivate the account. There is also a **Log out** link at the bottom of that screen.
-
-Your own subscription status is always visible under **Profile → Subscription**
-(see [17.3](#173-subscription-tab)).
-
-### 1.7 No self-signup
-
-There is no "create an account" page. Accounts are created for you by an admin or the CEO from
-the Team page. If you sign in with an account that has no URME profile you see an
-**Access Restricted** page telling you to contact the administrator.
-
-### 1.8 Logging out
-
-Go to **Profile → My Profile** and press **Logout** (bottom of the profile card). You are signed
-out immediately.
+1. [What URME is](#1-what-urme-is)
+2. [Getting in](#2-getting-in)
+3. [Finding your way around](#3-finding-your-way-around)
+4. [The Dashboard — your home screen](#4-the-dashboard--your-home-screen)
+5. [The Pipeline board](#5-the-pipeline-board)
+6. [Your list of companies](#6-your-list-of-companies)
+7. [One company's own page](#7-one-companys-own-page)
+8. [Asking the computer what to do next](#8-asking-the-computer-what-to-do-next)
+9. [People](#9-people)
+10. [Tasks — your to-do list](#10-tasks--your-to-do-list)
+11. [Templates — messages you send often](#11-templates--messages-you-send-often)
+12. [Ideas](#12-ideas)
+13. [Events](#13-events)
+14. [Sync Hub — talking to your team](#14-sync-hub--talking-to-your-team)
+15. [Money](#15-money)
+16. [Charts](#16-charts)
+17. [Your team, and who is allowed to do what](#17-your-team-and-who-is-allowed-to-do-what)
+18. [Your own account](#18-your-own-account)
+19. [Settings](#19-settings)
+20. [Where the computer helper appears](#20-where-the-computer-helper-appears)
+21. [Reminders and tasks that appear on their own](#21-reminders-and-tasks-that-appear-on-their-own)
+22. [Who can do what — quick table](#22-who-can-do-what--quick-table)
+23. [Questions people ask](#23-questions-people-ask)
+24. [Things you cannot do yet](#24-things-you-cannot-do-yet)
 
 ---
 
-## 2. Finding your way around
+## 1. What URME is
 
-### 2.1 The sidebar
+**What this is for:** knowing what the app does before you start pressing things.
 
-On a computer, the navigation sits down the left-hand side. Every entry is one click:
+URME is an address book that remembers your work for you.
 
-| Entry | What it opens |
+You add each company you meet. You write down every chat, call and meeting you have with them.
+URME keeps score in the background. It shows you who you have not spoken to in a while, and
+reminds you what to do next.
+
+It also plays matchmaker. You write down what each company **needs** and what each company can
+**offer**. The app reads all of that and suggests pairs of companies who should meet each other.
+
+That is the whole idea. Everything else in this guide is a detail.
+
+**Tip:** the two most useful habits are filling in "Needs" and "Offers" for every company, and
+writing up every conversation. Do those two things and the rest of the app gets clever. Skip
+them and it cannot help you much.
+
+---
+
+## 2. Getting in
+
+### 2.1 Log in with your email and password
+
+**What this is for:** getting into the app.
+
+1. Open URME in your web browser.
+2. You will see a box that says **"Welcome back"**.
+3. Type your email address in the field marked **"Email"**.
+4. Type your password in the field marked **"Password"**.
+5. Press the wide button that says **"Log in"**.
+
+You land on the Dashboard, which is the home screen.
+
+**If it doesn't work:** red writing above the boxes means your email or password was wrong. Try
+again, slowly. If it says *"Account locked"*, too many wrong tries have shut you out — ask an
+admin at your company to open it back up. You cannot unlock yourself.
+
+### 2.2 Log in with Google instead
+
+**What this is for:** getting in without typing a password.
+
+1. On the login screen, press **"Continue with Google"** at the very top.
+2. A Google window opens. Pick your account.
+3. You are sent back to URME, already logged in.
+
+Use the same email address your URME account was made with, or it will not work.
+
+**If it doesn't work:** if your account uses a 6-digit code (see next), the Google button will
+not ask you for it and may send you back to the login screen. Use your email and password instead.
+
+### 2.3 The 6-digit code
+
+**What this is for:** an extra lock on your account, on top of your password.
+
+Some accounts ask for a second thing at login. It is a 6-digit number that changes every 30
+seconds and lives in an app on your phone, such as Google Authenticator or Authy. It means
+someone who steals your password still cannot get in.
+
+1. Log in with your email and password as normal.
+2. A screen appears saying **"Two-factor authentication"**, with six empty boxes.
+3. Open the authenticator app on your phone.
+4. Find the 6-digit number listed for URME and type it into the boxes.
+5. Press **"Verify and continue"**.
+
+**If it doesn't work:** the numbers only last 30 seconds. Wait for your phone to show a fresh
+one and type that in instead.
+
+To switch this on for yourself, see [18.2](#182-your-password-and-the-6-digit-code).
+
+### 2.4 Forgotten password
+
+**What this is for:** getting back in when you cannot remember your password.
+
+1. On the login screen, press **"Forgot password?"**. It sits just under the password box.
+2. Type your email address.
+3. Press **"Send reset link"**.
+4. Go to your email inbox and open the message from URME.
+5. Click the link inside it. Do this on the same device and browser you want to log in with.
+6. Type your new password twice — once in **"New Password"** and again in **"Confirm Password"**.
+7. Press **"Reset password"**.
+8. Log in with the new password.
+
+**Tip:** the screen always says a link is on its way, even if that email has no account here.
+That is on purpose, so strangers cannot work out who does and does not work at your company.
+
+**If it doesn't work:** if the two passwords do not match, the app tells you and saves nothing —
+just retype them. If you see *"Invalid reset link"*, the link is too old, has been used already,
+or was opened somewhere it could not be read. Press **"Request a new link"** and start again.
+
+### 2.5 When the app stops letting you in
+
+**What this is for:** understanding the orange warning bar, and the "expired" screen.
+
+Most people need an up-to-date subscription to use URME. Bosses (admins and the CEO) always
+have access.
+
+- **Nearly out of time.** With less than 14 days left, an orange bar appears across the top of
+  every screen saying how many days you have. It has a **"Subscribe now"** link in it.
+- **Out of time.** You get one screen saying *"Your URME Access Has Expired"*. Nothing else
+  opens until it is sorted out.
+
+To fix it:
+
+1. Press **"Subscribe — $25/month"**. A payment page opens in a new tab.
+2. Pay on that page.
+3. Message an admin at your company and tell them you have paid.
+4. They switch your access back on. Reload URME and you are back in.
+
+**Tip:** you can check how long you have left any time. Go to **Profile**, then the
+**"Subscription"** tab.
+
+### 2.6 You cannot sign yourself up
+
+There is no "create an account" page. Someone at your company makes your account and gives you
+your first password.
+
+If you log in and see a page saying **"Access Restricted"**, your login works but nobody has set
+you up in URME yet. Ask an admin.
+
+### 2.7 Logging out
+
+1. Press **"Profile"** in the menu.
+2. Press **"Logout"**, under the boxes with your name and phone number in them.
+
+---
+
+## 3. Finding your way around
+
+### 3.1 The menu
+
+**What this is for:** getting from one screen to another.
+
+On a computer the menu is the strip down the left-hand side. Every word in it opens a different
+screen:
+
+| Menu word | What it holds |
 | --- | --- |
-| Search | The full-screen search panel |
-| Dashboard | Your daily overview |
-| Pipeline | The drag-and-drop relationship board |
-| Businesses | Every company in your network |
-| Contacts | Every named person |
+| Search | Find anything, anywhere |
+| Dashboard | Your home screen |
+| Pipeline | A board showing how far along each company is |
+| Businesses | Your full list of companies |
+| Contacts | Your list of people |
 | Tasks | Your to-do list |
-| Templates | Reusable email templates |
-| Ideas | The team idea board |
-| Events | Networking events |
-| Sync Hub | Team discussion threads |
-| Finance | Revenue, expenses and receivables |
-| Reports | Charts and analytics |
-| Team | Everyone in the workspace |
-| Settings | Payment and branding configuration |
+| Templates | Messages you have saved to reuse |
+| Ideas | A suggestions board for your team |
+| Events | Parties, workshops and meetups |
+| Sync Hub | Where your team chats |
+| Finance | Money in and money out |
+| Reports | Charts |
+| Team | Everyone you work with |
+| Settings | Payment and company name setup |
 | Profile | Your own account |
 
-**Settings only appears for admins and the CEO.** Every other entry is visible to everyone.
+**Tip:** the small arrow at the very bottom of the menu shrinks it to icons only, which gives
+you more room to work. Press it again to bring the words back.
 
-Press the arrow button at the very bottom of the sidebar to collapse it to icons only, and press
-it again to expand it.
+**Who can do this:** everybody sees all of these except **"Settings"**, which only appears for
+admins and the CEO.
 
-### 2.2 On a phone
+### 3.2 On a phone
 
-On a small screen the sidebar is hidden behind the **menu** button (three lines) in the top-right
-of the header bar. Tap it to slide the menu out, tap any entry to go there, or tap outside the
-menu to close it. The magnifying-glass button next to it opens search.
+There is no strip down the side. Tap the button with three stacked lines in the **top-right**
+corner and the menu slides out from the left. Tap any word to go there, or tap anywhere outside
+the menu to close it. The magnifying glass next to it opens search.
 
-### 2.3 Global search
+### 3.3 Search
 
-Search looks across businesses, contacts, tasks and events at once.
+**What this is for:** finding one company, person, task or event fast, without scrolling
+through lists.
 
-1. Press **Search** in the sidebar, or the magnifying-glass button in the mobile header.
-2. Type at least part of a name. Results appear as you type, grouped into
-   **Businesses**, **Contacts**, **Tasks** and **Events**.
-3. Tap a result to jump straight to it. Business and contact results open their profile page;
-   event and task results open the Events or Tasks page.
-4. If a group has more than five matches, press **Show all N results** to see the rest.
+1. Press **"Search"** at the top of the menu. On a phone, tap the magnifying glass in the top-right.
+2. Start typing a name. You do not need to finish the word.
+3. Results appear straight away under four headings: **Businesses**, **Contacts**, **Tasks** and
+   **Events**.
+4. Tap the result you want. The app takes you there.
 
-Before you type anything, search offers:
+If a heading has lots of matches you only see the first five. Press **"Show all N results"**
+underneath to see the rest.
 
-- **Category chips** (Businesses, Contacts, Tasks, Events) — tap one to browse just that type.
-  Press **Clear filter** to go back to searching everything.
-- **Recent** — your last eight searches. Tap one to run it again, or press **Clear All** to forget them.
+Before you type anything you get shortcut buttons for the four headings, so you can browse one
+kind of thing at a time. Your last eight searches sit under **"Recent"** — tap one to run it
+again, or press **"Clear All"** to forget them.
 
-What each type matches: businesses by name or industry, contacts by name or business name,
-tasks by title, events by name or location.
+**Tip:** companies can be found by name or industry, people by their name or their company,
+tasks by their title, and events by name or place.
 
-Press **Cancel** or the back arrow to close search.
+### 3.4 Quick Capture
 
-### 2.4 Quick Capture
+**What this is for:** writing something down in a few seconds, before you forget it.
 
-The round lightning-bolt button floats in the bottom-right corner of every page. Use it when you
-need to write something down before you forget it.
+There is a round button with a lightning bolt on it, floating in the **bottom-right** corner of
+every screen.
 
-1. Tap the lightning-bolt button.
-2. Choose **Task**, **Idea** or **Lead** at the top of the panel.
-3. Type the title (what needs doing / your idea / the business name).
-4. Optionally add details in the larger box underneath.
-5. Press **Capture**.
+1. Tap the round lightning-bolt button.
+2. Choose **"Task"**, **"Idea"** or **"Lead"**. ("Lead" means a new company.)
+3. Type a short title.
+4. Add extra detail in the bigger box if you want. You can leave it empty.
+5. Press **"Capture"**.
 
-A task is created as *To Do* with medium priority, an idea as a new *Other* idea, and a lead as a
-business at the *New Lead* stage. You can go and fill in the rest of the details later.
+**Tip:** what you save this way is deliberately bare. A task arrives as "To Do" with medium
+importance, an idea as an "Other" idea, and a company at the "New Lead" stage. Go back and fill
+in the rest when you have time.
 
-### 2.5 Messages and confirmations
+### 3.5 Little messages in the corner
 
-Actions confirm themselves with a small message in the top-right corner — green for success,
-red when something failed. Deletions always ask "are you sure?" first.
-
----
-
-## 3. Dashboard
-
-The Dashboard is the first page you see after signing in. It is read-only apart from one button,
-and every card links through to the page behind it.
-
-**Top row of numbers**
-
-- **Active Businesses** — everything in your network that is not archived.
-- **Open Tasks** — tasks that are not done, with a count of overdue ones underneath.
-- **Upcoming Events** — events dated today or later.
-- **Potential Matches** — AI-suggested pairings you have not acted on yet.
-
-**Needs Attention** lists businesses that have gone quiet, newest neglect first. How long counts
-as "quiet" depends on the stage — a scheduled meeting goes stale after three days, a new lead
-after a week, an established partnership after three weeks. Each card shows how many days it has
-been (or *Never contacted*). Tap a card to open that business. When nothing is overdue you see
-*"All relationships on track"* instead.
-
-**At-Risk Relationships** shows up to five businesses whose health score has fallen below 40.
-Tap a row to open the business.
-
-**Pipeline Health** is a bar chart of how many businesses sit in each stage. **View Pipeline**
-opens the board.
-
-**Risks & Opportunities** highlights overdue tasks, high-potential matches and businesses in
-active discussion. When there is nothing to flag it says *"All clear — no alerts"*.
-
-**Urgent & Due Soon** lists up to five tasks that are urgent, high priority, or due within three
-days. Overdue dates are shown in red.
-
-**Top Matches** shows the four highest-scoring suggested matches with their synergy score and
-reason. If it is empty it prompts you to run the Synergy Scanner.
-
-The CEO also sees a small **Manage Workspace Hosting · $25/mo** link at the very bottom of the page,
-which opens the hosting payment page in a new tab. Nobody else sees it.
-
-### 3.1 Logging one interaction against several businesses
-
-The **Log Interaction** button in the top-right of the Dashboard is for the case where a single
-event — a mixer, a group call, a mass email — touched a lot of companies at once.
-
-1. Press **Log Interaction**.
-2. In **Select Businesses**, tick each company involved. Use the search box to narrow the list,
-   and **Select All** / **Deselect All** to take everything currently listed.
-3. Choose the **Type** (Meeting, Email, Phone Call, Referral, Event, Follow-up, Introduction, Other)
-   and set the **Date & Time**.
-4. Fill in a **Title**, **Notes / Details** and **Outcome / Next Steps**.
-5. Press **Log for N Businesses**.
-
-The same entry is written to every company you ticked, and each one's health score, last-contact
-date and next follow-up date are recalculated.
+When you save something, a small message appears in the top-right corner. Green means it worked.
+Red means it did not. Anything that deletes something always asks *"are you sure?"* first.
 
 ---
 
-## 4. Pipeline
+## 4. The Dashboard — your home screen
 
-The Pipeline is a board with one column per stage: **New Lead**, **Contacted**,
-**Meeting Scheduled**, **In Discussion**, **Collaborating**, **Partnered**. Each card is a
-business, and the number in the top-right of a column is how many are in it. Archived businesses
-do not appear here.
+**What this is for:** seeing what needs your attention today, without going looking for it.
 
-**Moving a business to another stage**
+You cannot break anything here. Almost every box is just a summary, and tapping one takes you
+to the full screen behind it.
 
-1. Press and hold a card.
-2. Drag it into the target column.
-3. Release. A *"Stage updated"* message confirms the move.
+**The four numbers along the top**
 
-If automatic follow-up tasks are switched on (they are by default — see
-[20.2](#202-automatic-tasks-when-a-stage-changes)) moving a card also creates the matching task
-and writes a note into the business's timeline.
+- **"Active Businesses"** — how many companies you are working with.
+- **"Open Tasks"** — jobs not finished yet, with a count of late ones underneath.
+- **"Upcoming Events"** — events still to come.
+- **"Potential Matches"** — suggested introductions you have not acted on.
 
-**Opening a business from the board.** Click a card (without dragging) to open its
-[AI Acquisition Strategy](#7-ai-acquisition-strategy) page. From there, **View full profile →**
-takes you to the full business record.
+**"Needs Attention"** is the row to look at first. It lists companies you have left alone too
+long, worst first, and says how many days it has been. How long counts as too long depends on
+how far along the company is — a booked meeting goes stale after three days, a brand new lead
+after a week, an old partner after three weeks. Tap a card to open that company. When you are
+on top of everything it says *"All relationships on track"* instead.
 
-Each card shows the company name, industry, the assigned account manager, up to two tags, and a
-small coloured dot for its health score (green is strong, red is cold).
+**"At-Risk Relationships"** lists up to five companies whose score has dropped below 40. Tap a
+row to open it.
 
-**Export Report** in the top-right saves a PDF pipeline report: total active businesses, average
-health score, a count per stage, and a table of every business with its stage, health score and
-last contact date.
+**"Pipeline Health"** is a bar chart of how many companies sit at each stage. **"View Pipeline"**
+opens the board itself.
 
----
+**"Risks & Opportunities"** points out late tasks, promising matches, and companies you are deep
+in conversation with.
 
-## 5. Businesses (your network)
+**"Urgent & Due Soon"** lists up to five jobs that are important or nearly due. Late dates are red.
 
-**Businesses** in the sidebar lists every company you have. The subtitle tells you how many
-there are in total.
+**"Top Matches"** shows the four best suggested introductions, with a score and the reason.
 
-Each card shows the name, industry, health score badge, stage badge, the *Needs* and *Offers*
-lines, and the assigned account manager. An orange pulsing dot means the company is due a
-follow-up. Click a card to open the full profile.
+### 4.1 Writing up one meeting for lots of companies
 
-### 5.1 Searching and filtering
+**What this is for:** saving time after an event where you saw many companies at once.
 
-- **Search businesses…** matches the company name and the industry.
-- **Needs Follow-Up** is a toggle chip. Turn it on to see only companies that are overdue.
-- Five dropdown filters narrow the list further: **Stage**, **Manager**, **Industry**, **City**
-  and **State**. The Manager, Industry, City and State lists are built from the data you already
-  have, so they only offer values that exist.
-- When one or more dropdown filters are active, a **Clear (N)** button appears. Press it to reset
-  all five at once. (The Needs Follow-Up chip is separate — turn it off by tapping it again.)
+1. Press **"Log Interaction"** in the **top-right** of the Dashboard.
+2. Tick the box next to every company that was there. Use the search box to find them, or press
+   **"Select All"** to take the whole list.
+3. Under **"Type"**, pick what it was — a meeting, an email, a call and so on — and check the
+   date and time.
+4. Fill in **"Title"**, **"Notes / Details"** and **"Outcome / Next Steps"** once.
+5. Press the button at the bottom. It says **"Log for"** and the number of companies you ticked.
 
-### 5.2 Adding a business
+The same note is copied onto every company you ticked, and all their scores update.
 
-1. Press **Add Business**.
-2. Fill in **Company Name** — this is the only required field.
-3. Optionally set **Industry** (a fixed list of fifteen options) and **Stage** (defaults to *New Lead*).
-4. Describe the company in **Description**, and — most importantly for matchmaking — fill in
-   **Needs** (what they are looking for) and **Offers** (what they can provide). The Synergy
-   Scanner and every AI suggestion depend on these two fields.
-5. Add the main person: **Contact Name**, **Title / Role**, **Contact Email**, **Phone**.
-6. Add **LinkedIn**, **Website**, **Address**, **City** and **State**.
-7. Pick an **Account Manager** from your team.
-8. Add **Tags**: type a word and press Enter (or the **Add** button). Tap a tag to remove it.
-9. Add internal **Notes**. This box is a rich-text editor — you get bold, italic, underline,
-   bulleted and numbered lists, and links.
-10. Press **Add Business**.
-
-**Duplicate warning.** As you type the name, URME checks what you already have. If something
-looks like a match, an amber panel appears listing up to three candidates with the reason
-(*Same name*, *Similar name*, *Same email*). Press **View** next to a candidate to open the
-existing record instead, or press **Create Anyway** to dismiss the warning and carry on.
-
-**Improve with AI.** Press this button (next to the save button) once you have at least a company
-name. The AI rewrites the **Description**, **Needs** and **Offers** into sharper, more
-partner-facing copy and drops the result straight into the form. Nothing is saved until you press
-**Add Business**, so you can read it over and edit it first. If you do not like the result, retype
-the fields or close the dialog without saving.
-
-### 5.3 Export to CSV
-
-Press **Export CSV**. A spreadsheet file downloads containing whatever is currently on screen —
-the filters and search box apply — with these columns: Name, Industry, Stage, Contact, Email,
-Phone, City, State, Needs, Offers, Health Score, Last Contact.
-
-### 5.4 Import from CSV
-
-1. Press **Import CSV**.
-2. **Step 1 — Select File.** Tap the dashed box and choose a `.csv` or `.txt` file.
-3. **Step 2 — Map Columns.** You see the file name and size, the first three rows as a preview,
-   and one dropdown per column in your file. URME guesses the mapping from the column headings
-   (for example *Company* → Company Name, *Tel* → Contact Phone). Correct anything it got wrong,
-   and set columns you do not want to **— Skip —**. Press **Back** to pick a different file.
-4. Press **Import N Businesses**.
-5. **Step 3 — Import.** A progress bar runs, then a summary tells you how many rows imported and
-   how many failed. Press **Done**.
-
-Every imported company arrives at the **New Lead** stage and is tagged `csv-import`, so you can
-find the batch afterwards by searching for that tag. Rows with no company name are skipped and
-counted as failures. Note that import does **not** run duplicate detection, so de-duplicate your
-file before uploading.
-
-### 5.5 Map view
-
-Press the pin icon next to the search box to switch from the list to a map of the United States.
-Each company with coordinates appears as a coloured dot — the colour follows its health score.
-Click a dot for a pop-up with the name (which links to the profile), industry, stage and health score.
-Press the list icon to switch back.
-
-Companies only appear on the map once they have coordinates. If some are missing, a yellow note
-says how many. Press **Geocode All** to look up coordinates from the City and State of every
-company currently in view; this takes about a second per company, and a *"Geocoding complete"*
-message tells you when it is done. Companies without a city or state cannot be placed.
-
-### 5.6 Synergy Scanner (AI matchmaking)
-
-The Synergy Scanner reads what your companies need and offer and proposes partnerships.
-
-1. Press **Synergy Scanner**. You need at least two businesses; otherwise you get
-   *"Need at least 2 businesses"*.
-2. Wait while the button spins. The AI reviews up to 20 companies and returns roughly five pairings.
-3. A message confirms how many matches were found.
-
-Each suggested match is saved with a **synergy score** out of 100 and a written reason. You will
-find them on the Dashboard under **Top Matches**, and on each company's profile under the
-**Matches** tab, where you can act on them (see [6.9](#69-matches-tab)).
-
-Running the scanner again adds more suggestions rather than replacing the old ones, so you may
-see the same pairing twice if you run it repeatedly.
+**Tip:** this is perfect after a networking night. Ten companies written up in one go, instead
+of opening ten pages.
 
 ---
 
-## 6. A single business profile
+## 5. The Pipeline board
 
-Click any business card to open its profile. **Back to Network** at the top returns you to the list.
+**What this is for:** showing how far along you are with every company, at a glance.
 
-### 6.1 The header
+The board has six columns. Each one is a step on the journey from stranger to partner:
+**"New Lead"**, **"Contacted"**, **"Meeting Scheduled"**, **"In Discussion"**,
+**"Collaborating"**, **"Partnered"**.
 
-The top card shows the company name, its stage badge, its health score badge, the industry,
-the description, and quick links for email, phone, website and location.
+Every card is one of your companies. The number at the top of a column says how many are in it.
 
-Two buttons sit on the right:
+**Moving a company along**
 
-- The **sparkle** button generates an AI relationship brief (see [6.2](#62-ai-relationship-brief)).
-- The **⋮** button opens a menu with **Export PDF**, **Edit** and **Delete**.
+1. Press and hold the card.
+2. Drag it into the column you want.
+3. Let go. A message says *"Stage updated"*.
 
-Tags, if any, appear along the bottom of the card.
+**Tip:** moving a card usually writes your next task for you as well, so you do not forget the
+follow-up. A short note also goes into that company's history. If you would rather write your
+own tasks, see [21.2](#212-tasks-that-appear-on-their-own).
 
-**Export PDF** downloads a one-file profile report: overview (industry, stage, location, health
-score), full contact information, description, needs and offers, the last ten interactions, and
-every match with its score and status.
+**If it doesn't work:** tapping a card *without* dragging does something different — it opens
+the computer-written plan for that company. To get to the company's normal page from there,
+press **"View full profile"**.
 
-**Edit** reopens the same form used to add the business, pre-filled. Change anything and press
-**Update Business**. **Improve with AI** and the duplicate warning work here too. If you change
-the stage from this form, the same automatic follow-up task is created as when you drag a card on
-the Pipeline.
-
-**Delete** asks for confirmation and then removes the company permanently. This cannot be undone.
-
-### 6.2 AI relationship brief
-
-Press the **sparkle** button in the header. The AI reads the company's details plus its five most
-recent interactions and returns a panel with:
-
-- a short **summary** of where the relationship stands,
-- **Best Next Step** — the single most useful thing to do next,
-- **Outreach Draft** — a message you can copy and adapt,
-- **Talking Points** — things worth raising,
-- **Watchouts** — risks to keep in mind.
-
-Press **Regenerate** in that panel for a fresh take. The brief is generated on demand and is not
-saved — it disappears when you leave the page.
-
-### 6.3 Contact Info and Account Manager
-
-**Contact Info** shows the company's primary contact (name, title, email, phone) along with
-LinkedIn, website and address. Email and phone are tappable. **Account Manager** shows who owns
-the relationship, or *"No manager assigned"* — assign one by editing the business.
-
-### 6.4 Events & Engagements
-
-This card lists every event the company is taking part in, with the event status, date and location.
-
-To connect a company to an event:
-
-1. Press **Link Event**.
-2. Choose the event from the dropdown. Events the company is already linked to are not offered.
-3. Optionally add a **Note** and a **Link** (a URL). Both are appended to the event's post-event notes.
-4. Press **Link Event**.
-
-The company now appears under **participating businesses** on the Events page too. There is no
-button to un-link a company once it is linked.
-
-### 6.5 Needs, Offers and Notes
-
-Three cards show the company's **Needs**, **Offers** and internal **Notes** as they were entered.
-Edit them through **Edit** in the header menu.
-
-### 6.6 Activity tab — logging an interaction
-
-The **Activity** tab holds the full conversation history, newest first, with a count in the tab label.
-
-1. Press **Log Interaction**.
-2. Choose the **Type**: Meeting, Email, Phone Call, Referral, Event, Follow-up, Introduction or Other.
-3. Set the **Date & Time** (it defaults to now).
-4. Choose the **Contact Person**. The dropdown offers **No contact**, every contact record attached
-   to the company, and — unless the same name is already among those records — the company's primary
-   contact, marked *(primary contact)*.
-5. Give the entry a **Title**.
-6. Write up what happened in **Notes / Details** — a rich-text box with bold, italic, underline,
-   lists and links.
-7. Optionally pick a **Linked Team Member** — who from your side was involved.
-8. Record the **Outcome / Next Steps**.
-9. Optionally attach a file (see below).
-10. Press **Log Interaction**.
-
-Saving an interaction recalculates the company's health score, sets its last-contact date to today,
-updates the interaction count, and schedules the next follow-up date based on the stage.
-
-**Adding a contact while you log.** Press **Add new contact** above the contact dropdown, fill in
-the full name (required) plus title, email and phone, and press **Create & Link Contact**. The new
-person is saved against this company and selected for this interaction. If the name looks like
-someone you already have, an amber *"Possible duplicate contact"* box appears — tap the suggested
-person to use the existing record instead of creating another.
-
-**Starting from a template.** Press **Use Template** above the notes box, then pick a template.
-Its body is dropped into the notes with the business name and contact name filled in automatically.
-Press **Close** to dismiss the list without choosing.
-
-**Attaching a file.** Press **Attach a file** at the bottom, choose the file, and wait for
-*"File attached"*. Press the **×** next to the file name to remove it before saving. Attachments
-appear as clickable links in the timeline.
-
-**Filtering the timeline.** When there is more than one interaction, a dropdown appears above the
-list. Choose a type to show only entries of that kind; the count next to it updates. Each entry
-shows its icon and type, date and time, notes, the outcome (prefixed *Next:*), the contact and
-team member involved, any attachment, and who logged it.
-
-Interactions cannot be edited or deleted once saved.
-
-### 6.7 Contacts tab
-
-Lists the named people attached to this company, each with title, email and phone. Click one to
-open their profile. Press **Add Contact** to add another: fill in **Full Name** (required), plus
-title, email, phone, LinkedIn URL and notes, then press **Add Contact**.
-
-### 6.8 The two kinds of contact
-
-A company has one **primary contact** stored on the company record itself — that is the name,
-title, email and phone you type into the business form, and it is what appears under
-**Contact Info**. Separately, it can have any number of **contact records**, which live in the
-Contacts list and have their own profile pages.
-
-The primary contact is not a contact record, so it will not appear in the Contacts tab or the
-Contacts page. If you want a full profile and interaction history for that person, add them as a
-contact record as well.
-
-### 6.9 Matches tab
-
-Lists AI-suggested partnerships involving this company, with a count in the tab label. Each row
-shows the other company (a link to its profile), the current status, the reason and the synergy score.
-
-What you can do depends on the status:
-
-- **suggested** — press **Propose Intro** to move it to *intro proposed*, or **Dismiss** to set it
-  to *dismissed*.
-- **intro proposed** — press **Mark Introduced** to move it to *introduced*.
-- **introduced**, **collaborating** and **dismissed** have no further buttons.
-
-Dismissed matches stay in the list; they are just no longer counted as suggested.
+**"Export Report"** in the top-right saves a document you can print or email. It lists how many
+companies are at each stage, the average score, and every company with its stage, score and the
+date you last spoke.
 
 ---
 
-## 7. AI Acquisition Strategy
+## 6. Your list of companies
 
-Clicking a card on the Pipeline board opens this page. It is a longer, more structured plan than
-the relationship brief on the profile page, and it generates itself as soon as the page opens.
+Press **"Businesses"** in the menu. Every company you have is here, one card each. A card shows
+the name, the industry, the score, the stage, what they need, what they offer, and whose job it
+is to look after them. An orange flashing dot means they are due a chat.
 
-The page shows the company name, its stage, industry and location, then:
+Tap a card to open that company's own page.
 
-- **Key Insight** — the one thing that matters most about this relationship.
-- **Priority** (high / medium / low) and an **estimated timeline** to closing.
-- Five sections: **Immediate Next Steps**, **Outreach & Communication**, **Value Proposition**,
-  **Long-Term Partnership Potential** and **Stakeholder Engagement**. Each has a short summary and
-  a list of specific points.
+### 6.1 Narrowing down a long list
 
-**Working through the steps**
+**What this is for:** finding the companies you care about when the list is too long to scroll.
 
-- Tick the checkbox next to any item under **Immediate Next Steps** to cross it off. Ticks are
-  visual only — they are not saved and disappear when you leave the page.
-- Click the *text* of a next step to highlight it. Related points in the other four sections are
-  highlighted in yellow and everything else dims, so you can see how one action connects to the
-  rest of the plan. Press **Clear highlight** to undo it.
+- The **search box** at the top matches company names and industries.
+- Five drop-down menus underneath hide everything you have not picked: **"Stage"**,
+  **"Manager"**, **"Industry"**, **"City"** and **"State"**. They only offer choices you
+  actually have.
+- The rounded **"Needs Follow-Up"** button shows only the companies you have left alone too
+  long. Tap it again to switch it off.
 
-Press **Regenerate** at any time for a different plan. **Pipeline** takes you back to the board,
-and **View full profile →** opens the business record.
+**Tip:** once you have picked some drop-downs, a **"Clear"** button appears with a number on it.
+Press it to undo them all at once.
 
----
+### 6.2 Adding a company
 
-## 8. Contacts
+**What this is for:** putting a new company into URME so you can start tracking it.
 
-**Contacts** lists every named person across your whole network, with their initials as an avatar,
-their title and the company they belong to. Email and phone addresses at the bottom of each card
-are tappable — they open your mail app or dialler without opening the contact.
+1. Press **"Add Business"** in the top-right.
+2. Type the company name in **"Company Name"**. This is the only thing you *must* fill in.
+3. Pick an **"Industry"**, and a **"Stage"** — how far along you already are. New companies
+   start at **"New Lead"**.
+4. Write a short **"Description"** of what they do.
+5. Fill in **"Needs"** — what they are looking for.
+6. Fill in **"Offers"** — what they can give other people.
+7. Add the main person there: **"Contact Name"**, **"Title / Role"**, **"Contact Email"** and
+   **"Phone"**.
+8. Add **"LinkedIn"**, **"Website"**, **"Address"**, **"City"** and **"State"** if you know them.
+9. Under **"Account Manager"**, choose whose job it is to look after this company.
+10. Add **"Tags"** — your own labels. Type a word and press Enter. Tap a tag to peel it off again.
+11. Write anything else in **"Notes"**. Your team can see these. You can make text bold, add
+    bullet points and paste links.
+12. Press **"Add Business"** at the bottom.
 
-- **Search contacts…** matches the person's name and their email address.
-- The chips underneath filter by company. **All Businesses** clears the filter. Only the first
-  15 companies are offered as chips.
+**Tip:** please do fill in "Needs" and "Offers". They are the two boxes the matchmaking works
+from. Leave them empty and the app cannot suggest anybody for this company.
 
-Tap a card to open the contact's profile.
+### 6.3 The orange "possible duplicate" warning
 
-### 8.1 Adding a contact
+**What this is for:** stopping two copies of the same company appearing in your list.
 
-1. Press **Add Contact**.
-2. Choose the **Business** — required, because every contact belongs to a company.
-3. Fill in **Full Name** — also required.
-4. Optionally add **Title / Role**, **Email**, **Phone** and **Notes**.
-5. Press **Add Contact**.
+As you type a name, URME quietly checks what you already have. If something looks close, an
+orange box appears with up to three matches and why it thinks they match — same name, similar
+name, or same email.
 
-You can also add contacts from a business profile (see [6.7](#67-contacts-tab)) or while logging an
-interaction (see [6.6](#66-activity-tab--logging-an-interaction)).
+1. Read the names in the orange box.
+2. If one of them is the company you meant, press **"View"** next to it. That opens the record
+   you already have, and you can close the form without saving.
+3. If none of them is right, press **"Create Anyway"** and carry on.
 
-### 8.2 A contact's profile
+**Tip:** the same warning appears when you add a person while writing up a meeting. There,
+tapping the suggested name reuses that person instead of making a second copy of them.
 
-The header shows the name, title, a link to their company, and their email, phone and LinkedIn.
+**If it doesn't work:** this check does not run when you upload a spreadsheet, so tidy your file
+up first.
 
-- The **pencil** button opens the edit dialog: full name, title, email, phone, LinkedIn URL and
-  notes. Press **Save Contact**.
-- The **bin** button deletes the contact after a confirmation. This cannot be undone.
+### 6.4 Letting the computer improve your writing
 
-**AI Contact Brief.** Press **Generate** to have the AI read the contact's details and recent
-interactions and produce a summary, a **Best Next Step**, an **Outreach Draft**, **Talking Points**
-and **Watchouts**. Press **Regenerate** for a different version. The brief is not saved.
+**What this is for:** turning a rough note into something that reads well, without writing it
+yourself.
 
-**Interaction History** at the bottom lists every interaction logged against this person, with the
-same type filter as a business timeline. Interactions only appear here if the contact was chosen in
-the **Contact Person** dropdown when the interaction was logged.
+**"Improve with AI"** is a button with a little sparkle on it. It sends what you typed to a
+computer helper, which rewrites it more clearly and puts the better version straight back into
+the boxes.
 
----
+1. Type something rough first. A few words is enough.
+2. Press **"Improve with AI"**. It says *"Improving..."* while it thinks.
+3. Read what came back. Change anything you disagree with.
+4. Press the save button to keep it, or close the window to throw it away.
 
-## 9. Tasks
+Nothing is saved when you press the button, so you always get the last word.
 
-The Tasks page (titled **Accountability Engine**) is your to-do list. The subtitle tells you how
-many tasks are completed and how many are overdue.
+You will find the same button when you add or change a company, a task, an idea and an event.
 
-### 9.1 Creating a task
+**If it doesn't work:** the button needs something to work from — a company needs a name, a task
+needs a title or description, an idea needs a title, an event needs a name or description. If
+you see *"Failed to enhance"*, just press it again.
 
-1. Press **New Task**.
-2. Type the **Title** — required.
-3. Optionally add a **Description**.
-4. Set the **Priority**: Low, Medium (the default), High or Urgent.
-5. Set a **Due Date**.
-6. Press **Create Task**.
+### 6.5 Spreadsheets in and out
 
-New tasks are assigned to you and start in the *To Do* column.
+**What this is for:** moving lots of companies at once, instead of typing them one by one.
 
-**Improve with AI.** Press **Improve with AI** once you have a title or a description. The AI
-rewrites both into something clearer and more actionable and puts the result back into the form.
-Nothing is saved until you press **Create Task**.
+A CSV is a simple spreadsheet file. Excel, Numbers and Google Sheets can all make one.
 
-**Chat with AI about this task.** After using Improve with AI, a link appears:
-*"Chat with AI about how to make this task successful →"*. Press it to open the **Task AI Coach**:
+**To save your list out:**
 
-1. The coach opens with a briefing on why the task matters, the two or three most critical steps,
-   and one blocker to watch for.
-2. Type a question in the box at the bottom and press Enter or the send button.
-3. The conversation continues for as long as you like.
+1. Press **"Export CSV"**.
+2. The file downloads to your computer.
 
-Press the back arrow to return to Tasks. The conversation is not saved — leaving the page loses it.
+**Tip:** you get exactly what is on screen, so filter the list first and only those companies
+come out.
 
-### 9.2 Working through tasks
+**To bring a list in:**
 
-Tasks are grouped into tabs: **To Do**, **In Progress**, **Done**, and **Overdue** (which only
-appears when something is overdue). Each tab shows a count.
+1. Press **"Import CSV"**.
+2. Tap the dashed box and choose your `.csv` or `.txt` file.
+3. You now see your column names, and next to each one the app's guess at where it belongs. Fix
+   any wrong guesses. Set anything you do not want to **"— Skip —"**.
+4. Press the button saying **"Import"** and the number of rows.
+5. Wait for the bar to fill up, read how many worked, then press **"Done"**.
 
-- **Change status.** Tap the circle to the left of a task. To Do becomes In Progress, In Progress
-  becomes Done, and Done goes back to To Do.
-- **Complete a task.** Tapping through to Done fires confetti and a *"Task completed! +10 XP"*
-  message.
-- **Delete a task.** Press the **×** on the right of the row and confirm.
+**If it doesn't work:** every company brought in this way starts at "New Lead" and gets the
+label `csv-import`, so you can find the batch afterwards. Rows with no company name are skipped.
+Only companies can be brought in — there is no spreadsheet upload for people, tasks or money.
 
-Each row shows a coloured priority dot, the title, the description, the due date (red when
-overdue), the linked business if any, and who it is assigned to.
+### 6.6 Seeing your companies on a map
 
-Tasks cannot be edited after they are created — only their status changes. If the details are wrong,
-delete the task and create it again.
+**What this is for:** seeing where everybody is, instead of reading addresses.
 
-### 9.3 Team XP
+1. Next to the search box are two small buttons. Tap the one shaped like a **map pin**.
+2. A map appears with a coloured dot for each company. The colour is the score — green is
+   healthy, red has gone cold.
+3. Tap a dot for the company's name, industry, stage and score. Tap the name to open it properly.
+4. Tap the other small button, shaped like a **list**, to go back.
 
-The bar at the top of the page is a light gamification touch. It counts 10 XP for every completed
-task and shows the total for the **whole team**, not just for you. The bar fills up as the number
-grows and is full at 500 XP. There is no per-person score and no reward attached to it.
+**If it doesn't work:** a yellow message saying some companies *"need geocoding"* means the app
+does not know where they are yet. Press **"Geocode All"** and it works them out from each city
+and state. It takes about a second per company, so give it a minute. A company with no city and
+no state cannot go on the map at all.
 
----
+### 6.7 Letting the app suggest who should meet
 
-## 10. Templates
+**What this is for:** finding pairs of companies who would be useful to each other.
 
-Templates are reusable message bodies with placeholders that get filled in automatically. Anyone
-can create, edit and delete them.
+This is the matchmaking part of URME. It reads what your companies need and offer, then suggests
+pairs who fit — like one company needing a photographer and another one being a photographer.
+Each suggestion gets a score out of 100 and a sentence explaining why.
 
-The first time the page is opened on a workspace with no templates, three are created for you:
-**Introduction**, **Follow Up** and **Event Invite**.
+1. Press **"Synergy Scanner"** near the top of the Businesses screen. You need at least two
+   companies.
+2. Wait while the button spins. It reads up to 20 companies and usually returns about five pairs.
+3. A message tells you how many it found.
+4. To see them, go to the Dashboard and look under **"Top Matches"**, or open a company and
+   press its **"Matches"** tab.
 
-Each card shows the template title, its category, the subject line, a preview of the body, how many
-times it has been used, and pencil (edit) and bin (delete) buttons.
+**Tip:** the suggestions are only as good as your "Needs" and "Offers" boxes. Fill those in
+first and the results get much better.
 
-### 10.1 Creating a template
-
-1. Press **New Template**.
-2. Type a **Title** — required.
-3. Choose a **Category**: Intro, Follow Up, Event Invite, Thank You, Proposal or Custom.
-4. Write a **Subject**.
-5. Insert merge fields: tap any of the chips under **Merge Fields — tap to insert** and the
-   placeholder is appended to the body.
-6. Write the **Body** in the rich-text editor.
-7. Press **Preview** to see the template with sample data filled in (Jane Smith at Acme Corp).
-   Press **Hide Preview** to close it.
-8. Press **Create**.
-
-To change a template, press its pencil button, edit, and press **Update**. To remove one, press the
-bin button and confirm.
-
-### 10.2 Merge fields
-
-A merge field is written as `{{name}}` and is replaced with real information when the template is
-used. The available fields are:
-
-| Chip | Placeholder | Filled with |
-| --- | --- | --- |
-| Contact Name | `{{contact_name}}` | The person you are writing to |
-| Business Name | `{{business_name}}` | Their company |
-| Industry | `{{industry}}` | Their industry |
-| Contact Title | `{{contact_title}}` | Their job title |
-| Contact Email | `{{contact_email}}` | Their email address |
-| My Name | `{{my_name}}` | Your name |
-| My Title | `{{my_title}}` | Your job title |
-| Today | `{{today_date}}` | Today's date, written out |
-| Next Week | `{{next_week_date}}` | The same day next week |
-| Business Needs | `{{business_needs}}` | What they need |
-| Business Offers | `{{business_offers}}` | What they offer |
-
-### 10.3 Using a template
-
-Templates are applied from the **Use Template** link in the interaction log on a business profile
-(see [6.6](#66-activity-tab--logging-an-interaction)). In that context the business name and the
-selected contact name are filled in; the other placeholders are replaced with blanks, so check the
-text before you send it. Copy the finished text out of the notes box into your email client — URME
-does not send email itself.
+**If it doesn't work:** if it says *"Need at least 2 businesses"*, add another company. Pressing
+it again adds more suggestions rather than replacing the old ones, so you may see the same pair
+twice if you run it a lot.
 
 ---
 
-## 11. Ideas
+## 7. One company's own page
 
-The Ideas page (titled **Idea Incubator**) is a shared board for suggestions, sorted with the
-most-voted first.
+**What this is for:** finding everything you know about one company in one place.
 
-### 11.1 Posting an idea
+The box at the top holds the name, the stage, the score, and quick links to email them, ring
+them or visit their website.
 
-1. Press **New Idea**.
-2. Type a **Title** — required.
-3. Describe it in the rich-text **Description** box.
-4. Choose a **Category**: Strategy, Partnership, Event Concept, Marketing, Product or Other.
-5. Press **Post Idea**.
+Two buttons sit on the right of that box:
 
-**Improve with AI** rewrites the title and description into something sharper before you post.
-The same button is available when editing an idea.
+- The one with a **sparkle** asks the computer for advice — see [8](#8-asking-the-computer-what-to-do-next).
+- The one with **three dots** hides a small menu: **"Export PDF"**, **"Edit"** and **"Delete"**.
 
-### 11.2 Voting, discussing and editing
+Below that are cards for their contact details, whose job it is to look after them, events they
+are coming to, and their **"Needs"**, **"Offers"** and **"Notes"**.
 
-- **Vote.** Tap the thumbs-up on the left. The count goes up and the icon fills in. Tap again to
-  take your vote back. One vote per person.
-- **Comment.** Tap the speech-bubble icon (with the comment count) to open the discussion, type in
-  the box and press **Send** or Enter.
-- **AI Improve.** Press **AI Improve** on an idea and the AI posts two or three concrete
-  suggestions for strengthening it as a comment from *AI Assistant*, highlighted differently from
-  human comments.
-- **Edit.** Press the pencil to change the title, description or category, then **Save Changes**.
-- **Delete.** Press the bin and confirm.
+At the bottom are three tabs: **"Activity"** (every conversation), **"Contacts"** (the people
+who work there) and **"Matches"** (who they should meet).
 
-Anyone can edit, delete and vote on any idea, including ideas other people posted.
+### 7.1 Changing, saving or deleting a company
+
+1. To change details: press the **three-dots** button, choose **"Edit"**, change what you need,
+   then press **"Update Business"**.
+2. To save a summary you can print or email: press the **three-dots** button, choose
+   **"Export PDF"**.
+3. To remove the company: press the **three-dots** button, choose **"Delete"**, then confirm.
+
+**Tip:** the PDF is handy before a meeting. It puts the company details, your last ten
+conversations and every suggested match onto one sheet.
+
+**If it doesn't work:** deleting is forever. There is no undo and no bin to fish it out of. If
+you only want a company out of your way, edit it and set the stage to **"Archived"** instead —
+that keeps all its history.
+
+### 7.2 Writing up a chat, call or meeting
+
+**What this is for:** recording what was said, so you and your team remember it later.
+
+This is the most important habit in URME. The app works out who is going quiet from these notes.
+
+1. Press the **"Activity"** tab.
+2. Press **"Log Interaction"**.
+3. Under **"Type"**, pick what it was: **"Meeting"**, **"Email"**, **"Phone Call"**,
+   **"Referral"**, **"Event"**, **"Follow-up"**, **"Introduction"** or **"Other"**.
+4. Check **"Date & Time"**. It is already set to right now, so usually you can leave it.
+5. Under **"Contact Person"**, choose who you spoke to.
+6. Give it a short **"Title"**, like *First call*.
+7. Write what was said in the big **"Notes / Details"** box.
+8. Under **"Linked Team Member"**, pick anyone from your side who was there.
+9. Write what happens next in **"Outcome / Next Steps"**.
+10. Press **"Log Interaction"**.
+
+Saving this updates the company's score, sets the last-spoken date to today, and works out when
+you should chase them next.
+
+**Tip:** three shortcuts live in this form. **"Add new contact"** saves a new person without
+leaving the page. **"Use Template"** drops a pre-written message into the notes.
+**"Attach a file"** at the bottom adds a document or photo.
+
+**If it doesn't work:** read it over before you save. Once written up, a conversation cannot be
+edited or deleted by anybody.
+
+**Seeing the history.** When a company has several conversations, a drop-down appears above the
+list so you can show only meetings, only calls, and so on.
+
+### 7.3 The people who work there
+
+Press the **"Contacts"** tab to see the people you know at this company, with their job titles
+and details. Tap one to open their own page.
+
+To add somebody: press **"Add Contact"**, fill in **"Full Name"** (required) plus their title,
+email, phone, LinkedIn and notes, then press **"Add Contact"**.
+
+### 7.4 Two kinds of person — worth knowing
+
+When you fill in the contact name on the company form, that person is stored **on the company
+itself**. They are called the primary contact. They do not get their own page, and they will not
+show up in your Contacts list.
+
+Anybody you add through **"Add Contact"** is different. They get their own page and their own
+history.
+
+**Tip:** if you want a proper page and a conversation history for the main person, add them a
+second time as a contact. It is not a mistake to have them in both places.
+
+### 7.5 Events this company is coming to
+
+The **"Events & Engagements"** card lists every event this company is taking part in.
+
+1. Press **"Link Event"**.
+2. Choose the event from the drop-down.
+3. Add a **"Note"** and a **"Link"** if you want. Both are optional.
+4. Press **"Link Event"**.
+
+**If it doesn't work:** events the company is already going to are not offered in the list. And
+linking cannot be undone in the app, so check before you press.
+
+### 7.6 Acting on a suggested match
+
+**What this is for:** keeping track of introductions you have offered and actually made.
+
+Press the **"Matches"** tab. Each row shows the other company, the score, the reason, and where
+you are up to.
+
+1. Press **"Propose Intro"** once you have offered to introduce them.
+2. Press **"Dismiss"** instead if it is a bad idea.
+3. After you have actually put the two in touch, press **"Mark Introduced"**.
+
+This is bookkeeping only — the app does not email anybody. The buttons just record where you
+are up to.
+
+**Tip:** dismissed suggestions do not disappear. They stay on the list, just no longer counted
+as something to do.
 
 ---
 
-## 12. Events
+## 8. Asking the computer what to do next
 
-The Events page (titled **Event Orchestrator**) tracks networking events. It has two tabs:
-**Upcoming** (dated today or later) and **Archived** (dated in the past), each with a count.
+**What this is for:** getting a short plan when you do not know your next move.
 
-### 12.1 Creating an event
+There are two versions.
 
-1. Press **New Event**.
-2. Type the **Event Name** — required.
-3. Add a **Description**, the **Date**, and the **Time** as free text (for example `6:00 PM`).
-4. Add the **Location**.
-5. Choose the **Type**: Mixer, Workshop, Conference, Dinner, Virtual, Showcase or Other.
-6. Choose the **Status**: Planning, Confirmed, In Progress, Completed or Cancelled.
-7. Write down what you want out of it in **Objectives**.
-8. Press **Create Event**.
+**The short one** reads everything you have written about a company or a person and hands back:
+a summary, one clear **"Best Next Step"**, an **"Outreach Draft"** you can copy, some
+**"Talking Points"**, and some **"Watchouts"**.
 
-**Improve with AI** rewrites the name, description and objectives into more polished copy before
-you save.
+1. Open a company and press the **sparkle** button in the top-right of the first box. On a
+   person's page, press **"Generate"** instead.
+2. Read it. Press **"Regenerate"** if you want another go.
 
-### 12.2 Editing and deleting
+**The longer one** is called **"AI Acquisition Strategy"**. It gives you a **"Key Insight"**, how
+urgent it is, a rough guess at how long the deal will take, and five sections of specific actions.
 
-Press the **pencil** on an event card to edit it. The edit form has one extra field,
-**Post-Event Notes**, for writing up what happened afterwards. Press **Update Event** to save.
+1. Go to **"Pipeline"** and tap any company card. The plan writes itself as the page opens.
+2. Tick the boxes under **"Immediate Next Steps"** as you do them.
+3. Tap the *words* of a step to highlight the parts of the plan that go with it. Press
+   **"Clear highlight"** to undo.
+4. Press **"Regenerate"** for a different plan.
 
-Press the **bin** and confirm to delete an event permanently.
-
-### 12.3 What an event card shows
-
-The name and status badge, the description, and then the date, time, location and type. Objectives
-appear below a divider, and post-event notes below that in the accent colour.
-
-**Add to Google Calendar** at the bottom of every card opens Google Calendar with the name,
-description and location pre-filled. The slot is a placeholder one-hour block on the event date
-rather than the actual time you typed, so adjust it in Google Calendar before saving.
-
-### 12.4 Linking businesses to an event
-
-Companies are linked to events from the business side — open the business profile and use
-**Link Event** on the **Events & Engagements** card (see [6.4](#64-events--engagements)). There is
-no attendee picker on the Events page itself.
-
-Once at least one company is linked, the event card grows two extra sections:
-
-- **Collect Event Fee** — a payment button (see [12.5](#125-collecting-an-event-fee)).
-- **N participating businesses** — press it to expand the list. Each row shows the company and its
-  account manager; click a row to open the company profile.
-
-### 12.5 Collecting an event fee
-
-The **Collect Event Fee** button opens whatever payment link an admin has configured under
-Settings. If no link has been set up yet, the button is greyed out and reads
-*"Configure payment link in Settings"* — press it to go to the Settings page (admins and the CEO only).
-
-### 12.6 Export to CSV
-
-**Export CSV** downloads every event — not just the tab you are on — with these columns: Name,
-Date, Location, Status, Type, Attendees.
+**Tip:** none of this is saved. If you like it, copy it into the company's **"Notes"** or into a
+conversation you write up. The tick boxes are not saved either. The plan also rewrites itself
+every time you open the page, so do not use it as a checklist you come back to.
 
 ---
 
-## 13. Sync Hub
+## 9. People
 
-The Sync Hub is where the team talks. It is a list of threads; open one to read and reply.
+**What this is for:** keeping track of the individual humans you deal with, not just companies.
 
-### 13.1 Starting a thread
+Press **"Contacts"** in the menu. Everybody you know is here, with their initials in a circle,
+their job title and their company. The email address and phone number at the bottom of each card
+are tappable — they open your email app or start a call.
 
-1. Press **New Thread**.
-2. Type a **Title** — required.
-3. Write the **Opening Message** in the rich-text editor.
-4. Choose a **Category**: General, Business, Event, Idea or Announcement.
-5. Optionally, under **Link to Context**, attach the thread to a **Business** and/or an **Event**.
-   Choose **— None —** for neither.
-6. Press **Post Thread**.
+- The **search box** matches a person's name and their email address.
+- The rounded buttons underneath filter by company. **"All Businesses"** clears it.
+
+### 9.1 Adding a person
+
+1. Press **"Add Contact"** in the top-right.
+2. Choose the **"Business"** they work for. You have to pick one.
+3. Type their **"Full Name"**. Also required.
+4. Add their **"Title / Role"**, **"Email"**, **"Phone"** and any **"Notes"**.
+5. Press **"Add Contact"**.
+
+**Tip:** you can also add people from a company's "Contacts" tab, or while writing up a
+conversation — whichever is quicker at the time.
+
+**If it doesn't work:** the rounded company buttons only cover your first 15 companies. If the
+one you want is not there, use the search box.
+
+### 9.2 A person's own page
+
+The top shows their name, job title, a link to their company, and their email, phone and LinkedIn.
+
+- The **pencil** button opens a form to change their details. Press **"Save Contact"**.
+- The **bin** button deletes them, after asking you to confirm. There is no undo.
+- **"Generate"** asks the computer for advice about this person, the same as for a company.
+- **"Interaction History"** at the bottom lists every conversation where you picked this person
+  in the **"Contact Person"** box.
+
+---
+
+## 10. Tasks — your to-do list
+
+**What this is for:** remembering what you promised to do, and when.
+
+Press **"Tasks"** in the menu. Jobs are split across tabs: **"To Do"**, **"In Progress"**,
+**"Done"**, and **"Overdue"** if anything is late.
+
+Each job has a coloured dot for how important it is. Late dates turn red.
+
+### 10.1 Adding a job
+
+1. Press **"New Task"** in the top-right.
+2. Type what needs doing in **"Title"**.
+3. Add more detail in **"Description"** if you want.
+4. Pick a **"Priority"**: **"Low"**, **"Medium"**, **"High"** or **"Urgent"**.
+5. Pick a **"Due Date"**.
+6. Press **"Create Task"**.
+
+New jobs are given to you and start in **"To Do"**.
+
+### 10.2 Getting things done
+
+Tap the **circle** at the left of a job to move it along. To Do becomes In Progress. In Progress
+becomes Done. Done goes back to To Do if you tap again.
+
+Finishing a job fires little paper streamers across the screen and adds 10 points to a score at
+the top of the page.
+
+**Tip:** that score belongs to the whole team, not to you. There is no individual scoreboard and
+nothing to win — it is just a bit of fun.
+
+**If it doesn't work:** you cannot edit a job once it exists. Only move it along or delete it. If
+you typed it wrong, press the **"×"** on the right to delete it, then make a new one.
+
+### 10.3 Asking for advice on a job
+
+**What this is for:** getting help when you are not sure how to tackle something.
+
+1. Start a new job and type a title.
+2. Press **"Improve with AI"**.
+3. A line appears saying *"Chat with AI about how to make this task successful"*. Press it.
+4. Read the advice it opens with — why the job matters, the steps that matter most, and one
+   thing likely to trip you up.
+5. Type any question at the bottom and press Enter to ask more.
+6. Press the back arrow at the top-left to return to your list.
+
+**Tip:** the chat is not saved. Copy anything useful before you leave the page.
+
+---
+
+## 11. Templates — messages you send often
+
+**What this is for:** writing a message once and reusing it, instead of retyping it every time.
+
+A template is a message with blanks in it. The blanks fill themselves in with real names when
+you use it, so one template covers every company.
+
+A blank looks like `{{contact_name}}` — two curly brackets around a word. You never type those
+yourself. You tap a button and the app inserts them.
+
+Three templates are already there when you start: **"Introduction"**, **"Follow Up"** and
+**"Event Invite"**.
+
+### 11.1 Making a template
+
+1. Press **"Templates"** in the menu.
+2. Press **"New Template"** in the top-right.
+3. Give it a name in **"Title"**.
+4. Pick a **"Category"**.
+5. Write the subject line in **"Subject"**.
+6. Tap the small rounded buttons under **"Merge Fields — tap to insert"** to drop blanks into
+   your message.
+7. Write the message in the big box.
+8. Press **"Preview"** to see it filled in with pretend details, so you can check it reads
+   properly.
+9. Press **"Create"**.
+
+To change a template later, press its **pencil**. To remove one, press its **bin**.
+
+### 11.2 The blanks you can use
+
+| Button | What it becomes |
+| --- | --- |
+| Contact Name | The name of the person you are writing to |
+| Business Name | Their company |
+| Industry | The industry they work in |
+| Contact Title | Their job title |
+| Contact Email | Their email address |
+| My Name | Your name |
+| My Title | Your job title |
+| Today | Today's date |
+| Next Week | The same day next week |
+| Business Needs | What they said they need |
+| Business Offers | What they said they offer |
+
+### 11.3 Using a template
+
+1. Open a company and start writing up a conversation (see [7.2](#72-writing-up-a-chat-call-or-meeting)).
+2. Press **"Use Template"** above the notes box.
+3. Tap the template you want. The wording appears in the notes, with the company and person's
+   names already filled in.
+
+**If it doesn't work:** URME cannot send email. It only writes the words — copy them into Gmail,
+Outlook or whatever you use. Also check the message over: only the company name and person's
+name get filled in, so any other blanks come out empty. And ignore the *"Used 0x"* count on each
+card — it never goes up.
+
+---
+
+## 12. Ideas
+
+**What this is for:** putting a suggestion somewhere your team can vote on it and discuss it.
+
+Press **"Ideas"** in the menu. It is a noticeboard. Anyone can post, everyone can vote, and the
+most popular ideas float to the top.
+
+### 12.1 Posting an idea
+
+1. Press **"New Idea"** in the top-right.
+2. Type a **"Title"**.
+3. Describe it in the **"Description"** box.
+4. Pick a **"Category"**.
+5. Press **"Post Idea"**.
+
+**Tip:** **"Improve with AI"** will tidy up your title and description before you post.
+
+### 12.2 Voting and talking
+
+- **To vote**, tap the **thumbs-up** on the left of an idea. Tap it again to take your vote back.
+  One vote each.
+- **To comment**, tap the **speech bubble** (it has the number of comments next to it), type in
+  the box and press **"Send"**.
+- **"AI Improve"** adds two or three computer-written suggestions for making the idea stronger,
+  as a comment.
+- The **pencil** changes an idea. The **bin** deletes it.
+
+**If it doesn't work:** be careful here — anybody can edit or delete anybody's idea, including
+yours. There is no undo.
+
+---
+
+## 13. Events
+
+**What this is for:** organising a meetup and keeping track of which companies come.
+
+Press **"Events"** in the menu. There are two tabs: **"Upcoming"** for future dates and
+**"Archived"** for ones that have been and gone.
+
+### 13.1 Creating an event
+
+1. Press **"New Event"** in the top-right.
+2. Type the **"Event Name"**.
+3. Write a **"Description"**.
+4. Pick the **"Date"**, and type the **"Time"** as words, like `6:00 PM`.
+5. Type the **"Location"**.
+6. Pick a **"Type"**: **"Mixer"**, **"Workshop"**, **"Conference"**, **"Dinner"**,
+   **"Virtual"**, **"Showcase"** or **"Other"**.
+7. Pick a **"Status"**. Start with **"Planning"**.
+8. Write what you want out of it in **"Objectives"**.
+9. Press **"Create Event"**.
+
+**Tip:** **"Improve with AI"** will smarten up the name, description and objectives for you.
+
+### 13.2 Changing or deleting an event
+
+Press the **pencil** on the event card to change it. The form gains one extra box,
+**"Post-Event Notes"**, for writing up how it went afterwards. Press **"Update Event"** to save.
+
+Press the **bin** and confirm to delete it. There is no undo.
+
+### 13.3 Saying which companies are coming
+
+You do this from the company's side, not from the Events screen.
+
+1. Open the company.
+2. Press **"Link Event"** on the **"Events & Engagements"** card.
+3. Pick the event and press **"Link Event"**.
+
+The event card then shows a line saying how many companies are taking part. Tap it to see who,
+along with whose job it is to look after each one. Tap any of them to open that company.
+
+**If it doesn't work:** there is no attendee list on the Events screen itself, and linking cannot
+be undone. Check you have the right event before pressing.
+
+### 13.4 Adding an event to your calendar
+
+Press **"Add to Google Calendar"** at the bottom of the card. Google Calendar opens with the
+name, description and place already filled in.
+
+**If it doesn't work:** the time always comes through as a one-hour morning slot, whatever you
+typed in URME. Fix the time in Google Calendar before you save it.
+
+### 13.5 Taking a fee
+
+Once at least one company is linked, a **"Collect Event Fee"** button appears on the card. It
+opens whatever payment page your company has set up.
+
+**If it doesn't work:** if the button is grey and says *"Configure payment link in Settings"*,
+nobody has added the payment page address yet. Only admins and the CEO can do that — see
+[19](#19-settings).
+
+### 13.6 Saving your events out
+
+**"Export CSV"** downloads a spreadsheet of every event, not only the tab you are looking at.
+
+---
+
+## 14. Sync Hub — talking to your team
+
+**What this is for:** having a conversation about work in a place everybody can find again later.
+
+Press **"Sync Hub"** in the menu. It works like a message board. Somebody starts a thread about
+one topic and everyone replies underneath. Unlike a group chat, nothing scrolls away — you can
+come back to a thread weeks later.
+
+### 14.1 Starting a thread
+
+1. Press **"New Thread"** in the top-right.
+2. Type a **"Title"** — a short summary of what you want to talk about.
+3. Write your first message in **"Opening Message"**.
+4. Pick a **"Category"**: **"General"**, **"Business"**, **"Event"**, **"Idea"** or
+   **"Announcement"**.
+5. If the thread is about one company or one event, pick it under **"Link to Context"**.
+   Otherwise leave both on **"— None —"**.
+6. Press **"Post Thread"**.
 
 The thread opens straight away so you can carry on.
 
-### 13.2 Finding a thread
+### 14.2 Reading and replying
 
-- **Search threads…** matches the title and the opening message.
-- The category chips (**all**, **general**, **business**, **event**, **idea**, **announcement**)
-  filter the list. Pinned threads always sort to the top.
+Tap any thread to open it. The first message is marked **"OP"**. Replies follow underneath, and
+your own appear on the right labelled **"You"**.
 
-Each card in the list shows the title, category badge, any linked business or event, a preview of
-the latest reply (or the opening message if there are no replies yet), who started it, when it was
-last active, and the reply count.
+1. Type in the box at the bottom.
+2. Press the **arrow** button to send.
 
-### 13.3 Reading and replying
+**Tip:** instead of the arrow, hold **Ctrl** and press **Enter**. On a Mac, hold **Cmd** and
+press **Enter**.
 
-Click a thread to open it. The opening post is marked **OP**; replies follow underneath, with your
-own replies aligned to the right and labelled *You*.
+### 14.3 Finding a thread
 
-To reply: type in the box at the bottom and press the send button, or press **Ctrl+Enter**
-(**Cmd+Enter** on a Mac). The thread scrolls to your new message.
+The **search box** matches thread titles and first messages. The rounded category buttons filter
+the list. Pinned threads always sit at the top.
 
-Press the back arrow at the top to return to the list.
+### 14.4 Pinning and archiving
 
-### 13.4 Pinning and archiving (admins and the CEO only)
+**Who can do this:** admins and the CEO only. If you are a standard member you will not see
+these buttons — you can still read and reply to everything.
 
-Pin and archive controls are only visible to admins and the CEO. Regular members see threads and
-can reply, but have no pin or archive buttons.
+- **In the list**, hover over a thread card and use the small **pin** and **archive** buttons on
+  its right-hand edge.
+- **Inside a thread**, press the **three-dots** button at the top and choose **"Pin Thread"**,
+  **"Unpin Thread"** or **"Archive Thread"**.
 
-- **From the list:** hover a thread card and use the small **pin** and **archive** buttons on its
-  right-hand edge.
-- **Inside a thread:** press the **⋮** button in the header and choose **Pin Thread** /
-  **Unpin Thread** or **Archive Thread**.
+Pinned threads go to the top of the list for everybody. Archived threads disappear from the main
+list and gather under a line at the bottom saying how many there are — tap it to expand.
 
-Pinned threads sort to the top of the list for everyone. Archived threads disappear from the main
-list; admins and the CEO see them collected under a *"N archived threads"* section at the bottom
-of the page, which expands when clicked. There is no un-archive button.
+**If it doesn't work:** archiving cannot be undone in the app, so be sure before you press it.
 
 ---
 
-## 14. Finance
+## 15. Money
 
-The Finance page (titled **Finance Hub**) tracks money in and money out.
+**What this is for:** keeping a record of what you earned and what you spent.
 
-**Collect Payment** at the top is the same configurable payment button described in
-[12.5](#125-collecting-an-event-fee).
+Press **"Finance"** in the menu. Everything here is built from two kinds of entry. **Revenue**
+is money coming in. **Expense** is money going out.
 
-**Four summary cards** show this month's **Revenue**, this month's **Expenses**, this month's
-**Profit** (which turns red and says *"Running at a loss"* when negative), and total
-**Receivables** with a count of how many are pending.
+Four boxes across the top show this month's money in, money out, profit, and how much you are
+owed. If you spent more than you earned, the profit box turns red and says *"Running at a loss"*.
+Below them, a chart compares money in against money out over the last four months.
 
-Below them, a bar chart compares revenue against expenses for the last four months.
+### 15.1 Writing down money
 
-### 14.1 Logging revenue or an expense
+1. Press **"Log Revenue"** for money in, or **"Log Expense"** for money out.
+2. Pick the **"Category"** that best describes it.
+3. Type the **"Amount"** and check the **"Date"**. Both are needed.
+4. Write a short **"Description"** so you remember what it was.
+5. For money coming in, set **"Payment Status"**: **"Paid"** if you have the money,
+   **"Pending"** if you are still waiting, **"Overdue"** if they are late.
+6. In the box with the coloured border, link the entry to an event and a company if it belongs
+   to one.
+7. Press the button at the bottom to save.
 
-1. Press **Log Revenue** or **Log Expense**.
-2. Choose the **Category**. Revenue offers Event Revenue, Matchmaking Fee, Sponsorship, Consulting
-   and Other Revenue. Expenses offer Venue Cost, Marketing, Operations, Software/Tools, Travel,
-   Payroll and Other Expense.
-3. Enter the **Amount** and the **Date** — both required.
-4. Add a **Description**.
-5. For revenue only, set the **Payment Status**: Paid (the default), Pending or Overdue.
-6. In the highlighted **Link to Event or Business** box, pick the event and/or the client this
-   entry belongs to. Linking is what makes the *By Event* tab and per-partner revenue work, so it
-   is worth doing.
-7. Add any **Notes**.
-8. Press **Log Revenue** / **Log Expense**.
+**Tip:** do link entries to events and companies. It costs two taps and it is the only way the
+app can tell you whether an event made or lost money.
 
-Entries cannot be edited after saving. To correct one, delete it and log it again.
+**If it doesn't work:** you cannot edit an entry after saving. Delete it with the **bin** symbol
+and write it again.
 
-### 14.2 All Entries tab
+### 15.2 The "All Entries" tab
 
-Every entry, newest first. Each row shows an up or down arrow, the description (or the category if
-there is no description), the date, the category badge, any linked event or business, a *Pending* or
-*Overdue* badge where relevant, and the amount in green (revenue) or red (expense).
+Everything you have written down, newest first. Green with a **+** is money in. Red with a **−**
+is money out. Press the **bin** on any line and confirm to delete it.
 
-Press the **bin** on a row and confirm to delete an entry.
+### 15.3 Chasing money people owe you
 
-### 14.3 Receivables tab
+**What this is for:** seeing who has not paid yet, and ticking them off when they do.
 
-Every revenue entry that is not marked paid, with a count in the tab label. Entries marked overdue,
-or dated more than 30 days ago, are flagged **Overdue** and their card is outlined in red. Each row
-shows the date, who it is from, the related event, how many days ago it was, and the amount.
+Press the **"Receivables"** tab. Receivables is a posh word for money you are owed. Every bit of
+income you marked as not-yet-paid is listed here.
 
-Press **Mark Paid** to settle an entry — it leaves this tab immediately. A **Total Outstanding**
-row sits at the bottom.
+Anything more than 30 days old is flagged **"Overdue"** and outlined in red, so the awkward ones
+are obvious.
 
-### 14.4 By Event tab
+1. Look down the list. Each line shows who owes you, how much, and how long it has been.
+2. When the money arrives, press **"Mark Paid"** on that line. It leaves the tab straight away.
 
-Profit and loss per event, most profitable first. Each card shows the event name, **Net Profit**,
-side-by-side **Revenue** and **Expenses** totals, and a bar showing revenue as a share of total
-money moved. Only entries you linked to an event appear here.
+**Tip:** the total at the very bottom is everything you are still waiting on, added up.
 
-### 14.5 Tax Estimate tab
+### 15.4 Which events made money
 
-A rough quarterly picture for the current calendar quarter:
+Press the **"By Event"** tab. Each event shows its **"Net Profit"**, with money in and money out
+side by side. Most profitable first.
 
-- **Current Quarter Breakdown** — total revenue, total expenses and net profit for the quarter.
-- **Revenue Sources** and **Expense Breakdown** — each category with a bar and a total.
-- **Estimated Tax Reserve** — roughly 25% of net profit, split into an indicative federal (~21%)
-  and self-employment (~15.3%) figure. If the quarter is at break-even or a loss it says no reserve
-  is needed.
+**If it doesn't work:** only entries you linked to an event appear here. If the tab is empty,
+start linking them as you go.
 
-This is a rough estimate only. It ignores deductions, credits and state obligations — the page says
-as much at the bottom. Use your accountant's numbers for anything that matters.
+### 15.5 Tax
 
-### 14.6 Exports
+Press the **"Tax Estimate"** tab. It shows this quarter's money in, money out and profit, broken
+down by category, plus a rough amount to put aside — about a quarter of your profit.
 
-- **Export CSV** downloads every entry with these columns: Date, Type, Category, Amount,
-  Description, Status, Business.
-- **Export PDF** downloads a financial summary PDF for the current month: total revenue, total
-  expenses, net, and a table of every entry.
+**If it doesn't work:** treat this as a rough guide only, never as advice. It ignores all sorts
+of real-world rules. Ask an accountant before paying anything.
+
+### 15.6 Saving your figures out
+
+- **"Export CSV"** downloads a spreadsheet of every single entry.
+- **"Export PDF"** downloads a tidy one-page summary of this month.
 
 ---
 
-## 15. Reports
+## 16. Charts
 
-Reports pulls your network, activity and money together into one page. It is read-only apart from
-the revenue goal and the AI summary.
+**What this is for:** seeing how the whole team is doing, in pictures rather than lists.
 
-**Top row of numbers:** total businesses, average health score across active businesses,
-interactions logged this month, and revenue this month.
+Press **"Reports"** in the menu. Nothing here needs anything from you.
 
-**Activity — Last 8 Weeks** is a stacked bar chart of interactions per week, coloured by type
-(meetings, calls, emails, follow-ups and notes).
+- **The four numbers on top** — how many companies you have, the average score, conversations
+  this month, money in this month.
+- **"Activity — Last 8 Weeks"** — how busy each week has been, coloured by the kind of
+  conversation.
+- **"Team Activity"** — who has written up the most conversations.
+- **"At-Risk Relationships"** — companies going cold, worst first. Tap any to open it. This is
+  the one to check on a Monday morning.
+- **"Interaction Breakdown"** — a pie chart of the kinds of conversation you have.
+- **"Pipeline Movement"** — the ten companies that moved most recently this month.
 
-**Team Activity** is a horizontal bar chart of how many interactions each person has logged,
-top eight only.
+### 16.1 Setting a money target
 
-**At-Risk Relationships** lists every active business with a health score below 40, worst first,
-with how long since the last contact. Click a row to open the business.
+Type a number in the small box next to **"Revenue vs Goal"**. The bar underneath fills up as you
+earn.
 
-**Interaction Breakdown — This Month** is a pie chart of interaction types.
+**Tip:** this target is remembered only in the browser you typed it in. It is not shared with
+your team, and it disappears if you clear your browser history.
 
-**Pipeline Movement — This Month** lists the ten businesses changed most recently this month with
-their stage and health score. Click one to open it.
+### 16.2 A written round-up of your week
 
-**Revenue vs Goal — This Month** compares revenue against a monthly target. Type your target into
-the box next to the heading; it is remembered in this browser only (it is not shared with the team,
-and it will reset if you switch browsers or clear your browser data). The default is $10,000.
+1. Press **"Generate Weekly Summary"**.
+2. Wait a few seconds while the computer reads your last seven days.
+3. Read the summary and the suggested priorities for next week.
+4. Press the small **copy** symbol in its corner to copy it, ready to paste into an email.
 
-**AI Weekly Summary:** press **Generate Weekly Summary** to have the AI look at the last seven days
-— interactions logged, businesses that moved stage, new leads, notable conversations, relationships
-going quiet — and write a short executive summary plus two or three priorities for next week. Press
-the **copy** icon in the corner of the result to put it on your clipboard. The summary is not saved.
+**Tip:** it is not saved. Copy it before you leave the page.
 
-**Export Financial PDF** at the bottom saves this month's finance summary as a PDF, the same report
-as the Finance page's Export PDF.
+**"Export Financial PDF"** at the very bottom saves this month's money summary.
 
 ---
 
-## 16. Team, roles and account management
+## 17. Your team, and who is allowed to do what
 
-The Team page lists everyone in the workspace. The subtitle shows how many members there are and,
-if any account is locked, how many.
+Press **"Team"** in the menu to see everybody you work with. Each card shows their photo or
+initial, their name, their job title, their email and phone, whether they are around, and
+whether their account is locked.
 
-Each card shows the photo or initial, the display name, an **ADMIN** or **CEO** badge where
-relevant, the job title, email and phone, the working status (Active, On Leave, Inactive), a
-**Locked** badge, a **2FA Enabled** badge, the subscription status for standard members, and when
-the profile was last updated.
+### 17.1 The three kinds of account
 
-A small **padlock** icon on a card means you are not allowed to administer that account.
+**What this is for:** understanding why you can see some buttons and not others.
 
-### 16.1 The three roles
+- A **standard member** gets on with normal work.
+- An **admin** can also look after other people's accounts.
+- The **CEO** is the same as an admin, with its own badge.
 
-- **user** — a standard member.
-- **admin** — can administer other members.
-- **ceo** — the same administrative rights as admin, plus its own badge.
+Two accounts are **protected**: the person who runs the whole system, and the CEO. Only the
+system owner can touch those two.
 
-Two accounts are **protected**: the super-admin (Michael Alexander) and the CEO (AJ Macedonia).
-Protection is tied to those two specific accounts, not to their role or their email address.
+A small **padlock** on somebody's card means that account is not yours to change.
 
-### 16.2 Who can administer whom
+You can always change your own details, whoever you are.
 
-| You are | You can administer |
+### 17.2 Who can look after whom
+
+| If you are… | You can look after… |
 | --- | --- |
-| The super-admin (Michael) | Everyone, including the CEO |
-| The CEO or an admin | Standard members only — not the super-admin, and not the CEO |
-| A standard member | Nobody |
+| The person who runs the system | Everybody, including the CEO |
+| The CEO, or an admin | Standard members only |
+| A standard member | Nobody but yourself |
 
-Editing **your own** profile is not "administering" and is always allowed, though what a standard
-member can change about themselves is limited — see [16.4](#164-editing-a-members-profile).
+**Tip:** nobody can change anybody's account type inside URME, not even the CEO. That has to be
+done outside the app — ask whoever runs your system.
 
-### 16.3 Adding a team member
+### 17.3 Adding somebody
 
-**Admins and the CEO see an Add Team Member button at the top of the Team page. Standard members
-do not.**
+**Who can do this:** admins and the CEO. Standard members will not see the button.
 
-1. Press **Add Team Member**.
-2. Fill in **Full Name**, **Email** and a **Temporary Password** (at least 8 characters).
-3. **Role** is fixed to `user` and cannot be changed — only standard members can be created here.
-4. Press **Create Account**.
+1. Press **"Add Team Member"** near the top of the Team screen.
+2. Fill in their **"Full Name"**, their **"Email"**, and a starter password of at least 8
+   characters in **"Temporary Password"**.
+3. Press **"Create Account"**.
+4. Tell them the starter password and ask them to change it on their Profile page.
 
-Tell the new member their temporary password and ask them to change it under
-**Profile → Account Security**.
+New accounts are always standard members. That cannot be changed on this form.
 
-The same **Add Team Member** button also appears under **Profile → Team**, which admins and the
-CEO have as an extra tab.
+### 17.4 Changing somebody's details
 
-### 16.4 Editing a member's profile
+Tap anywhere on their card. What you see depends on who you are:
 
-Click anywhere on a member's card to open **Edit Team Member**. What you see depends on who you
-are and whose card it is:
+- **If the account is not yours to change**, you just get a message saying *"Contact admin to
+  edit this profile"*.
+- **If you are a standard member looking at your own card**, you get a short form with only
+  **"Email"** and **"New Password"**. Press **"Save Security Settings"**.
+- **Otherwise** you get the full form: photo, **"Display Name"**, **"Job Title"**, **"Phone"**,
+  **"Bio"**, **"LinkedIn URL"**, **"Department"**, **"Location"**, **"Skills"** and
+  **"Status"**. Press **"Save Changes"**.
 
-- **If you may not administer that person**, the dialog just says *"Contact admin to edit this
-  profile"*.
-- **If you are a standard member opening your own card**, you get a cut-down form with only
-  **Email** and **New Password**. Press **Save Security Settings**. Standard members cannot change
-  their own name, title, phone or bio — ask an admin.
-- **Otherwise** you get the full form:
-  1. Upload a photo with the small **+** badge on the avatar.
-  2. Edit **Display Name**, **Job Title**, **Phone**, **Bio**, **LinkedIn URL**, **Department**
-     and **Location**.
-  3. Add **Skills**: type one and press Enter or **Add**; press the **×** on a chip to remove it.
-  4. Set the **Status**: Active, On Leave or Inactive.
-  5. Press **Save Changes**.
+**"Subscription Management"** — where you switch somebody's access on — only appears when the
+account is yours to look after and they are a standard member.
 
-**Subscription Management** — a **Subscription Status** dropdown (None, Active, Expired) and a
-**Paid Through Date** — only appears when you may administer that person *and* they are a standard
-member. This is how you switch someone's access back on after they pay.
+### 17.5 Helping somebody who is locked out
 
-Roles cannot be changed anywhere in the app. Promoting someone to admin or CEO, or demoting them,
-has to be done by whoever administers the workspace database.
+**Who can do this:** admins and the CEO.
 
-### 16.5 Unlocking a locked account
+1. Find their card. It has a red **"Locked"** label.
+2. Press **"Unlock"**.
 
-If a member's card shows a **Locked** badge and you may administer them, an **Unlock** button
-appears at the bottom of the card. Press it and the account is unlocked immediately. Standard
-members never see this button.
+They can log in again straight away.
 
-### 16.6 Deleting an account
+### 17.6 Switching somebody's access back on after they pay
 
-A **Delete** button appears on a card only when all of the following are true:
+1. Tap their card.
+2. Set **"Subscription Status"** to **"Active"**, or put a future date in
+   **"Paid Through Date"**.
+3. Press **"Save Changes"**.
 
-- you may administer that person,
-- their role is `user` (admins and the CEO cannot be deleted from the app),
-- it is not your own card (you cannot delete yourself).
+### 17.7 Removing somebody
 
-Press **Delete**, confirm, and the account is removed. This cannot be undone.
+Press **"Delete"** on their card and confirm. There is no undo.
 
-The same delete control appears next to eligible members under **Profile → Team**.
+**If it doesn't work:** the **"Delete"** button only appears when the person is a standard
+member, the card is not your own, and the account is yours to look after. You cannot delete an
+admin, the CEO, or yourself.
 
-### 16.7 What a standard member sees on this page
+### 17.8 What a standard member does not see
 
-A standard member can open the Team page and browse the member cards they are allowed to see, but has:
+Nothing below is broken or missing — these buttons simply are not yours to press:
 
-- no **Add Team Member** button,
-- a padlock instead of an editable form on everyone else's card,
-- no **Unlock** buttons,
-- no **Delete** buttons,
-- no **Subscription Management** section,
-- and on their own card, only email and password fields.
+- the **"Add Team Member"** button
+- **"Unlock"** buttons
+- **"Delete"** buttons
+- the **"Subscription Management"** boxes
+- the **"Settings"** word in the menu
+- the **pin** and **archive** buttons in Sync Hub
+
+On your own card you get email and password, and nothing else. Ask an admin to change your name
+or job title.
 
 ---
 
-## 17. Profile
+## 18. Your own account
 
-**Profile** is your own account. The header shows your email address, and the page is split into
-tabs. Admins and the CEO get one extra tab, **Team**.
+Press **"Profile"** in the menu. Your email address is shown at the top, and the page is split
+into tabs.
 
-### 17.1 My Profile tab
+### 18.1 Your details
 
-Your photo, name, email, role and job details sit at the top.
+**What this is for:** updating your name, photo, job title and phone number.
 
-- **Change your photo:** hover the avatar and click the camera icon, then choose an image. It is
-  saved straight away.
-- **Edit:** opens the same full **Edit Team Member** dialog described in
-  [16.4](#164-editing-a-members-profile), for your own account.
-- **Full Name**, **Job Title**, **Phone** and **Bio** can be edited inline and saved with
-  **Save Profile**. **Standard members find these fields greyed out and have no Save Profile
-  button** — they can only change email and password.
-- **Logout** signs you out.
-- **View Full Team →** at the bottom opens the Team page.
+1. To change your photo: hover over the current picture and tap the **camera** symbol, then
+   choose an image. It saves by itself.
+2. Type over **"Full Name"**, **"Job Title"**, **"Phone"** or **"Bio"**.
+3. Press **"Save Profile"**.
 
-Your LinkedIn URL and skills are shown here read-only if they have been filled in — change them
-through the **Edit** dialog.
+Pressing **"Edit"** opens a bigger form with a few more boxes, including LinkedIn, department,
+location and skills.
 
-### 17.2 Account Security: email, password and 2FA
+**If it doesn't work:** if these boxes are greyed out and there is no **"Save Profile"** button,
+you are a standard member. You can still change your email and password further down the page,
+but ask an admin to change anything else.
 
-In the **Account Security** block on the My Profile tab:
+### 18.2 Your password and the 6-digit code
 
-- **Change your email:** type the new address in **Email** and press **Update Credentials**.
-- **Change your password:** type a new one (at least 8 characters) in **New Password** and press
-  **Update Credentials**. Leave the field blank to keep your current password.
+**What this is for:** keeping your account safe.
 
-**Turning on two-factor authentication**
+Find the **"Account Security"** section, part way down the page.
 
-1. Press **Enable 2FA**.
-2. A QR code appears. Open your authenticator app and scan it.
-3. If scanning fails, use the **Manual setup key** shown underneath — press **Copy setup key** and
-   paste it into your authenticator app. **Start over** generates a fresh code if something went wrong.
-4. Type the 6-digit code from your app into the six boxes.
-5. Press **Verify 2FA Code**. A *"2FA enabled"* message confirms it, and a **2FA Enabled** badge
-   appears on your Team card.
+**To change your email or password:**
 
-From now on, signing in with email and password asks for a code (see [1.3](#13-two-factor-authentication-at-login)).
+1. Type the new email in **"Email"**, or a new password in **"New Password"**.
+2. Press **"Update Credentials"**.
 
-**Turning it off:** press **Disable 2FA**. Do this before you wipe or replace the phone holding
-your authenticator app, or you may lock yourself out.
+Leave the password box empty if you only want to change your email.
 
-### 17.3 Subscription tab
+**To switch on the 6-digit code:**
 
-Shows whether your access is **Active** (with the paid-through date), **Expires in N days**, or
-**Expired**. When it is expired or was never set up, a **Reactivate — $25/month** button opens the
-payment page in a new tab. Admins also see a note pointing at the Team page, where they manage
-other people's subscriptions.
+1. Press **"Enable 2FA"**.
+2. A square black-and-white pattern appears. Open an authenticator app on your phone (Google
+   Authenticator, Authy or similar) and point its camera at the pattern.
+3. Your phone now shows a 6-digit number for URME. Type it into the six boxes.
+4. Press **"Verify 2FA Code"**. A message says *"2FA enabled"*.
 
-### 17.4 My Businesses tab
+**Tip:** if your phone cannot read the pattern, press **"Copy setup key"** and type or paste
+that long code into the app by hand instead. **"Start over"** gives you a fresh pattern.
 
-**Managed Businesses** lists every company where you are the account manager, with its stage.
-Click one to open it. **Related Events** lists events any of those companies are linked to, marked
-*Upcoming* or *Past*, with the company that connects you to each one.
+**If it doesn't work:** getting a new phone? Press **"Disable 2FA"** here *first*, then set it up
+again on the new phone. If you skip that step you can lock yourself out of your own account.
 
-### 17.5 Activity tab
+### 18.3 The other tabs
 
-**My Logged Interactions** — every interaction you have logged, anywhere in the app, in the same
-timeline format (with the same type filter) as a business profile.
+- **"Subscription"** — how long your access lasts. If it has run out there is a
+  **"Reactivate — $25/month"** button.
+- **"My Businesses"** — the companies you look after, and events they are going to.
+- **"Activity"** — every conversation you have written up, anywhere in the app.
+- **"AI Settings"** — nothing to do here. It just explains that the computer helper is already
+  set up and you never need your own key for it.
+- **"Settings"** — two switches, explained in [21](#21-reminders-and-tasks-that-appear-on-their-own).
+- **"Team"** — a short list of colleagues. Admins and the CEO only.
 
-### 17.6 AI Settings tab
+### 18.4 The help button
 
-Informational only. AI features run through URME's own server-side integration; there is nothing
-to configure and you never need to supply a personal API key.
-
-### 17.7 Settings tab
-
-Two switches, both of which apply to you in this browser only:
-
-- **Push Notifications** — see [20.1](#201-browser-notifications).
-- **Auto-create tasks on stage change** — see [20.2](#202-automatic-tasks-when-a-stage-changes).
-
-### 17.8 Team tab (admins and the CEO only)
-
-A compact list of team members with name, email, role and job title, an **Add Team Member** button,
-and a bin icon next to members you are allowed to delete. It is a shortcut; the full Team page has
-more. Note that this particular list hides the super-admin account.
+At the very bottom of the Profile page is a button called **"HELP Yourself"**. It opens the
+short version of this guide, inside the app, with a search box. Everybody has it.
 
 ---
 
-## 18. Settings (admins and the CEO only)
+## 19. Settings
 
-**Settings** appears in the sidebar for admins and the CEO. A standard member who navigates to it
-directly gets an **Access Denied** screen with a **Back to Dashboard** button.
+**Who can do this:** admins and the CEO. If you are a standard member you will not see
+**"Settings"** in the menu, and going to it directly shows a page saying *"Access Denied"*. That
+is normal, not a fault.
 
-**Payment Collection** configures the payment button that appears on the Finance page and on event
-cards:
+**What this is for:** telling URME where to send people who want to pay you.
 
-1. Paste the **Payment Link URL** — a Stripe payment link or any other payment page URL.
-2. Set the **Button Label** (defaults to *Make Payment*).
-3. Write a **Payment Description** explaining what the payment is for.
-4. A **Preview** shows how the button will look once a URL is entered.
+1. Press **"Settings"** in the menu.
+2. Paste the web address of your payment page into **"Payment Link URL"**.
+3. Type what the button should say in **"Button Label"**.
+4. Explain what the payment is for in **"Payment Description"**.
+5. Check the preview underneath looks right.
+6. Type your company name under **"Business Name"**.
+7. Press **"Save Settings"**.
 
-**Business Branding** holds your **Business Name**, used for branding inside the app.
-
-Press **Save Settings** to save everything on the page. Until a payment link is saved, payment
-buttons elsewhere in the app stay greyed out.
+**If it doesn't work:** until this is filled in, the payment buttons everywhere else in the app
+stay grey and do nothing.
 
 ---
 
-## 19. Where AI shows up
+## 20. Where the computer helper appears
 
-Every AI feature runs through URME's own service. You never enter an API key, and results are
-generated fresh each time — nothing here is stored unless the feature explicitly saves it.
+**What this is for:** knowing which computer-written results are saved and which vanish.
 
-| Where | What it does | Saved? |
+Anything with a **sparkle** on it uses the computer helper. You never need to set it up, and you
+never need your own key or account for it.
+
+| Where | What it does | Kept? |
 | --- | --- | --- |
-| Businesses → **Synergy Scanner** | Suggests up to five partnerships with a score and reason | Yes, as matches |
-| Add / Edit Business → **Improve with AI** | Rewrites description, needs and offers | Only when you save the form |
-| Business profile → **sparkle** button | Relationship brief: summary, next step, outreach draft, talking points, watchouts | No |
-| Pipeline card → **AI Acquisition Strategy** | Five-section acquisition plan, priority and timeline | No |
-| Contact profile → **Generate** | Contact brief: summary, next step, outreach draft, talking points, watchouts | No |
-| New / Edit Task → **Improve with AI** | Rewrites the task title and description | Only when you save the task |
-| Task AI Coach | A chat about how to land a specific task | No |
-| New / Edit Idea → **Improve with AI** | Rewrites the idea title and description | Only when you save the idea |
-| Idea card → **AI Improve** | Posts concrete suggestions as a comment | Yes, as a comment |
-| New / Edit Event → **Improve with AI** | Rewrites the event name, description and objectives | Only when you save the event |
-| Reports → **Generate Weekly Summary** | Executive summary of the week plus priorities | No |
+| Businesses → "Synergy Scanner" | Suggests pairs of companies who should meet | **Yes** |
+| Add or edit a company → "Improve with AI" | Rewrites the description, needs and offers | Only if you save the form |
+| A company's **sparkle** button | Advice: summary, next step, draft message, talking points | No |
+| Pipeline card → "AI Acquisition Strategy" | A longer five-part plan | No |
+| A person's page → "Generate" | The same kind of advice, about a person | No |
+| New or edit a task → "Improve with AI" | Rewrites the title and description | Only if you save the task |
+| Task chat | Answers questions about one job | No |
+| New or edit an idea → "Improve with AI" | Rewrites the title and description | Only if you save the idea |
+| An idea → "AI Improve" | Posts suggestions as a comment | **Yes** |
+| New or edit an event → "Improve with AI" | Rewrites the name, description and objectives | Only if you save the event |
+| Reports → "Generate Weekly Summary" | A round-up of your week | No |
 
-The AI is only as good as what you have written down. Filling in **Needs** and **Offers** on every
-business, and logging interactions as you go, is what makes the matches and the briefs useful.
+**Tip:** if a result looks useful, copy it somewhere safe before you move on. Pasting it into
+the company's **"Notes"** works well.
 
----
-
-## 20. Notifications and automations
-
-### 20.1 Browser notifications
-
-Turn on **Push Notifications** under **Profile → Settings** and allow the browser prompt. URME
-then checks, when you open the Dashboard, for tasks that are due or overdue and businesses with no
-contact in 14 days, and shows up to three desktop notifications.
-
-Two things to know: these fire only while URME is open in a browser tab — they are not real
-background push alerts, and closing the app stops them. And the setting is per browser, so
-enabling it on your laptop does not enable it on your phone. If you blocked notifications
-previously, the toggle will fail with *"Notifications blocked. Enable in browser settings."* and
-you have to allow them in your browser's site settings first.
-
-### 20.2 Automatic tasks when a stage changes
-
-While **Auto-create tasks on stage change** is on (the default, under **Profile → Settings**),
-moving a business to a new stage — by dragging it on the Pipeline or changing the stage in the edit
-form — creates a follow-up task assigned to you and writes a note into the business's timeline:
-
-| New stage | Task created | Priority | Due |
-| --- | --- | --- | --- |
-| Contacted | Send intro email to *company* | Medium | in 2 days |
-| Meeting Scheduled | Prepare meeting agenda for *company* | High | tomorrow |
-| In Discussion | Draft proposal for *company* | Medium | in 5 days |
-| Collaborating | Set up collaboration framework with *company* | Medium | in 7 days |
-| Partnered | Schedule quarterly review with *company* | Low | in 30 days |
-
-Moving a business back to **New Lead** or to **Archived** creates nothing. Turning the switch off
-stops the tasks and the timeline notes; it is per browser, like the notification setting.
-
-### 20.3 Health scores and follow-up dates
-
-The health score out of 100 that you see on every business card is worked out from three things:
-
-- **How recently** you last spoke — up to 40 points, full marks within a week, nothing after 60 days.
-- **How often** you have spoken — up to 30 points, full marks at ten or more logged interactions.
-- **How far** the relationship has progressed — up to 30 points, from 5 for a new lead to 30 for a
-  partnership.
-
-The badge label follows the number: **Strong** (80+), **Good** (60–79), **Cooling** (40–59),
-**At Risk** (20–39), **Cold** (under 20).
-
-Scores are recalculated when you log an interaction. A company's next follow-up date is set at the
-same time, based on its stage: 2 days after a scheduled meeting, 5 for a new lead, 7 for contacted
-or in-discussion, 14 for collaborating, 21 for partnered.
+**If it doesn't work:** the helper only knows what you have typed into URME. Thin results
+usually mean thin "Needs" and "Offers" boxes, or no written-up conversations yet.
 
 ---
 
-## 21. Roles at a glance
+## 21. Reminders and tasks that appear on their own
 
-| Feature | Standard member | Admin / CEO |
+### 21.1 Reminders on your screen
+
+**What this is for:** being nudged about late jobs and companies going quiet.
+
+1. Press **"Profile"**, then the **"Settings"** tab.
+2. Switch on **"Push Notifications"**.
+3. Your browser asks permission. Press **Allow**.
+
+After that, URME checks for late jobs and companies you have not contacted in two weeks, and
+pops up to three little reminders.
+
+**Tip:** these only appear while URME is actually open in a browser tab. Close the app and they
+stop, so do not rely on them like a phone alarm.
+
+**If it doesn't work:** if the switch flicks back and says notifications are blocked, you said No
+to your browser at some point. Go into your browser's site settings, allow notifications for
+URME, then try again. You have to do this separately on each device.
+
+### 21.2 Tasks that appear on their own
+
+**What this is for:** understanding where a job you never wrote came from.
+
+When you move a company along the Pipeline board, URME usually writes your next job for you:
+
+| Move a company to… | You get the job… | When it is due |
 | --- | --- | --- |
-| Dashboard, Pipeline, Businesses, Contacts | Full access | Full access |
-| Tasks, Ideas, Events, Templates, Finance, Reports | Full access | Full access |
-| Sync Hub — read and reply | Yes | Yes |
-| Sync Hub — pin and archive threads | No | Yes |
-| Settings page (payment link, branding) | No — Access Denied | Yes |
-| Team page — view members | Yes | Yes |
-| Team page — Add Team Member | No | Yes |
-| Team page — edit another member's profile | No (padlock) | Yes, except protected accounts |
-| Team page — Unlock a locked account | No | Yes, except protected accounts |
-| Team page — Delete an account | No | Yes, standard members only |
-| Manage someone's subscription | No | Yes, standard members only |
-| Edit your own name, title, phone, bio | No — ask an admin | Yes |
-| Change your own email, password and 2FA | Yes | Yes |
-| Requires an active subscription to use the app | Yes | No |
-| Change anyone's role | Not available in the app | Not available in the app |
+| "Contacted" | Send intro email | in 2 days |
+| "Meeting Scheduled" | Prepare meeting agenda | tomorrow |
+| "In Discussion" | Draft proposal | in 5 days |
+| "Collaborating" | Set up collaboration framework | in 7 days |
+| "Partnered" | Schedule quarterly review | in 30 days |
 
-Neither an admin nor the CEO can administer the two protected accounts; only the super-admin can.
-Nobody can delete their own account from the app.
+A short note also goes into the company's history saying it moved.
 
----
+**Tip:** if you would rather write your own jobs, go to **Profile → "Settings"** and switch off
+**"Auto-create tasks on stage change"**. Moving a company back to "New Lead" or "Archived" never
+creates anything anyway.
 
-## 22. Tips and FAQ
+### 21.3 What the coloured score means
 
-**I forgot my password — what now?**
-Use **Forgot password?** on the login screen. Open the emailed link in the same browser you want to
-reset from, then set the new password twice. If the link says it is invalid, it has expired or has
-already been used; request a fresh one.
+**What this is for:** reading the little number and colour on every company card.
 
-**Why can I not see the Settings entry in the sidebar?**
-Settings is for admins and the CEO. Standard members do not see it, and going to the address
-directly shows Access Denied.
+Every company gets a score out of 100. It is the app's guess at how healthy your relationship
+is. Green and high is good. Red and low means you are losing them.
 
-**Why is there a padlock on a team member's card?**
-You are not allowed to administer that account. Standard members see a padlock on everyone else's
-card; admins and the CEO see one on the two protected accounts.
+Three things make it up:
 
-**Why can I not edit my own name?**
-Standard members can only change their own email and password. Anything else on the profile —
-name, job title, phone, bio, skills — has to be changed by an admin or the CEO.
+- **How recently you last spoke.** This matters most. Talking within the last week scores full
+  marks; nothing at all after two months.
+- **How many times you have spoken.** Ten or more conversations scores full marks.
+- **How far along the company is** on the Pipeline board. A partner scores more than a new lead.
 
-**Why is the Add Team Member button missing?**
-Only admins and the CEO can create accounts. There is no self-signup either — ask an admin to
-create the account for you.
+The words next to the number are the score in plain English: **Strong** (80 and up), **Good**,
+**Cooling**, **At Risk**, and **Cold** at the bottom.
 
-**Someone is locked out. How do I let them back in?**
-Open the Team page as an admin or the CEO, find their card, and press **Unlock**.
+The score updates itself every time you write up a conversation. You never set it by hand.
 
-**A member says the app kicked them out to a "Access Has Expired" screen.**
-Their subscription lapsed. An admin can open their card on the Team page and set **Subscription
-Status** to *Active*, or set a **Paid Through Date** in the future.
-
-**Why is the same business listed twice?**
-Duplicate detection only warns you when you add a business by hand — it does not run during CSV
-import, and you can dismiss the warning with **Create Anyway**. Delete the extra record from its
-profile (**⋮ → Delete**).
-
-**Why is nothing showing on the map?**
-Companies need coordinates. Switch to map view and press **Geocode All** to look them up from City
-and State. A company with neither a city nor a state cannot be placed.
-
-**Why did my AI suggestion disappear?**
-Relationship briefs, contact briefs, acquisition strategies, coach conversations and weekly
-summaries are generated on the spot and are not saved. Copy anything you want to keep — the weekly
-summary has a copy button, and you can paste a brief into a business's notes or an interaction log.
-
-**The Synergy Scanner is not finding anything useful.**
-It works from the **Needs** and **Offers** fields. Fill those in for each company (Improve with AI
-can help), and note that it only looks at the first 20 businesses in your list per run.
-
-**I made a mistake in an interaction / a task / a finance entry.**
-Interactions cannot be edited or deleted. Tasks and finance entries cannot be edited, but they can
-be deleted and re-created.
-
-**Can URME send the email in a template?**
-No. Templates fill in the wording for you; copy the finished text into your own email client to send it.
-
-**Can I un-archive a Sync Hub thread, or un-link a business from an event?**
-Not from the app. Both are one-way today.
-
-**Where do the numbers on the Dashboard come from?**
-Everything is computed live from your businesses, tasks, events and matches. Nothing on the
-Dashboard needs a refresh button — it updates as you work.
+**Tip:** the only way to raise a score is to talk to the company and write it up. There is no
+shortcut.
 
 ---
 
-## 23. Things that are limited or missing today
+## 22. Who can do what — quick table
 
-Recorded here so nobody hunts for a button that does not exist.
+| Thing | Standard member | Admin / CEO |
+| --- | --- | --- |
+| Dashboard, Pipeline, Businesses, Contacts | Yes | Yes |
+| Tasks, Ideas, Events, Templates, Finance, Reports | Yes | Yes |
+| Read and reply in Sync Hub | Yes | Yes |
+| Pin or archive a Sync Hub thread | No | Yes |
+| The "Settings" screen | No — "Access Denied" | Yes |
+| See the Team screen | Yes | Yes |
+| Add a team member | No | Yes |
+| Change somebody else's details | No — padlock | Yes, except the two protected accounts |
+| Unlock a locked account | No | Yes, except the two protected accounts |
+| Delete an account | No | Yes, standard members only |
+| Switch somebody's access on or off | No | Yes, standard members only |
+| Change your own name, job title, phone, bio | No — ask an admin | Yes |
+| Change your own email, password and 6-digit code | Yes | Yes |
+| Need an up-to-date subscription | Yes | No |
+| Change anybody's account type | Not possible in the app | Not possible in the app |
 
-- **No editing after the fact** for interactions (no edit, no delete), tasks (status and delete
-  only) or finance entries (mark paid and delete only).
-- **Roles cannot be changed in the app.** The Add Team Member form always creates a standard member,
-  and there is no role dropdown anywhere.
-- **One-way actions:** archiving a Sync Hub thread, and linking a business to an event, cannot be
-  reversed from the interface.
-- **Events have no attendee picker.** Businesses are attached from the business profile only.
-- **"Add to Google Calendar"** uses a placeholder one-hour slot rather than the time typed on the
-  event, so adjust the time in Google Calendar.
-- **Template use counts always read "Used 0x".** Applying a template does not increase the counter.
-- **Browser notifications only work while the app is open**, and are configured per browser.
-- **The revenue goal on Reports is stored in your browser**, not shared with the team, and resets
-  if you clear your browser data.
-- **Task XP is a team-wide total** (10 points per completed task) with no per-person score and
-  nothing attached to it.
-- **Global search opens the Tasks page** for a task result rather than that specific task.
-- **The contact filter chips on the Contacts page cover the first 15 companies only.** Use the
-  search box for anything beyond that.
-- **Idea permissions are open:** anyone can edit or delete anyone's idea.
-- **CSV import creates businesses only** — contacts, tasks and finance entries have no importer.
-- **The Acquisition Strategy page regenerates every time you open it**, which uses an AI call each
-  visit even if you only wanted to re-read the previous plan.
+Neither an admin nor the CEO can change the two protected accounts. Nobody can delete their own
+account.
+
+---
+
+## 23. Questions people ask
+
+**I forgot my password. What now?**
+Press **"Forgot password?"** on the login screen. Open the emailed link in the same browser you
+want to log in with, then type your new password twice. If the link says it is invalid, it has
+expired or been used already — ask for a fresh one.
+
+**Why can't I see "Settings" in the menu?**
+It is for admins and the CEO only. You are not missing anything you need.
+
+**Why is there a padlock on somebody's card?**
+That account is not yours to change. Standard members see a padlock on everybody but themselves.
+
+**Why can't I change my own name?**
+Standard members can only change their own email and password. Ask an admin for anything else.
+
+**Why can't I add a team member?**
+Only admins and the CEO can create accounts. There is no self-signup either.
+
+**Somebody is locked out. How do I let them back in?**
+If you are an admin or the CEO: open **"Team"**, find their card, press **"Unlock"**.
+
+**A colleague got thrown out to a screen saying their access expired. What do I do?**
+Their subscription has run out. An admin can tap their card on the Team screen and set
+**"Subscription Status"** to **"Active"**, or put a future date in **"Paid Through Date"**.
+
+**Why is the same company in my list twice?**
+The duplicate warning only appears when you add a company by hand, and it can be dismissed. It
+never runs on spreadsheet uploads. Open the extra one and delete it from the **three-dots** menu.
+
+**Nothing is showing on the map.**
+Companies need coordinates first. Switch to map view and press **"Geocode All"**. A company with
+no city and no state cannot be placed at all.
+
+**My computer-written advice disappeared!**
+Most of it is never saved — see the table in [20](#20-where-the-computer-helper-appears). Copy
+anything you want to keep. The weekly summary has a copy button; for the rest, paste it into a
+company's **"Notes"**.
+
+**The match suggestions are rubbish.**
+They are built entirely from the **"Needs"** and **"Offers"** boxes. Fill those in for each
+company — "Improve with AI" can help — and try again. The scanner also only looks at your first
+20 companies each time you run it.
+
+**I made a mistake writing up a meeting.**
+Conversations cannot be edited or deleted by anybody, sorry. Write a second, correcting one.
+
+**I made a mistake on a task or a money entry.**
+Neither can be edited, but both can be deleted and written again.
+
+**Can URME send my emails for me?**
+No. Templates write the words; you copy them into your own email app.
+
+**Can I un-archive a thread, or un-link a company from an event?**
+Not in the app. Both are one-way.
+
+**Do I need to refresh the Dashboard?**
+No. Everything on it works itself out from your companies, jobs, events and matches as you go.
+
+---
+
+## 24. Things you cannot do yet
+
+Listed here so you do not go hunting for a button that is not there.
+
+- **Conversations cannot be edited or deleted** at all, by anybody.
+- **Tasks and money entries cannot be edited.** Delete and re-create instead.
+- **Account types cannot be changed** anywhere in the app. New accounts are always standard
+  members.
+- **Some things are one-way:** archiving a Sync Hub thread, and linking a company to an event.
+- **The Events screen has no attendee list.** Companies are linked from their own page.
+- **"Add to Google Calendar" gets the time wrong** — it always uses a one-hour morning slot.
+  Fix it in Google Calendar.
+- **Template use counts always say "Used 0x"**, even for templates you use constantly.
+- **Screen reminders only work while the app is open**, and are set up separately on each device.
+- **The money target on the Charts screen** lives in your browser only. It is not shared, and it
+  disappears if you clear your browser history.
+- **The team score on Tasks** is one number for everybody. There is no personal score.
+- **Searching for a task** takes you to the Tasks screen, not to that exact task.
+- **The company buttons on the Contacts screen** only cover your first 15 companies. Use the
+  search box for the rest.
+- **Anybody can edit or delete anybody's idea.**
+- **Only companies can be uploaded from a spreadsheet** — not people, jobs or money.
+- **The company plan rewrites itself every time you open it**, so you cannot come back to the
+  same one.

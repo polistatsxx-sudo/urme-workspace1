@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Search, X, LifeBuoy, Info } from 'lucide-react';
+import { Search, X, LifeBuoy, Info, Lightbulb, HelpCircle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import PageHeader from '@/components/shared/PageHeader';
@@ -8,9 +8,36 @@ import { HELP_SECTIONS, groupHelpSections, searchHelpSections } from '@/data/hel
 
 const ALL = 'all';
 
+function Callout({ icon: Icon, label, children, tone }) {
+  const tones = {
+    tip: 'bg-accent/10 border-accent/20 text-accent',
+    stuck: 'bg-orange-500/10 border-orange-500/25 text-orange-400',
+    role: 'bg-primary/5 border-primary/20 text-primary',
+  };
+  return (
+    <div className={`flex items-start gap-2 border rounded-lg p-3 ${tones[tone]}`}>
+      <Icon className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
+      <p className="text-xs text-foreground/80 leading-relaxed">
+        <span className="font-semibold">{label} </span>
+        {children}
+      </p>
+    </div>
+  );
+}
+
 function SectionBody({ section }) {
+  // `whatFor` is deliberately not repeated here: it sits in the always-visible header
+  // above, so a reader sees what the topic is for before any of the steps.
   return (
     <div className="space-y-3">
+      {section.body?.length > 0 && (
+        <div className="space-y-2">
+          {section.body.map((paragraph, i) => (
+            <p key={i} className="text-sm text-muted-foreground leading-relaxed">{paragraph}</p>
+          ))}
+        </div>
+      )}
+
       {section.steps?.length > 0 && (
         <ol className="space-y-2">
           {section.steps.map((step, i) => (
@@ -24,22 +51,16 @@ function SectionBody({ section }) {
         </ol>
       )}
 
-      {section.body?.length > 0 && (
-        <div className="space-y-2">
-          {section.body.map((paragraph, i) => (
-            <p key={i} className="text-sm text-muted-foreground leading-relaxed">{paragraph}</p>
-          ))}
-        </div>
+      {section.tip && (
+        <Callout icon={Lightbulb} label="Tip:" tone="tip">{section.tip}</Callout>
+      )}
+
+      {section.ifStuck && (
+        <Callout icon={HelpCircle} label="If it doesn’t work:" tone="stuck">{section.ifStuck}</Callout>
       )}
 
       {section.roleNote && (
-        <div className="flex items-start gap-2 bg-primary/5 border border-primary/20 rounded-lg p-3">
-          <Info className="w-3.5 h-3.5 text-primary flex-shrink-0 mt-0.5" />
-          <p className="text-xs text-foreground/80 leading-relaxed">
-            <span className="font-semibold text-primary">Who can do this: </span>
-            {section.roleNote}
-          </p>
-        </div>
+        <Callout icon={Info} label="Who can do this:" tone="role">{section.roleNote}</Callout>
       )}
     </div>
   );
@@ -80,7 +101,7 @@ export default function HelpYourself() {
     <div className="animate-slide-up pb-20">
       <PageHeader
         title="How-To Guide"
-        subtitle="Step-by-step answers for every part of URME — search it or browse by topic"
+        subtitle="New here? Start at the top. Looking for one thing? Search for it below."
       />
 
       {/* Search */}
@@ -91,7 +112,7 @@ export default function HelpYourself() {
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search help — try “password”, “CSV”, “matches”…"
+            placeholder="Type what you want to do — “password”, “add a company”, “map”…"
             aria-label="Search help topics"
             // The clear button below is ours; hide the one WebKit adds to type="search".
             className="pl-9 pr-9 h-11 bg-card [&::-webkit-search-cancel-button]:appearance-none"
@@ -141,7 +162,8 @@ export default function HelpYourself() {
           <LifeBuoy className="w-10 h-10 text-muted-foreground opacity-20 mb-3" />
           <p className="text-sm font-medium">No results — try another term</p>
           <p className="text-xs text-muted-foreground mt-1 max-w-xs">
-            Search for the thing you are trying to do, such as “reset password”, “import”, “match” or “unlock”.
+            Try fewer words, or a plainer one. Things like “password”, “add a company”, “money” or
+            “locked out” all work.
           </p>
           <Button variant="outline" size="sm" className="mt-4" onClick={reset}>
             Show all topics
@@ -162,8 +184,13 @@ export default function HelpYourself() {
               >
                 {group.sections.map((section) => (
                   <AccordionItem key={section.id} value={section.id} id={section.id} className="border-b-0">
-                    <AccordionTrigger className="hover:no-underline gap-3">
-                      <span className="font-semibold">{section.title}</span>
+                    <AccordionTrigger className="hover:no-underline gap-3 text-left">
+                      <span className="min-w-0">
+                        <span className="block font-semibold">{section.title}</span>
+                        <span className="block text-xs font-normal text-muted-foreground mt-0.5">
+                          {section.whatFor}
+                        </span>
+                      </span>
                     </AccordionTrigger>
                     <AccordionContent>
                       <SectionBody section={section} />
@@ -177,8 +204,8 @@ export default function HelpYourself() {
       )}
 
       <p className="text-[11px] text-muted-foreground text-center mt-8">
-        Still stuck? Ask an admin or the CEO — they can unlock accounts, reactivate subscriptions and
-        change details you cannot edit yourself.
+        Still stuck? Ask an admin or your CEO. They can unlock your account, switch your access back
+        on, and change things you are not allowed to change yourself.
       </p>
     </div>
   );
