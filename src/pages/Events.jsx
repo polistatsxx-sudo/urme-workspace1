@@ -16,17 +16,8 @@ import { toast } from 'sonner';
 import { format, isPast } from 'date-fns';
 import { useAuth } from '@/lib/AuthContext';
 import { exportToCSV } from '@/utils/csvExport';
+import { getGoogleCalendarUrl } from '@/utils/calendar';
 import PaymentButton from '@/components/shared/PaymentButton';
-
-const getGoogleCalendarUrl = (ev) => {
-  const base = 'https://www.google.com/calendar/render?action=TEMPLATE';
-  const title = encodeURIComponent(ev.name || '');
-  const details = encodeURIComponent(ev.description || '');
-  const location = encodeURIComponent(ev.location || '');
-  const dateStr = (ev.date || '').replace(/-/g, '');
-  const dates = dateStr ? `${dateStr}T090000Z/${dateStr}T100000Z` : '';
-  return `${base}&text=${title}&details=${details}&location=${location}${dates ? `&dates=${dates}` : ''}`;
-};
 
 const statusColors = {
   planning: 'bg-blue-500/15 text-blue-400', confirmed: 'bg-emerald-500/15 text-emerald-400',
