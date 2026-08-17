@@ -118,6 +118,23 @@ export default function LogInteractionForm({ onSubmit, saving, users = [], bizId
     onSubmit(form);
   };
 
+  // Applying a template to the notes is the only place a template is actually used, so
+  // it is the only place the "Used Nx" count on the Templates page may grow. Opening the
+  // list or previewing does not count. The count is a nicety: if the write fails the
+  // applied template still stands.
+  const applyTemplate = async (template) => {
+    const filled = fillMergeFields(template.body || '', { business_name: bizName, contact_name: form.contact_name });
+    set('notes', filled);
+    setShowTemplateSheet(false);
+    toast.success('Template applied');
+    try {
+      await base44.entities.EmailTemplate.update(template.id, { use_count: (template.use_count || 0) + 1 });
+      qc.invalidateQueries({ queryKey: ['emailTemplates'] });
+    } catch {
+      // Leave the count alone rather than interrupt the interaction being logged.
+    }
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
       <div className="grid grid-cols-2 gap-3">
@@ -226,13 +243,7 @@ export default function LogInteractionForm({ onSubmit, saving, users = [], bizId
                 <button
                   key={t.id}
                   type="button"
-                  onClick={() => {
-                    const data = { business_name: bizName, contact_name: form.contact_name };
-                    const filled = fillMergeFields(t.body || '', data);
-                    set('notes', filled);
-                    setShowTemplateSheet(false);
-                    toast.success('Template applied');
-                  }}
+                  onClick={() => applyTemplate(t)}
                   className="w-full text-left text-xs bg-card border border-border rounded-md px-2 py-1.5 hover:border-primary/30 active:scale-95 transition-all"
                 >
                   <span className="font-medium">{t.title}</span>
