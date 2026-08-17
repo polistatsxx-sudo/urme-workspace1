@@ -23,7 +23,7 @@ function Avatar({ name, size = 'md' }) {
   return <div className={`${sz} ${color} rounded-full flex items-center justify-center font-bold flex-shrink-0`}>{initials}</div>;
 }
 
-export default function ThreadView({ disc, user, onBack, onAddReply, onPin, onArchive, onUnarchive, isAdmin, archived, saving }) {
+export default function ThreadView({ disc, user, onBack, onAddReply, onPin, onArchive, onUnarchive = null, isAdmin, archived = false, saving }) {
   const [replyText, setReplyText] = useState('');
   const bottomRef = useRef(null);
 

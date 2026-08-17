@@ -72,6 +72,7 @@ export default function SyncHub() {
   });
 
   const unarchiveMut = useMutation({
+    /** @param {any} disc */
     mutationFn: (disc) => {
       const stored = discussions.find(d => d.id === disc.id) || disc;
       const updates = { archived: false };

@@ -24,7 +24,7 @@ const typeLabels = {
  * Profile and Contact pages, which show interactions from businesses other than the one
  * being viewed. Only the business's own Activity tab passes them.
  */
-export default function InteractionTimeline({ interactions, onEdit, onDelete }) {
+export default function InteractionTimeline({ interactions, onEdit = null, onDelete = null }) {
   const [filter, setFilter] = useState('all');
 
   const filtered = filter === 'all' ? interactions : interactions.filter(ix => ix.type === filter);

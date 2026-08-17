@@ -31,7 +31,7 @@ export default function Events() {
   const { user } = useAuth();
   const [showAdd, setShowAdd] = useState(false);
   const [editEvent, setEditEvent] = useState(null);
-  const [form, setForm] = useState({ name: '', description: '', date: '', time: '', location: '', status: 'planning', event_type: 'mixer', objectives: '', target_industries: [], attendee_business_ids: [] });
+  const [form, setForm] = useState(/** @type {Record<string, any>} */ ({ name: '', description: '', date: '', time: '', location: '', status: 'planning', event_type: 'mixer', objectives: '', target_industries: [], attendee_business_ids: [] }));
   const [isEnhancing, setIsEnhancing] = useState(false);
   const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
 
@@ -68,16 +68,19 @@ export default function Events() {
   const past = events.filter(e => e.date && isPast(new Date(e.date)));
 
   const createMut = useMutation({
+    /** @param {any} d */
     mutationFn: (d) => base44.entities.Event.create({ ...d, organizer_name: user?.full_name, attendee_business_ids: d.attendee_business_ids || [] }),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['events'] }); setShowAdd(false); resetForm(); toast.success('Event created!'); },
   });
 
   const updateMut = useMutation({
+    /** @param {{ id: string, data: any }} variables */
     mutationFn: ({ id, data }) => base44.entities.Event.update(id, data),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['events'] }); setEditEvent(null); resetForm(); toast.success('Updated'); },
   });
 
   const deleteMut = useMutation({
+    /** @param {string} id */
     mutationFn: (id) => base44.entities.Event.delete(id),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['events'] }); toast.success('Deleted'); },
   });

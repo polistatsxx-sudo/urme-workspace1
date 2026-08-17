@@ -14,7 +14,7 @@ const catColors = {
 
 const contextIcon = { business: Building2, event: Calendar, idea: Lightbulb };
 
-export default function ThreadCard({ disc, onOpen, onPin, onArchive, onUnarchive, isAdmin, archived }) {
+export default function ThreadCard({ disc, onOpen, onPin, onArchive, onUnarchive = null, isAdmin, archived = false }) {
   const lastReply = disc.replies?.length ? disc.replies[disc.replies.length - 1] : null;
   const lastActivity = lastReply ? new Date(lastReply.date) : new Date(disc.created_date);
   const preview = lastReply ? lastReply.text : disc.content;

@@ -45,6 +45,7 @@ export default function EventEngagements({ bizId }) {
   // The mirror image of linking. Any note or link that was appended to the event's
   // post-event notes stays there: it is free text somebody may have edited since.
   const unlinkMut = useMutation({
+    /** @param {any} ev */
     mutationFn: (ev) => base44.entities.Event.update(ev.id, {
       attendee_business_ids: (ev.attendee_business_ids || []).filter(id => id !== bizId),
       attendee_count: Math.max(0, (ev.attendee_count || 0) - 1),

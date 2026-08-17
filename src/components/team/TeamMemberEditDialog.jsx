@@ -23,7 +23,7 @@ const MANAGEMENT_FIELDS = ['subscription_status', 'paid_through_date', 'role'];
 const roleLabels = { user: 'Standard member', admin: 'Admin', ceo: 'CEO' };
 
 export default function TeamMemberEditDialog({ member, open, onOpenChange, canEdit, onSaved }) {
-  const [form, setForm] = useState({});
+  const [form, setForm] = useState(/** @type {Record<string, any>} */ ({}));
   const [credentials, setCredentials] = useState({ email: '', password: '' });
   const [skillInput, setSkillInput] = useState('');
   const [saving, setSaving] = useState(false);

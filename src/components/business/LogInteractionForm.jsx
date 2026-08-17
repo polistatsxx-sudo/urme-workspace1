@@ -40,7 +40,7 @@ function buildForm(initialData) {
   };
 }
 
-export default function LogInteractionForm({ onSubmit, saving, users = [], bizId, bizName, bizContactName, bizContactTitle, initialData }) {
+export default function LogInteractionForm({ onSubmit, saving, users = [], bizId, bizName, bizContactName, bizContactTitle, initialData = null }) {
   const qc = useQueryClient();
   const isEdit = !!initialData;
   const [form, setForm] = useState(() => buildForm(initialData));

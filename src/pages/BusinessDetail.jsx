@@ -108,6 +108,7 @@ export default function BusinessDetail() {
   // Anyone who can see this business can correct or remove its history: the entries are
   // shared team notes, not personal ones, and RLS on `interactions` is the real boundary.
   const updateInteractionMut = useMutation({
+    /** @param {{ id: string, data: any }} variables */
     mutationFn: ({ id, data }) => base44.entities.Interaction.update(id, data),
     onSuccess: async () => {
       qc.invalidateQueries({ queryKey: ['interactions', bizId] });
@@ -119,6 +120,7 @@ export default function BusinessDetail() {
   });
 
   const deleteInteractionMut = useMutation({
+    /** @param {string} id */
     mutationFn: (id) => base44.entities.Interaction.delete(id),
     onSuccess: async () => {
       qc.invalidateQueries({ queryKey: ['interactions', bizId] });
