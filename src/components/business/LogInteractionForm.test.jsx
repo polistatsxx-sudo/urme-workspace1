@@ -31,7 +31,7 @@ beforeAll(() => {
   Element.prototype.releasePointerCapture = () => {};
 });
 
-async function renderForm({ contacts = [], templates = [], bizContactName, bizContactTitle } = {}) {
+async function renderForm({ contacts = [], templates = [], bizContactName, bizContactTitle, initialData } = {}) {
   contactFilter.mockResolvedValue(contacts);
   templateList.mockResolvedValue(templates);
   const onSubmit = vi.fn();
@@ -47,6 +47,7 @@ async function renderForm({ contacts = [], templates = [], bizContactName, bizCo
         bizName="Acme"
         bizContactName={bizContactName}
         bizContactTitle={bizContactTitle}
+        initialData={initialData}
       />
     </QueryClientProvider>
   );
@@ -127,6 +128,49 @@ describe('Log Interaction contact picker', () => {
 
     expect(await option('michael')).toBeTruthy();
     expect(screen.queryByRole('option', { name: /primary contact/ })).toBeNull();
+  });
+});
+
+describe('Log Interaction form as an editor', () => {
+  beforeEach(() => {
+    vi.resetModules();
+    contactFilter.mockClear();
+    templateList.mockClear();
+  });
+
+  afterEach(cleanup);
+
+  it('seeds itself from the interaction being edited and submits the corrections', async () => {
+    const { onSubmit } = await renderForm({
+      contacts: [{ id: 'c-1', full_name: 'Dana Reed' }],
+      initialData: {
+        id: 'ix-1',
+        type: 'call',
+        title: 'Intro call',
+        outcome: 'Send deck',
+        contact_id: 'c-1',
+        contact_name: 'Dana Reed',
+        interaction_date: '2026-08-17T14:45:00+00:00',
+      },
+    });
+
+    // The stored wall-clock time is read back as typed, not shifted by the browser offset.
+    expect(screen.getByDisplayValue('2026-08-17T14:45')).toBeTruthy();
+
+    fireEvent.change(screen.getByDisplayValue('Intro call'), { target: { value: 'Intro call (rescheduled)' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save Changes' }));
+
+    const [payload] = onSubmit.mock.calls[0];
+    expect(payload.title).toBe('Intro call (rescheduled)');
+    expect(payload.type).toBe('call');
+    expect(payload.outcome).toBe('Send deck');
+    expect(payload.contact_id).toBe('c-1');
+    expect(payload.interaction_date).toBe('2026-08-17T14:45');
+  });
+
+  it('still says "Log Interaction" when there is nothing to edit', async () => {
+    await renderForm({});
+    expect(screen.getByRole('button', { name: 'Log Interaction' })).toBeTruthy();
   });
 });
 
