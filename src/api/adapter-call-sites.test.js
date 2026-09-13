@@ -44,6 +44,21 @@ describe('adapter call sites match the adapter surface', () => {
     expect(missing).toEqual([]);
   });
 
+  it('every Edge Function a page invokes exists in supabase/functions/', () => {
+    const deployed = readdirSync(join(process.cwd(), 'supabase/functions')).filter(
+      (entry) => !entry.startsWith('_') && statSync(join(process.cwd(), 'supabase/functions', entry)).isDirectory()
+    );
+
+    // A name that is not a literal cannot be checked; the adapter's own passthrough
+    // (`invoke(functionName, ...)`) is the one such site and is excluded by the regex.
+    const missing = callSites(/functions\.invoke\(\s*['"]([^'"]+)['"]/g)
+      .filter(({ name }) => !deployed.includes(name))
+      .map(({ file, name }) => `${file}: functions.invoke('${name}') has no supabase/functions/${name}/`);
+
+    expect(deployed).toContain('invoke-llm');
+    expect(missing).toEqual([]);
+  });
+
   it('every base44.entities.Entity.method call resolves', () => {
     const missing = callSites(/base44\.entities\.([A-Za-z0-9_]+\.[A-Za-z0-9_]+)\s*\(/g)
       .map(({ file, name }) => {

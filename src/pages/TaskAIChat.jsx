@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Send, Sparkles, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
+import { toast } from 'sonner';
 
 export default function TaskAIChat() {
   const params = new URLSearchParams(window.location.search);
@@ -20,8 +21,9 @@ export default function TaskAIChat() {
     // Seed an initial AI message about this task
     const seed = async () => {
       setIsLoading(true);
-      const res = await base44.integrations.Core.InvokeLLM({
-        prompt: `You are a strategic productivity coach. A user has created this task:
+      try {
+        const res = await base44.integrations.Core.InvokeLLM({
+          prompt: `You are a strategic productivity coach. A user has created this task:
 Title: ${title}
 Description: ${description}
 
@@ -31,9 +33,13 @@ Give them a brief, encouraging breakdown of:
 3. One potential blocker to watch out for
 
 Keep it concise and actionable.`,
-      });
-      setMessages([{ role: 'assistant', content: res }]);
-      setIsLoading(false);
+        });
+        setMessages([{ role: 'assistant', content: res }]);
+      } catch (err) {
+        toast.error(err?.message || 'The coach could not be reached. Ask a question to retry.');
+      } finally {
+        setIsLoading(false);
+      }
     };
     if (title) seed();
   }, []);
@@ -59,9 +65,16 @@ ${history.map(m => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`).
 
 Respond helpfully and concisely.`;
 
-    const res = await base44.integrations.Core.InvokeLLM({ prompt: contextPrompt });
-    setMessages(prev => [...prev, { role: 'assistant', content: res }]);
-    setIsLoading(false);
+    try {
+      const res = await base44.integrations.Core.InvokeLLM({ prompt: contextPrompt });
+      setMessages(prev => [...prev, { role: 'assistant', content: res }]);
+    } catch (err) {
+      // The typing indicator is driven by isLoading, so without this the chat sat on
+      // "thinking" forever and the Send button never came back.
+      toast.error(err?.message || 'The coach could not be reached. Try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
