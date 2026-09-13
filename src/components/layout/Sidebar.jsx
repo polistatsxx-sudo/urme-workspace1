@@ -27,12 +27,8 @@ const navItems = [
   { path: '/profile', icon: User, label: 'Profile' },
 ];
 
-export default function Sidebar({ collapsed, setCollapsed }) {
-  const location = useLocation();
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const { user } = useAuth();
-
-  const NavContent = () => (
+function NavContent({ collapsed, setCollapsed, role, pathname, onNavigate }) {
+  return (
     <div className="flex flex-col h-full">
       <div className={cn("flex items-center gap-2 px-4 py-5 border-b border-border/50", collapsed && "justify-center px-2")}>
         <img
@@ -50,8 +46,8 @@ export default function Sidebar({ collapsed, setCollapsed }) {
 
       <nav className="flex-1 py-3 px-2 space-y-0.5 overflow-y-auto">
         {navItems.map((item) => {
-          if (item.adminOnly && !['admin', 'ceo'].includes(user?.role)) return null;
-          const isActive = location.pathname === item.path;
+          if (item.adminOnly && !['admin', 'ceo'].includes(role)) return null;
+          const isActive = pathname === item.path;
           if (item.isAction) {
             return (
               <button
@@ -71,7 +67,7 @@ export default function Sidebar({ collapsed, setCollapsed }) {
             <Link
               key={item.path}
               to={item.path}
-              onClick={() => setMobileOpen(false)}
+              onClick={onNavigate}
               className={cn(
                 "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
                 collapsed && "justify-center px-2",
@@ -99,6 +95,20 @@ export default function Sidebar({ collapsed, setCollapsed }) {
       </div>
     </div>
   );
+}
+
+export default function Sidebar({ collapsed, setCollapsed }) {
+  const location = useLocation();
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const { user } = useAuth();
+
+  const navProps = {
+    collapsed,
+    setCollapsed,
+    role: user?.role,
+    pathname: location.pathname,
+    onNavigate: () => setMobileOpen(false),
+  };
 
   return (
     <>
@@ -127,7 +137,7 @@ export default function Sidebar({ collapsed, setCollapsed }) {
         <div className="fixed inset-0 z-40 bg-black/25 lg:hidden" onClick={() => setMobileOpen(false)}>
           <div className="w-[min(85vw,18rem)] h-full bg-background border-r border-border shadow-xl overflow-y-auto" onClick={e => e.stopPropagation()}>
             <div className="pt-14">
-              <NavContent />
+              <NavContent {...navProps} />
             </div>
           </div>
         </div>
@@ -138,7 +148,7 @@ export default function Sidebar({ collapsed, setCollapsed }) {
         "hidden lg:block fixed left-0 top-0 h-screen bg-sidebar border-r border-sidebar-border z-30 transition-all duration-300",
         collapsed ? "w-16" : "w-56"
       )}>
-        <NavContent />
+        <NavContent {...navProps} />
       </aside>
     </>
   );
