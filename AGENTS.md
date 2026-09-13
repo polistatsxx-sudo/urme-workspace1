@@ -31,10 +31,21 @@ Single-page app, migrated off the Base44 low-code platform to Supabase.
   `'primary'` sentinel, and writes `interactions.contact_name` with no `contact_id`.
   De-dupe by name (case-insensitive) so a business that has both does not list it twice.
 - **Event attendees have two writers.** `events.attendee_business_ids` is set from the
- attendee tick-list in the Event form (`pages/Events.jsx`) and from Link/Unlink Event on a
+ attendee tick-list in `components/event/EventForm.jsx` and from Link/Unlink Event on a
  business page (`components/business/EventEngagements.jsx`). `attendee_count` tracks the
- length of that array — the form sets it to the list length, the business page steps it by
- one — so keep both writers in step or the CSV export's "Attendees" column drifts.
+ length of that array — the form derives it from the tick-list at submit time, the business
+ page steps it by one — so keep both writers in step or the CSV export's "Attendees" column
+ drifts.
+- **Dialog forms must be their own module-level component.** `pages/Events.jsx` used to
+ declare `EventForm` and `EventCard` inside `Events()`, which gave each a new function
+ identity on every render, so React remounted the whole subtree on each keystroke and the
+ focused input was replaced after one character. Forms live in `components/<area>/`, own
+ their own state, and take `initialData` / `onSubmit` / `saving` — see
+ `components/business/BusinessForm.jsx` and `components/event/EventForm.jsx`. Never declare
+ a component that renders an input inside another component's body.
+ `pages/Events.test.jsx` types a multi-character name with `userEvent` and asserts the
+ input node is the same object afterwards, which is the only assertion that catches this
+ (a single `fireEvent.change` passes either way).
 - **Google Calendar links** come from `src/utils/calendar.js`, which reads the day out of
  `events.date` textually (a `new Date()` shifts it west of UTC) and parses the free-text
  `events.time`. Times are handed to Google without a `Z` so they land in the viewer's own

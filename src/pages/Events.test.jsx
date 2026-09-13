@@ -1,5 +1,6 @@
 import React from 'react';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -56,13 +57,83 @@ async function renderEvents(events = []) {
   );
 }
 
-// The form is rebuilt on every parent render, so a node captured before the businesses
-// query settles is already detached. Wait for the picker, then query as you go.
 const nameBox = () => screen.getAllByRole('textbox')[0];
 const openCreateForm = async () => {
   fireEvent.click(screen.getByRole('button', { name: /new event/i }));
   await screen.findByRole('checkbox', { name: 'Acme Supply' });
 };
+
+describe('Event form typing', () => {
+  beforeEach(() => {
+    vi.resetModules();
+    eventList.mockClear();
+    eventCreate.mockClear();
+    businessList.mockClear();
+  });
+
+  afterEach(cleanup);
+
+  // A form component re-created on every parent render is a *new* element type, so React
+  // throws the old input away and mounts a fresh one after the first keystroke: the
+  // character lands but focus goes with the discarded node. Typing more than one
+  // character is the only thing that catches it — fireEvent.change fires once and passes
+  // either way.
+  it('keeps the Event Name field mounted and focused while a whole name is typed', async () => {
+    const user = userEvent.setup();
+    await renderEvents();
+    await openCreateForm();
+
+    const nameInput = nameBox();
+    nameInput.focus();
+    await user.type(nameInput, 'Fall Mixer');
+
+    expect(nameBox()).toBe(nameInput);
+    expect(nameInput.value).toBe('Fall Mixer');
+    expect(document.activeElement).toBe(nameInput);
+  });
+
+  it('keeps the Location field mounted and focused too', async () => {
+    const user = userEvent.setup();
+    await renderEvents();
+    await openCreateForm();
+
+    // Event Name, Description, Time, Location, Objectives — date inputs have no textbox role.
+    const locationInput = screen.getAllByRole('textbox')[3];
+    locationInput.focus();
+    await user.type(locationInput, 'Halifax');
+
+    expect(screen.getAllByRole('textbox')[3]).toBe(locationInput);
+    expect(locationInput.value).toBe('Halifax');
+    expect(document.activeElement).toBe(locationInput);
+  });
+
+  it('ticks and unticks attendees while a typed name is preserved', async () => {
+    const user = userEvent.setup();
+    await renderEvents();
+    await openCreateForm();
+
+    const nameInput = nameBox();
+    await user.type(nameInput, 'Spring Social');
+
+    await user.click(screen.getByRole('checkbox', { name: 'Borealis Metals' }));
+    await user.click(screen.getByRole('checkbox', { name: 'Acme Supply' }));
+    expect(screen.getByText('2 selected')).toBeTruthy();
+
+    await user.click(screen.getByRole('checkbox', { name: 'Borealis Metals' }));
+    expect(screen.getByText('1 selected')).toBeTruthy();
+    expect(screen.getByRole('checkbox', { name: 'Borealis Metals' }).getAttribute('aria-checked')).toBe('false');
+    expect(screen.getByRole('checkbox', { name: 'Acme Supply' }).getAttribute('aria-checked')).toBe('true');
+
+    expect(nameBox().value).toBe('Spring Social');
+
+    await user.click(screen.getByRole('button', { name: /create event/i }));
+    await waitFor(() => expect(eventCreate).toHaveBeenCalledWith(expect.objectContaining({
+      name: 'Spring Social',
+      attendee_business_ids: ['biz-1'],
+      attendee_count: 1,
+    })));
+  });
+});
 
 describe('Event attendee picker', () => {
   beforeEach(() => {
