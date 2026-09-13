@@ -19,7 +19,6 @@ export default function ThreadCard({ disc, onOpen, onPin, onArchive, onUnarchive
   const lastActivity = lastReply ? new Date(lastReply.date) : new Date(disc.created_date);
   const preview = lastReply ? lastReply.text : disc.content;
   const CtxIcon = disc.category && contextIcon[disc.category];
-  const contextName = disc.linked_business_id ? disc.linked_event_id ? null : null : null;
 
   // Determine linked context label
   let contextLabel = null;
