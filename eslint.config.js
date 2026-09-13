@@ -55,6 +55,10 @@ export default [
         { ignore: ["cmdk-input-wrapper", "toast-close"] },
       ],
       "react-hooks/rules-of-hooks": "error",
+      // A component declared inside another component gets a new identity on every
+      // render, so React remounts its subtree and any focused input is replaced after
+      // one keystroke. This broke Create Event; see AGENTS.md.
+      "react/no-unstable-nested-components": ["error", { allowAsProps: false }],
     },
   },
 ];
