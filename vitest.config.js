@@ -12,5 +12,8 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     include: ['src/**/*.test.{js,jsx}'],
+    // The app owner reads URME from America/Denver, and event dates are stored as midnight
+    // UTC, so a suite running in UTC cannot see the day-behind bug that shift causes.
+    env: { TZ: 'America/Denver' },
   },
 });
