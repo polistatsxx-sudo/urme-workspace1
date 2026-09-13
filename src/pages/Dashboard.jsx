@@ -13,19 +13,19 @@ import { format, isPast, isToday, addDays, differenceInDays } from 'date-fns';
 import BulkLogInteractionModal from '@/components/business/BulkLogInteractionModal';
 import { computeHealthScore, isBusinessStale, daysSinceLastInteraction } from '@/utils/healthScore';
 import { checkAndNotify } from '@/utils/notifications';
+import { useAuth } from '@/lib/AuthContext';
+import { AJ_ID } from '@/utils/permissions';
 
 const stageLabels = {
   new_lead: 'New Lead', contacted: 'Contacted', meeting_scheduled: 'Meeting',
   in_discussion: 'Discussion', collaborating: 'Collaborating', partnered: 'Partnered', archived: 'Archived'
 };
 
-const CEO_EMAIL = 'macecnc@urmeinc.com';
-
 export default function Dashboard() {
-  const [currentUser, setCurrentUser] = useState(null);
   const [bulkLogOpen, setBulkLogOpen] = useState(false);
-  useEffect(() => { base44.auth.me().then(setCurrentUser).catch(() => {}); }, []);
-  const isCEO = currentUser?.email === CEO_EMAIL;
+  const { user: currentUser } = useAuth();
+  // Identity is keyed on the user id, never the email — see src/utils/permissions.js.
+  const isCEO = currentUser?.id === AJ_ID;
 
   const { data: businesses = [] } = useQuery({ queryKey: ['businesses'], queryFn: () => base44.entities.Business.list() });
   const { data: tasks = [] } = useQuery({ queryKey: ['tasks'], queryFn: () => base44.entities.Task.list() });
