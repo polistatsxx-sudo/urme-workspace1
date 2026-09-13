@@ -26,6 +26,7 @@ export default function BusinessStrategy() {
   const { id } = useParams();
   const [strategy, setStrategy] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const [checked, setChecked] = useState({});
   const [activeStep, setActiveStep] = useState(null);
 
@@ -45,6 +46,7 @@ export default function BusinessStrategy() {
     if (!biz) return;
     setLoading(true);
     setStrategy(null);
+    setError(null);
 
     const recentInteractions = interactions
       .slice(0, 5)
@@ -76,31 +78,38 @@ Provide a detailed client acquisition strategy with these 5 sections:
 
 Be specific, concise, and practical. Reference their actual details.`;
 
-    const result = await base44.integrations.Core.InvokeLLM({
-      prompt,
-      response_json_schema: {
-        type: 'object',
-        properties: {
-          sections: {
-            type: 'array',
-            items: {
-              type: 'object',
-              properties: {
-                title: { type: 'string' },
-                summary: { type: 'string' },
-                points: { type: 'array', items: { type: 'string' } },
+    try {
+      const result = await base44.integrations.Core.InvokeLLM({
+        prompt,
+        response_json_schema: {
+          type: 'object',
+          properties: {
+            sections: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  title: { type: 'string' },
+                  summary: { type: 'string' },
+                  points: { type: 'array', items: { type: 'string' } },
+                },
               },
             },
+            overall_priority: { type: 'string', enum: ['high', 'medium', 'low'] },
+            timeline_to_close: { type: 'string' },
+            key_insight: { type: 'string' },
           },
-          overall_priority: { type: 'string', enum: ['high', 'medium', 'low'] },
-          timeline_to_close: { type: 'string' },
-          key_insight: { type: 'string' },
         },
-      },
-    });
+      });
 
-    setStrategy(result);
-    setLoading(false);
+      setStrategy(result);
+    } catch (err) {
+      // This runs on page load, so an unhandled failure left the page spinning with
+      // nothing to click and no way to find out why.
+      setError(err?.message || 'The strategy could not be generated. Try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -155,6 +164,15 @@ Be specific, concise, and practical. Reference their actual details.`;
         <div className="flex flex-col items-center justify-center py-16 gap-4 text-muted-foreground">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
           <p className="text-sm">Analyzing business context and generating strategy...</p>
+        </div>
+      )}
+
+      {error && !loading && (
+        <div className="flex flex-col items-center justify-center py-16 gap-3 text-center">
+          <p className="text-sm text-destructive">{error}</p>
+          <Button variant="outline" size="sm" onClick={generateStrategy} className="gap-1.5">
+            <Sparkles className="w-3.5 h-3.5" /> Try again
+          </Button>
         </div>
       )}
 

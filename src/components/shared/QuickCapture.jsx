@@ -19,18 +19,26 @@ export default function QuickCapture() {
   const handleSave = async () => {
     if (!title.trim()) return;
     setSaving(true);
-    if (mode === 'task') {
-      await base44.entities.Task.create({ title, description: detail, status: 'todo', priority: 'medium' });
-      qc.invalidateQueries({ queryKey: ['tasks'] });
-    } else if (mode === 'idea') {
-      await base44.entities.Idea.create({ title, description: detail, status: 'new', category: 'other', votes: 0, voted_by: [], comments: [] });
-      qc.invalidateQueries({ queryKey: ['ideas'] });
-    } else {
-      await base44.entities.Business.create({ name: title, description: detail, stage: 'new_lead', tags: [] });
-      qc.invalidateQueries({ queryKey: ['businesses'] });
+    try {
+      if (mode === 'task') {
+        await base44.entities.Task.create({ title, description: detail, status: 'todo', priority: 'medium' });
+        qc.invalidateQueries({ queryKey: ['tasks'] });
+      } else if (mode === 'idea') {
+        await base44.entities.Idea.create({ title, description: detail, status: 'new', category: 'other', votes: 0, voted_by: [], comments: [] });
+        qc.invalidateQueries({ queryKey: ['ideas'] });
+      } else {
+        await base44.entities.Business.create({ name: title, description: detail, stage: 'new_lead', tags: [] });
+        qc.invalidateQueries({ queryKey: ['businesses'] });
+      }
+      toast.success(`${mode === 'task' ? 'Task' : mode === 'idea' ? 'Idea' : 'Business'} captured!`);
+      setTitle(''); setDetail(''); setOpen(false);
+    } catch (err) {
+      // Without this the panel stayed open with Save disabled for good, and what the
+      // person typed was only recoverable by reloading the page.
+      toast.error(err?.message || 'Could not save that. Try again.');
+    } finally {
+      setSaving(false);
     }
-    toast.success(`${mode === 'task' ? 'Task' : mode === 'idea' ? 'Idea' : 'Business'} captured!`);
-    setTitle(''); setDetail(''); setOpen(false); setSaving(false);
   };
 
   const modes = [

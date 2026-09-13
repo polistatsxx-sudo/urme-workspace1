@@ -45,6 +45,16 @@ export default function Businesses() {
     if (businesses.length < 2) { toast.error('Need at least 2 businesses'); return; }
     setScanning(true);
     const bizSummaries = businesses.slice(0, 20).map(b => `${b.name} (${b.industry || 'unknown'}): Needs: ${b.needs || 'n/a'}, Offers: ${b.offers || 'n/a'}`).join('\n');
+    try {
+      await scanForSynergies(bizSummaries);
+    } catch (err) {
+      toast.error(err?.message || 'The synergy scan failed. Try again.');
+    } finally {
+      setScanning(false);
+    }
+  };
+
+  const scanForSynergies = async (bizSummaries) => {
     const result = await base44.integrations.Core.InvokeLLM({
       prompt: `You are a B2B matchmaking expert. Analyze these businesses and find the top 5 most synergistic potential partnerships. For each pair, explain WHY they'd work well together and give a synergy score (0-100).\n\nBusinesses:\n${bizSummaries}\n\nReturn JSON with matches array.`,
       response_json_schema: {
@@ -65,22 +75,24 @@ export default function Businesses() {
         }
       }
     });
-    if (result.matches) {
-      for (const m of result.matches) {
-        const a = businesses.find(b => b.name.toLowerCase().includes(m.business_a.toLowerCase()));
-        const b_biz = businesses.find(b => b.name.toLowerCase().includes(m.business_b.toLowerCase()));
-        if (a && b_biz) {
-          await base44.entities.Match.create({
-            business_a_id: a.id, business_a_name: a.name,
-            business_b_id: b_biz.id, business_b_name: b_biz.name,
-            synergy_score: m.synergy_score, reason: m.reason, status: 'suggested'
-          });
-        }
+    let created = 0;
+    for (const m of result.matches || []) {
+      const a = businesses.find(b => b.name?.toLowerCase().includes(m.business_a?.toLowerCase()));
+      const b_biz = businesses.find(b => b.name?.toLowerCase().includes(m.business_b?.toLowerCase()));
+      if (a && b_biz) {
+        await base44.entities.Match.create({
+          business_a_id: a.id, business_a_name: a.name,
+          business_b_id: b_biz.id, business_b_name: b_biz.name,
+          synergy_score: m.synergy_score, reason: m.reason, status: 'suggested'
+        });
+        created++;
       }
-      qc.invalidateQueries({ queryKey: ['matches'] });
-      toast.success(`Found ${result.matches.length} potential matches!`);
     }
-    setScanning(false);
+    qc.invalidateQueries({ queryKey: ['matches'] });
+    // The old code counted what the model proposed, not what was saved, and said nothing
+    // at all when it proposed none.
+    if (created > 0) toast.success(`Found ${created} potential ${created === 1 ? 'match' : 'matches'}!`);
+    else toast.info('No new partnerships stood out this time.');
   };
 
   const managers = [...new Set(businesses.map(b => b.assigned_to_name).filter(Boolean))].sort();
