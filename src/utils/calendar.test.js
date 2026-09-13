@@ -1,5 +1,16 @@
-import { describe, expect, it } from 'vitest';
-import { getGoogleCalendarDates, getGoogleCalendarUrl, parseEventDate, parseEventTime } from '@/utils/calendar';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import {
+  classifyEvent,
+  compareEventsByStart,
+  formatEventDate,
+  getEventStart,
+  getGoogleCalendarDates,
+  getGoogleCalendarUrl,
+  isEventPast,
+  isEventUpcoming,
+  parseEventDate,
+  parseEventTime,
+} from '@/utils/calendar';
 
 describe('parseEventTime', () => {
   it('reads the shapes people actually type', () => {
@@ -99,5 +110,100 @@ describe('getGoogleCalendarUrl', () => {
 
   it('leaves the dates parameter off an undated event', () => {
     expect(getGoogleCalendarUrl({ name: 'Someday' })).not.toContain('dates=');
+  });
+});
+
+// A date-only event reaches the database as midnight UTC, which is the previous evening in
+// Denver. Everything below is the fallout of that one shift, so the suite has to run west
+// of UTC (TZ is pinned in vitest.config.js) or none of it can fail.
+describe('event day classification', () => {
+  // Noon on Sunday 13 September 2026 in Denver, the middle of the day the live events sat on.
+  const denverNoon = new Date('2026-09-13T18:00:00Z');
+  const today = { date: '2026-09-13 00:00:00+00' };
+
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(denverNoon);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('runs west of UTC, where a midnight-UTC date reads as the day before', () => {
+    expect(new Date().getTimezoneOffset()).toBe(360);
+    expect(new Date('2026-09-13T00:00:00Z').getDate()).toBe(12);
+  });
+
+  it('keeps a date-only event dated today upcoming', () => {
+    expect(classifyEvent(today)).toBe('upcoming');
+    expect(isEventUpcoming(today)).toBe(true);
+    expect(isEventPast(today)).toBe(false);
+  });
+
+  it('holds a date-only event to the end of its own day, then archives it', () => {
+    vi.setSystemTime(new Date('2026-09-14T05:59:00Z')); // 11:59 PM Denver, still the 13th
+    expect(classifyEvent(today)).toBe('upcoming');
+
+    vi.setSystemTime(new Date('2026-09-14T06:00:00Z')); // midnight Denver, now the 14th
+    expect(classifyEvent(today)).toBe('past');
+  });
+
+  it('reads the free-text time, so tonight is upcoming and this morning is not', () => {
+    expect(classifyEvent({ ...today, time: '6:00 PM' })).toBe('upcoming');
+    expect(classifyEvent({ ...today, time: '6:00 PM - 8:30 PM' })).toBe('upcoming');
+    expect(classifyEvent({ ...today, time: '8:00 AM' })).toBe('past');
+    expect(classifyEvent({ ...today, time: '8:00 AM - 10:00 AM' })).toBe('past');
+  });
+
+  it('falls back to the whole day when the time is unreadable', () => {
+    expect(classifyEvent({ ...today, time: 'TBD' })).toBe('upcoming');
+    expect(classifyEvent({ ...today, time: '' })).toBe('upcoming');
+  });
+
+  it('archives yesterday and keeps tomorrow', () => {
+    expect(classifyEvent({ date: '2026-09-12 00:00:00+00' })).toBe('past');
+    expect(classifyEvent({ date: '2026-09-14 00:00:00+00' })).toBe('upcoming');
+  });
+
+  it('calls an event with no readable date undated rather than past', () => {
+    expect(classifyEvent({ date: null })).toBe('undated');
+    expect(classifyEvent({ date: '' })).toBe('undated');
+    expect(classifyEvent({ date: 'sometime in the fall' })).toBe('undated');
+    expect(classifyEvent({})).toBe('undated');
+    expect(isEventUpcoming({ date: null })).toBe(true);
+    expect(isEventPast({ date: null })).toBe(false);
+  });
+
+  it('starts a date-only event at local midnight and a timed one at its own clock', () => {
+    expect(getEventStart(today)?.toString()).toContain('Sep 13 2026 00:00:00');
+    expect(getEventStart({ ...today, time: '6:00 PM' })?.toString()).toContain('Sep 13 2026 18:00:00');
+    expect(getEventStart({ date: null })).toBeNull();
+  });
+
+  it('sorts soonest first and leaves undated events at the end', () => {
+    const undated = { id: 'undated', date: null };
+    const tonight = { id: 'tonight', date: '2026-09-13 00:00:00+00', time: '6:00 PM' };
+    const morning = { id: 'morning', date: '2026-09-13 00:00:00+00', time: '8:00 AM' };
+    const tomorrow = { id: 'tomorrow', date: '2026-09-14 00:00:00+00' };
+
+    expect([undated, tomorrow, tonight, morning].sort(compareEventsByStart).map(e => e.id))
+      .toEqual(['morning', 'tonight', 'tomorrow', 'undated']);
+  });
+});
+
+describe('formatEventDate', () => {
+  it('prints the day that was picked, not the day before', () => {
+    expect(formatEventDate({ date: '2026-09-13 00:00:00+00' })).toBe('Sep 13, 2026');
+    expect(formatEventDate({ date: '2026-09-13T00:00:00+00:00' })).toBe('Sep 13, 2026');
+    expect(formatEventDate({ date: '2026-01-01 00:00:00+00' })).toBe('Jan 1, 2026');
+    expect(formatEventDate({ date: '2026-09-13 00:00:00+00' }, 'MMM d')).toBe('Sep 13');
+    expect(formatEventDate({ date: '2026-09-13 00:00:00+00' }, 'yyyy-MM-dd')).toBe('2026-09-13');
+  });
+
+  it('gives back an empty string instead of throwing on a date it cannot read', () => {
+    expect(formatEventDate({ date: null })).toBe('');
+    expect(formatEventDate({ date: 'nonsense' })).toBe('');
+    expect(formatEventDate(null)).toBe('');
   });
 });

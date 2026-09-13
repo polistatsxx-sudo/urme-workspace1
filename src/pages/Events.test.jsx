@@ -2,7 +2,7 @@ import React from 'react';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const eventList = vi.fn(() => Promise.resolve([]));
 const eventCreate = vi.fn((record) => Promise.resolve({ id: 'ev-new', ...record }));
@@ -205,5 +205,102 @@ describe('Event attendee picker', () => {
     await waitFor(() => expect(eventCreate).toHaveBeenCalledWith(expect.objectContaining({
       attendee_business_ids: [],
     })));
+  });
+});
+
+// The live bug: `events.date` is date-only, so it is stored as midnight UTC, which is the
+// evening *before* in Denver. isPast(new Date(date)) therefore called today's events past
+// and Upcoming sat at 0. TZ is pinned to America/Denver in vitest.config.js; only the Date
+// clock is faked, so React Testing Library's own timers keep working.
+describe('Event upcoming / archived split', () => {
+  // Noon on Sunday 13 September 2026, Denver — mid-afternoon UTC of the same day.
+  const denverNoon = new Date('2026-09-13T18:00:00Z');
+
+  const aroundToday = [
+    { id: 'ev-today', name: 'Today Mixer', date: '2026-09-13 00:00:00+00', status: 'confirmed', event_type: 'mixer' },
+    { id: 'ev-tonight', name: 'Tonight Dinner', date: '2026-09-13 00:00:00+00', time: '6:00 PM', status: 'confirmed', event_type: 'dinner' },
+    { id: 'ev-morning', name: 'Morning Briefing', date: '2026-09-13 00:00:00+00', time: '8:00 AM', status: 'completed', event_type: 'workshop' },
+    { id: 'ev-yesterday', name: 'Yesterday Workshop', date: '2026-09-12 00:00:00+00', status: 'completed', event_type: 'workshop' },
+    { id: 'ev-tomorrow', name: 'Tomorrow Showcase', date: '2026-09-14 00:00:00+00', status: 'planning', event_type: 'showcase' },
+    { id: 'ev-undated', name: 'Someday Summit', date: null, status: 'planning', event_type: 'conference' },
+  ];
+
+  beforeAll(() => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(denverNoon);
+  });
+
+  afterAll(() => {
+    vi.useRealTimers();
+  });
+
+  beforeEach(() => {
+    vi.resetModules();
+    eventList.mockClear();
+    businessList.mockClear();
+  });
+
+  afterEach(cleanup);
+
+  it("files today's events under Upcoming, not Archived", async () => {
+    await renderEvents(aroundToday);
+
+    expect(await screen.findByText('Today Mixer')).toBeTruthy();
+    expect(screen.getByText('Tonight Dinner')).toBeTruthy();
+    expect(screen.getByText('Tomorrow Showcase')).toBeTruthy();
+    // Undated events ride along with Upcoming rather than falling out of both tabs.
+    expect(screen.getByText('Someday Summit')).toBeTruthy();
+    expect(screen.getByText(/Date TBD \(1\)/)).toBeTruthy();
+
+    expect(screen.queryByText('Yesterday Workshop')).toBeNull();
+    expect(screen.queryByText('Morning Briefing')).toBeNull();
+
+    expect(screen.getByRole('tab', { name: 'Upcoming (4)' })).toBeTruthy();
+    expect(screen.getByRole('tab', { name: 'Archived (2)' })).toBeTruthy();
+    expect(screen.getByText('4 upcoming • 2 past')).toBeTruthy();
+  });
+
+  it('archives yesterday, and today once its own time has gone by', async () => {
+    await renderEvents(aroundToday);
+    await screen.findByText('Today Mixer');
+
+    // Radix switches tabs on pointer down, not on click.
+    fireEvent.mouseDown(screen.getByRole('tab', { name: 'Archived (2)' }));
+
+    expect(await screen.findByText('Yesterday Workshop')).toBeTruthy();
+    expect(screen.getByText('Morning Briefing')).toBeTruthy();
+    expect(screen.queryByText('Today Mixer')).toBeNull();
+    expect(screen.queryByText('Tonight Dinner')).toBeNull();
+  });
+
+  it('prints the day that was picked, not the evening before it', async () => {
+    await renderEvents([aroundToday[0]]);
+
+    expect(await screen.findByText('Sep 13, 2026')).toBeTruthy();
+    expect(screen.queryByText('Sep 12, 2026')).toBeNull();
+  });
+
+  it('shows an event whose date is missing instead of dropping it', async () => {
+    await renderEvents([{ id: 'ev-undated', name: 'Someday Summit', date: null, status: 'planning' }]);
+
+    expect(await screen.findByText('Someday Summit')).toBeTruthy();
+    expect(screen.getAllByText('Date TBD').length).toBeGreaterThan(0);
+    expect(screen.getByRole('tab', { name: 'Upcoming (1)' })).toBeTruthy();
+    expect(screen.getByRole('tab', { name: 'Archived (0)' })).toBeTruthy();
+  });
+
+  it('keeps an unreadable date visible too', async () => {
+    await renderEvents([{ id: 'ev-vague', name: 'Vague Retreat', date: 'sometime in the fall', status: 'planning' }]);
+
+    expect(await screen.findByText('Vague Retreat')).toBeTruthy();
+    expect(screen.getByRole('tab', { name: 'Upcoming (1)' })).toBeTruthy();
+  });
+
+  it('lists upcoming events soonest first', async () => {
+    await renderEvents(aroundToday);
+    await screen.findByText('Today Mixer');
+
+    const names = screen.getAllByText(/Mixer|Dinner|Showcase|Summit$/).map(el => el.textContent);
+    expect(names).toEqual(['Someday Summit', 'Today Mixer', 'Tonight Dinner', 'Tomorrow Showcase']);
   });
 });

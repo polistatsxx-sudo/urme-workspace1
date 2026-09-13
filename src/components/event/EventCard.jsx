@@ -3,8 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Calendar, MapPin, Clock, Edit, Trash2, ExternalLink, Building2, User, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { format } from 'date-fns';
-import { getGoogleCalendarUrl } from '@/utils/calendar';
+import { formatEventDate, getGoogleCalendarUrl } from '@/utils/calendar';
 import PaymentButton from '@/components/shared/PaymentButton';
 
 const statusColors = {
@@ -37,7 +36,7 @@ export default function EventCard({ ev, businesses = [], users = [], onEdit, onD
           </div>
           <p className="text-xs text-muted-foreground">{ev.description}</p>
           <div className="flex flex-wrap gap-3 mt-2 text-[11px] text-muted-foreground">
-            {ev.date && <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> {format(new Date(ev.date), 'MMM d, yyyy')}</span>}
+            <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> {formatEventDate(ev) || 'Date TBD'}</span>
             {ev.time && <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {ev.time}</span>}
             {ev.location && <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {ev.location}</span>}
             {ev.event_type && <span className="capitalize">{ev.event_type}</span>}

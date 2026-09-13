@@ -11,6 +11,7 @@ import HealthScoreBadge from '@/components/shared/HealthScoreBadge';
 import { Button } from '@/components/ui/button';
 import { format, isPast, isToday, addDays, differenceInDays } from 'date-fns';
 import BulkLogInteractionModal from '@/components/business/BulkLogInteractionModal';
+import { isEventUpcoming } from '@/utils/calendar';
 import { computeHealthScore, isBusinessStale, daysSinceLastInteraction } from '@/utils/healthScore';
 import { checkAndNotify } from '@/utils/notifications';
 
@@ -41,7 +42,7 @@ export default function Dashboard() {
   const activeBiz = businesses.filter(b => b.stage !== 'archived');
   const openTasks = tasks.filter(t => t.status !== 'done');
   const overdueTasks = tasks.filter(t => t.status !== 'done' && t.due_date && isPast(new Date(t.due_date)) && !isToday(new Date(t.due_date)));
-  const upcomingEvents = events.filter(e => e.date && !isPast(new Date(e.date))).sort((a, b) => new Date(a.date) - new Date(b.date));
+  const upcomingEvents = events.filter(e => isEventUpcoming(e));
   const topMatches = matches.filter(m => m.status === 'suggested').sort((a, b) => (b.synergy_score || 0) - (a.synergy_score || 0)).slice(0, 4);
 
   const pipelineCounts = {};

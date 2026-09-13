@@ -8,7 +8,7 @@ import { Link } from 'react-router-dom';
 import InteractionTimeline from '@/components/business/InteractionTimeline';
 import StageBadge from '@/components/shared/StageBadge';
 import TeamMemberEditDialog from '@/components/team/TeamMemberEditDialog';
-import { format, isPast } from 'date-fns';
+import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -20,6 +20,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import PageHeader from '@/components/shared/PageHeader';
 import { toast } from 'sonner';
 import { useAuth } from '@/lib/AuthContext';
+import { formatEventDate, isEventPast } from '@/utils/calendar';
 import { requestNotificationPermission } from '@/utils/notifications';
 import { hasActiveAccess, isExpiringSoon, getDaysRemaining } from '@/utils/subscription';
 import { CreditCard, Calendar as CalendarIcon } from 'lucide-react';
@@ -601,7 +602,8 @@ export default function Profile() {
               ) : (
                 <div className="space-y-2">
                   {myEvents.map(ev => {
-                    const past = ev.date && isPast(new Date(ev.date));
+                    const past = isEventPast(ev);
+                    const dateLabel = formatEventDate(ev);
                     const linkedBizNames = (ev.attendee_business_ids || [])
                       .filter(bid => myBusinessIds.has(bid))
                       .map(bid => allBusinesses.find(b => b.id === bid)?.name)
@@ -616,7 +618,7 @@ export default function Profile() {
                             <p className="text-sm font-medium">{ev.name}</p>
                             <span className={`text-[10px] ${past ? 'text-muted-foreground' : 'text-emerald-400'}`}>{past ? 'Past' : 'Upcoming'}</span>
                           </div>
-                          {ev.date && <p className="text-[10px] text-muted-foreground">{format(new Date(ev.date), 'MMM d, yyyy')}{ev.location ? ` · ${ev.location}` : ''}</p>}
+                          <p className="text-[10px] text-muted-foreground">{dateLabel || 'Date TBD'}{ev.location ? ` · ${ev.location}` : ''}</p>
                           {linkedBizNames.length > 0 && (
                             <p className="text-[10px] text-primary mt-0.5">via {linkedBizNames.join(', ')}</p>
                           )}

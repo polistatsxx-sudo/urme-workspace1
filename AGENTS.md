@@ -46,10 +46,33 @@ Single-page app, migrated off the Base44 low-code platform to Supabase.
  `pages/Events.test.jsx` types a multi-character name with `userEvent` and asserts the
  input node is the same object afterwards, which is the only assertion that catches this
  (a single `fireEvent.change` passes either way).
-- **Google Calendar links** come from `src/utils/calendar.js`, which reads the day out of
- `events.date` textually (a `new Date()` shifts it west of UTC) and parses the free-text
- `events.time`. Times are handed to Google without a `Z` so they land in the viewer's own
- calendar timezone; an unreadable time falls back to an all-day event.
+- **Event dates are date-only values — parse them textually, never with `new Date()`.**
+ The Event form's date input writes a plain `yyyy-mm-dd`, so `events.date` lands in the
+ timestamptz column as **midnight UTC**. `new Date('2026-09-13T00:00:00Z')` is therefore
+ Sept 12, 6:00 PM for the app owner in America/Denver: a same-day event read that way looks
+ already past, which is exactly how "Upcoming" once sat at 0 while both live events were
+ filed under Archived. `src/utils/calendar.js` owns the one correct reading and every call
+ site goes through it — do not add a second one:
+ - `parseEventDate` / `getEventDay` — the calendar day out of the string, textually.
+ - `classifyEvent(event, now?)` → `'upcoming' | 'past' | 'undated'`, plus the
+ `isEventUpcoming` / `isEventPast` shorthands. A date-only event stays upcoming until the
+ **end** of its own day in the viewer's timezone; a timed one until the end named in the
+ free-text `events.time`, or `DEFAULT_DURATION_MINUTES` past a lone start time.
+ - `compareEventsByStart` for sorting (soonest first, undated last) and
+ `formatEventDate(event, pattern?)` for display, which returns `''` rather than throwing
+ the way `format(new Date('nonsense'))` does.
+ - An event whose date is missing or unreadable is `'undated'`, **not** past: it must stay
+ visible (`pages/Events.jsx` groups it under "Date TBD" inside Upcoming, cards print
+ "Date TBD"). Filtering on `e.date && …` is what used to hide it from both tabs.
+ - Call sites: `pages/Events.jsx` (split, sort, CSV export), `pages/Dashboard.jsx`
+ (Upcoming Events stat), `pages/Profile.jsx` (Related Events), `components/event/EventCard.jsx`,
+ `components/business/EventEngagements.jsx`, `components/search/GlobalSearch.jsx`.
+ - `vitest.config.js` pins `TZ=America/Denver`; in UTC none of the regression tests in
+ `src/utils/calendar.test.js` or `pages/Events.test.jsx` can fail.
+- **Google Calendar links** come from the same module, which parses the free-text
+ `events.time` ("6:00 PM", "18:00", "6 - 8pm"). Times are handed to Google without a `Z` so
+ they land in the viewer's own calendar timezone; an unreadable time falls back to an
+ all-day event.
 - **Auth:** Supabase Auth. Roles live in `profiles.role`: `ceo > admin > user`.
 - **Account management (`canManage`).** Who may administer whose account is one rule, kept
   in `src/utils/permissions.js` for the UI and mirrored in
