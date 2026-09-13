@@ -7,8 +7,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import PageHeader from '@/components/shared/PageHeader';
 import { toast } from 'sonner';
-import { isPast } from 'date-fns';
 import { useAuth } from '@/lib/AuthContext';
+import { classifyEvent, compareEventsByStart, formatEventDate } from '@/utils/calendar';
 import { exportToCSV } from '@/utils/csvExport';
 import EventCard from '@/components/event/EventCard';
 import EventForm from '@/components/event/EventForm';
@@ -23,8 +23,12 @@ export default function Events() {
   const { data: businesses = [] } = useQuery({ queryKey: ['businesses'], queryFn: () => base44.entities.Business.list() });
   const { data: users = [] } = useQuery({ queryKey: ['users'], queryFn: () => base44.entities.User.list() });
 
-  const upcoming = events.filter(e => e.date && !isPast(new Date(e.date))).sort((a, b) => new Date(a.date) - new Date(b.date));
-  const past = events.filter(e => e.date && isPast(new Date(e.date)));
+  // An event is upcoming until the end of the day it names — see classifyEvent. Events with
+  // no readable date are their own group inside the Upcoming tab rather than being dropped
+  // from both tabs.
+  const upcoming = events.filter(e => classifyEvent(e) === 'upcoming').sort(compareEventsByStart);
+  const past = events.filter(e => classifyEvent(e) === 'past');
+  const undated = events.filter(e => classifyEvent(e) === 'undated');
 
   const createMut = useMutation({
     /** @param {any} d */
@@ -51,7 +55,7 @@ export default function Events() {
       {list.map(ev => (
         <EventCard key={ev.id} ev={ev} businesses={businesses} users={users} onEdit={setEditEvent} onDelete={confirmDelete} />
       ))}
-      {list.length === 0 && <p className="text-center text-muted-foreground text-sm py-12">{emptyText}</p>}
+      {list.length === 0 && emptyText && <p className="text-center text-muted-foreground text-sm py-12">{emptyText}</p>}
     </div>
   );
 
@@ -59,10 +63,10 @@ export default function Events() {
     <div className="animate-slide-up">
       <PageHeader
         title="Event Orchestrator"
-        subtitle={`${upcoming.length} upcoming • ${past.length} past`}
+        subtitle={`${upcoming.length + undated.length} upcoming • ${past.length} past`}
         actions={
           <>
-          <Button variant="outline" size="sm" onClick={() => exportToCSV(events, 'events_export.csv', [
+          <Button variant="outline" size="sm" onClick={() => exportToCSV(events.map(e => ({ ...e, date: formatEventDate(e, 'yyyy-MM-dd') })), 'events_export.csv', [
             { key: 'name', header: 'Name' },
             { key: 'date', header: 'Date' },
             { key: 'location', header: 'Location' },
@@ -87,10 +91,18 @@ export default function Events() {
 
       <Tabs defaultValue="upcoming">
         <TabsList className="bg-card border border-border mb-4">
-          <TabsTrigger value="upcoming">Upcoming ({upcoming.length})</TabsTrigger>
+          <TabsTrigger value="upcoming">Upcoming ({upcoming.length + undated.length})</TabsTrigger>
           <TabsTrigger value="past">Archived ({past.length})</TabsTrigger>
         </TabsList>
-        <TabsContent value="upcoming">{renderCards(upcoming, 'No upcoming events')}</TabsContent>
+        <TabsContent value="upcoming">
+          {undated.length > 0 && (
+            <div className="mb-4">
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Date TBD ({undated.length})</p>
+              {renderCards(undated, null)}
+            </div>
+          )}
+          {renderCards(upcoming, undated.length > 0 ? null : 'No upcoming events')}
+        </TabsContent>
         <TabsContent value="past">{renderCards(past, 'No archived events')}</TabsContent>
       </Tabs>
 

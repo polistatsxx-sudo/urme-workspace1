@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { formatEventDate } from '@/utils/calendar';
 
 const RECENT_KEY = 'urme_recent_searches';
 
@@ -27,7 +28,7 @@ const typeConfig = {
   businesses: { icon: Building2, color: 'text-blue-400', label: 'Businesses', getPath: (item) => `/businesses/${item.id}`, subtitle: (item) => item.industry || 'No industry' },
   contacts: { icon: User, color: 'text-purple-400', label: 'Contacts', getPath: (item) => `/contacts/${item.id}`, subtitle: (item) => item.business_name || 'No business' },
   tasks: { icon: CheckSquare, color: 'text-green-400', label: 'Tasks', getPath: () => '/tasks', subtitle: (item) => item.due_date ? format(new Date(item.due_date), 'MMM d') : 'No due date', useToast: (item) => toast.info(`Showing task: ${item.title}`) },
-  events: { icon: Calendar, color: 'text-orange-400', label: 'Events', getPath: (item) => '/events', subtitle: (item) => `${item.date ? format(new Date(item.date), 'MMM d') : ''}${item.location ? ' · ' + item.location : ''}` },
+  events: { icon: Calendar, color: 'text-orange-400', label: 'Events', getPath: (item) => '/events', subtitle: (item) => [formatEventDate(item, 'MMM d') || 'Date TBD', item.location].filter(Boolean).join(' · ') },
 };
 
 export default function GlobalSearch() {

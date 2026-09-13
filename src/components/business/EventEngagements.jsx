@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { format } from 'date-fns';
+import { formatEventDate } from '@/utils/calendar';
 import { toast } from 'sonner';
 
 const statusColors = {
@@ -88,7 +88,7 @@ export default function EventEngagements({ bizId }) {
                   </div>
                 </div>
                 <div className="flex items-center gap-3 mt-1 text-[10px] text-muted-foreground flex-wrap">
-                  {ev.date && <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> {format(new Date(ev.date), 'MMM d, yyyy')}</span>}
+                  <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> {formatEventDate(ev) || 'Date TBD'}</span>
                   {ev.location && <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {ev.location}</span>}
                 </div>
               </div>
